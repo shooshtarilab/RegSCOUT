@@ -10,7 +10,7 @@ This option can be used to choose the mode of operation of the pipeline based on
 ### Working_dir: 
 This option should be used for setting the working directory (the directory address should end with “/”). All the output and intermediate files of the pipeline are generated in this directory. If running the pipeline with processed peak by cell matrix, the required tables of the pipeline should be provided in this directory.
 ### Seurat_obj:
-If using the pipeline for analyzing Seurat object, this option should be set as the path to the Seurat object. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. 
+If using the pipeline for analyzing Seurat object, this option should be set as the path to the Seurat object. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. In addition, cell type lables should be provided as Idents in the seurat object.  
 ### Genome_built:
 This option should be used for setting the genome-built of the scATAC-seq data.
 ### Genecode_dir: 
