@@ -94,9 +94,9 @@ row.names(pd) = colnames(indata)
 #Running the Cicero in each cell type separately
 print("Cell type specific loop started!")
 
-for (cell in levels(pbmc)){
+for (cell in levels(pbmc)[10:12]){
   #Extracting the peaks in the current cell type and filtering the matrix
-  next_stat = 0
+  next_stat <- FALSE
   
   #Extracting the cells belonging to the current cell type from the counts matrix
   cell_idx = Idents(pbmc) == cell
@@ -152,10 +152,14 @@ for (cell in levels(pbmc)){
                             window = 2e+6)
       }},
     error = function(e){
-      next_stat = 1
+      print("Error happened!")
+      next_stat <<- TRUE
     })
-  if(next_stat == 1){
-    next_stat = 0
+  print("Next stat value is:")
+  print(next_stat)
+  if(next_stat){
+    next_stat <- FALSE
+    print("Signal not found. Moving to the next cell")
     next
   }
   
