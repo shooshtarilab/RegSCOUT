@@ -1,8 +1,8 @@
 # EffReg_updated
 This is the repository for the EffReg pipeline. This pipeline can be used as a stand-alone command line application which integrates the scATAC-seq data with the risk SNPs of diseases to identify the SNP-affected open chromatin sites, Transcription Factors, and Genes. This pipeline can handle both a scATAC-seq data as a Seurat object or processed results of analyzing scATAC-seq data as a cell by peak table along with peak-peak interaction tables. The pipeline has two modes. If a Seurat object is provided, the pipeline can be executed as:
-**Bash EffReg_main.sh --mode ATAC_obj --seurat_obj [path to the Seurat object] --Working_dir [Working directory]  --genome_built [genome built of the scATAC-seq data] --genecode_dir  [path to the genecode data of the relevant genome built]  --EffSNP_file [Path to the list of Effect SNPs of the disease]**
+\n**Bash EffReg_main.sh --mode ATAC_obj --seurat_obj [path to the Seurat object] --Working_dir [Working directory]  --genome_built [genome built of the scATAC-seq data] --genecode_dir  [path to the genecode data of the relevant genome built]  --EffSNP_file [Path to the list of Effect SNPs of the disease]**\n
 And if you want to run the pipeline with cell by peak and peak-peak interaction tables, the command would be:
-**Bash EffReg_main.sh --mode peak_table  --Working_dir [Working directory]  --genome_built [genome built of the scATAC-seq data] --genecode_dir  [path to the genecode data of the relevant genome built]  --EffSNP_file [Path to the list of Effect SNPs of the disease]**
+\n**Bash EffReg_main.sh --mode peak_table  --Working_dir [Working directory]  --genome_built [genome built of the scATAC-seq data] --genecode_dir  [path to the genecode data of the relevant genome built]  --EffSNP_file [Path to the list of Effect SNPs of the disease]**\n
 In the following, full description of parameters and output files are provided:
 ## Parameters:
 ### Mode: 
