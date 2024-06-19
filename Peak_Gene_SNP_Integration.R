@@ -16,7 +16,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
-#output_file_main = "./rprojects_whole/Final_new_pip/results/MS/10x/"
+#output_file_main = "~/rprojects_whole/Final_new_pip/results/MS/10x/"
 print("Step passed")
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.xlsx")
@@ -27,10 +27,6 @@ eff_snp_file = args[["EffSNP_file"]]
 #eff_snp_file = "~/rprojects_whole/ms_pbmc/gwas_data/bmi_chip/Ci_effect_SNPs.txt"
 eff_snp = read.table(file = eff_snp_file, header = TRUE)
 
-#Processing the cell by peak table to have SNP, TF, and Locus information
-cell_peak[["SNP"]] = NA
-cell_peak[["TF"]] = NA
-cell_peak[["Locus"]] = NA
 
 #Changing the cell by peak matrix so that each line has only one cell type
 cell_peak = cell_peak %>% 
@@ -47,16 +43,20 @@ eff_snp_grg = StringToGRanges(paste(eff_snp$CHR,(eff_snp$Pos-1),
 
 peak_snp_overlap = findOverlaps(cell_peak_grg, eff_snp_grg)
 
-cell_peak$SNP[queryHits(peak_snp_overlap)] = 
-  eff_snp$SNP[subjectHits(peak_snp_overlap)]
-cell_peak$TF[queryHits(peak_snp_overlap)] = 
-  eff_snp$TF[subjectHits(peak_snp_overlap)]
-cell_peak$Locus[queryHits(peak_snp_overlap)] = 
-  eff_snp$Locus[subjectHits(peak_snp_overlap)]
+
+cell_peak_filt = as.data.frame(matrix(0,nrow = length(peak_snp_overlap),
+                                      ncol=(ncol(cell_peak)+3)))
+
+colnames(cell_peak_filt) = c(colnames(cell_peak),"SNP","TF","Locus")
+
+cell_peak_filt[,colnames(cell_peak)] = cell_peak[queryHits(peak_snp_overlap),]
+
+cell_peak_filt$SNP = eff_snp$SNP[subjectHits(peak_snp_overlap)]
+cell_peak_filt$TF = eff_snp$TF[subjectHits(peak_snp_overlap)]
+cell_peak_filt$Locus = eff_snp$Locus[subjectHits(peak_snp_overlap)]
 
 #In the final dataframe, the affected peaks, SNPs affecting them,
 #the loci of SNPs, and TFs are provided
-cell_peak_filt = cell_peak[!is.na(cell_peak$TF),]
 
 cell_peak_filt[["locs-reg"]] = paste0("Loc ",cell_peak_filt$Locus,":",
                                       paste(cell_peak_filt$chr,
@@ -69,7 +69,7 @@ cell_tf_mat = as.matrix(table(cell_peak_filt$`cell sub-types`, cell_peak_filt$TF
 cell_tf_mat[which(cell_tf_mat > 0)] = 1
 
 cell_peak_mat = as.matrix(table(cell_peak_filt$`cell sub-types`, cell_peak_filt$`locs-reg`))
-cell_peak_mat[which(cell_tf_mat > 0)] = 1
+cell_peak_mat[which(cell_peak_mat > 0)] = 1
 
 #Saving the matrices and generating heatmaps of results
 cell_peak_out = paste0(output_file_main, "filt_cell_peak.csv")

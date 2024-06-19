@@ -1,6 +1,7 @@
 library(Repitools)
 library(Seurat)
 library(Signac)
+library(monocle3)
 library(cicero)
 library(xlsx)
 library(stringr)
@@ -94,7 +95,7 @@ row.names(pd) = colnames(indata)
 #Running the Cicero in each cell type separately
 print("Cell type specific loop started!")
 
-for (cell in levels(pbmc)[10:12]){
+for (cell in levels(pbmc)){
   #Extracting the peaks in the current cell type and filtering the matrix
   next_stat <- FALSE
   
