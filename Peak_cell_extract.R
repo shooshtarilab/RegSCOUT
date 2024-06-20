@@ -55,13 +55,14 @@ pbmc_counts = pbmc@assays$peaks$counts
 
 #Extracting cell type specific peaks
 print("Extracting cell-type specific regions:")
+th = as.numeric(args[["peak_th"]])
 for (cell in cell_types){
   cell_index = Idents(pbmc) == cell
   cell_counts = pbmc_counts[,cell_index]
 
   cell_counts[which(cell_counts>0)] = 1
   cell_counts_perc = rowSums(cell_counts)/ncol(cell_counts)
-  cell_peaks = names(cell_counts_perc)[cell_counts_perc>0.1]
+  cell_peaks = names(cell_counts_perc)[cell_counts_perc>th]
   
   loci_cluster_matrix[cell_peaks,cell] = 1
   
