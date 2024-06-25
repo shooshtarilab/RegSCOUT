@@ -5,6 +5,8 @@ library(R.utils)
 library(GenomicRanges)
 library(dplyr)
 library(RSQLite)
+library(biomaRt)
+library(stringr)
 #library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
 #library(SNPlocs.Hsapiens.dbSNP144.GRCh38)
 
@@ -43,13 +45,28 @@ ci_gwas_dir = args[["ci_gwas_dir"]]
 
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="\t", header=TRUE)
 
-if(sum(c("id","chr","pos","PPA","chunk","a1","a2") %in% colnames(ci_gwas_data)) < 7){
-  req_list = c("id","chr","pos","PPA","chunk","a1","a2")
+if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
+  req_list = c("id","chr","pos","PPA","chunk")
   req_not_found = req_list[which(!(req_list %in% colnames(ci_gwas_data)))]
   stop(paste0("Required columns missing in CI SNPs:",req_not_found))
   
 }
 
+if(sum(c("a1","a2") %in% colnames(ci_gwas_data)) < 2){
+  ensembl <- useMart("ENSEMBL_MART_SNP", dataset = "hsapiens_snp")
+  snp_list = ci_gwas_data$id
+  snp_info <- getBM(
+    attributes = c("refsnp_id", "allele"),
+    filters = "snp_filter",
+    values = snp_list,
+    mart = ensembl
+  )
+  snp_alleles = snp_info$allele
+  snp_a1 = str_split(snp_alleles, pattern = "/", simplify = TRUE)[,1]
+  snp_a2 = str_split(snp_alleles, pattern = "/", simplify = TRUE)[,2]
+  ci_gwas_data[["a1"]] = snp_a1
+  ci_gwas_data[["a2"]] = snp_a2
+}
 
 head(ci_gwas_data)
 genome_built = args[["genome_built"]]
