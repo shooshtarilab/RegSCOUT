@@ -7,12 +7,12 @@ library(ComplexHeatmap)
 library(xlsx)
 library(R.utils)
 library(ape)
-library(cicero)
+#library(cicero)
 library(Repitools)
 library(BSgenome.Hsapiens.UCSC.hg38)
 library(reshape2)
 library(dplyr)
-library(xlsx)
+
 
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
