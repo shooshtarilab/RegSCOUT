@@ -474,6 +474,7 @@ enh_cell_gene[["Peak_gene"]] = paste0(enh_cell_gene$Peak1,"; ",
                                            enh_cell_gene$Gene)
 
 enh_matrix = enh_cell_gene[,c("Peak_gene","Cell_Type")]
+enh_matrix = unique(enh_matrix)
 #tf_cluster_matrix <- tf_cluster_matrix %>%
 #  separate_rows(cell, sep = ",")
 enh_matrix <- enh_matrix %>%
