@@ -42,6 +42,15 @@ ci_gwas_dir = args[["ci_gwas_dir"]]
 #ci_gwas_dir = paste0(output_dir,"gwas_CI.txt")
 
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="\t", header=TRUE)
+
+if(sum(c("id","chr","pos","PPA","chunk","a1","a2") %in% colnames(ci_gwas_data)) < 7){
+  req_list = c("id","chr","pos","PPA","chunk","a1","a2")
+  req_not_found = req_list[which(!(req_list %in% colnames(ci_gwas_data)))]
+  stop(paste0("Required columns missing in CI SNPs:",req_not_found))
+  
+}
+
+
 head(ci_gwas_data)
 genome_built = args[["genome_built"]]
 #genome_built = "hg19"

@@ -91,6 +91,15 @@ snp_ref_files = paste0(SNP_ref,snp_population)
 gwas_data_dir = args[["sum_stats"]]
 #gwas_data_dir = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/ms_data/new_discovery"
 gwas_data = read.table(gwas_data_dir, sep = "\t", header = TRUE)
+
+if(sum(c("P","CHR","SNP","POS") %in% colnames(gwas_data)) < 4){
+  req_list = c("P","CHR","SNP","POS")
+  req_not_found = req_list[which(!(req_list %in% colnames(gwas_data)))]
+  stop(paste0("Required columns missing in Sum Stats:",req_not_found))
+  
+}
+
+
 gwas_data = gwas_data[!is.na(gwas_data$P),]
 gwas_data = gwas_data[gwas_data$P < 1e-02,]
 
@@ -101,6 +110,13 @@ gwas_data$CHR = gsub("chr", "", tolower(gwas_data$CHR))
 loci_head_dir = args[["lead_snps"]]
 #loci_head_dir = "/Users/naderhosseininaghavi/rprojects_whole/ms_pbmc/gwas_data/bmi_chip/lead_SNPs_filt.txt"
 loci_head = read.table(loci_head_dir, sep = "\t", header = TRUE)
+
+if(sum(c("SNP") %in% colnames(loci_head)) < 1){
+  req_list = c("SNP")
+  req_not_found = req_list[which(!(req_list %in% colnames(loci_head)))]
+  stop(paste0("Required columns missing in Lead SNPs:",req_not_found))
+  
+}
 
 
 gwas_data['SEGNUM'] = 'None'
