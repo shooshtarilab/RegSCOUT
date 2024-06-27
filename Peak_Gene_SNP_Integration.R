@@ -287,7 +287,8 @@ dev.off()
 print("Affected peaks and TFs extraction finished!")
 
 #Loading the gene reference data from genecode files
-prom_th = as.numeric(args[["prom_th"]])
+prom_th_up = as.numeric(args[["prom_th_up"]])
+prom_th_down = as.numeric(args[["prom_th_down"]])
 gene_annot_dir = args[["genecode_dir"]]
 #gene_annot_dir = "~/rprojects_whole/ATAC_seq_RA/gwas_data/naderH_new/nadeR/files/gencode.v43lift37.annotation.gff3"
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
@@ -319,16 +320,16 @@ gene_transcript_data[["ens_id"]] = gene_id_list
 
 gene_data_temp_pos = gene_transcript_data[gene_transcript_data$strand == "+",]
 
-gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th,
-                                       end = gene_data_temp_pos$TSS + prom_th),
+gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th_down,
+                                       end = gene_data_temp_pos$TSS + prom_th_up),
                        seqnames = gene_data_temp_pos$seqid)
 
 gene_tss_grg_pos$gene_name = gene_data_temp_pos$gene_name
 
 gene_data_temp_neg = gene_transcript_data[gene_transcript_data$strand == "-",]
 
-gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th,
-                                           end = gene_data_temp_neg$TSS + prom_th),
+gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th_up,
+                                           end = gene_data_temp_neg$TSS + prom_th_down),
                            seqnames = gene_data_temp_neg$seqid)
 
 gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
