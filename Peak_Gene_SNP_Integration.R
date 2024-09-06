@@ -287,8 +287,7 @@ dev.off()
 print("Affected peaks and TFs extraction finished!")
 
 #Loading the gene reference data from genecode files
-prom_th_up = as.numeric(args[["prom_th_up"]])
-prom_th_down = as.numeric(args[["prom_th_down"]])
+prom_th = as.numeric(args[["prom_th"]])
 gene_annot_dir = args[["genecode_dir"]]
 #gene_annot_dir = "~/rprojects_whole/ATAC_seq_RA/gwas_data/naderH_new/nadeR/files/gencode.v43lift37.annotation.gff3"
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
@@ -320,16 +319,16 @@ gene_transcript_data[["ens_id"]] = gene_id_list
 
 gene_data_temp_pos = gene_transcript_data[gene_transcript_data$strand == "+",]
 
-gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th_down,
-                                       end = gene_data_temp_pos$TSS + prom_th_up),
+gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th,
+                                       end = gene_data_temp_pos$TSS + prom_th),
                        seqnames = gene_data_temp_pos$seqid)
 
 gene_tss_grg_pos$gene_name = gene_data_temp_pos$gene_name
 
 gene_data_temp_neg = gene_transcript_data[gene_transcript_data$strand == "-",]
 
-gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th_up,
-                                           end = gene_data_temp_neg$TSS + prom_th_down),
+gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th,
+                                           end = gene_data_temp_neg$TSS + prom_th),
                            seqnames = gene_data_temp_neg$seqid)
 
 gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
@@ -475,7 +474,6 @@ enh_cell_gene[["Peak_gene"]] = paste0(enh_cell_gene$Peak1,"; ",
                                            enh_cell_gene$Gene)
 
 enh_matrix = enh_cell_gene[,c("Peak_gene","Cell_Type")]
-enh_matrix = unique(enh_matrix)
 #tf_cluster_matrix <- tf_cluster_matrix %>%
 #  separate_rows(cell, sep = ",")
 enh_matrix <- enh_matrix %>%

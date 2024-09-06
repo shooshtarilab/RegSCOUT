@@ -1,7 +1,7 @@
 library(GenomicRanges)
 #library(liftOver)
 #library(rtracklayer)
-library(Repitools)
+#library(Repitools)
 #library(LDlinkR)
 library(dplyr)
 #library(ggplot2)
@@ -74,32 +74,23 @@ ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_allele
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Setting the output directory
-output_dir = args[["output_dir"]]
-#output_dir = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/results/MS/10x/"
+#output_dir = args[["output_dir"]]
+output_dir = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/results/MS/10x/"
 
 #Getting the Plink files for reference SNPs
-SNP_ref = args[["SNP_ref"]]
-#SNP_ref = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/results/MS/10x/1kg.v3/"
+#SNP_ref = args[["SNP_ref"]]
+SNP_ref = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/results/MS/10x/1kg.v3/"
 
 #Getting the population 
-snp_population = args[["Population"]]
-#snp_population = "EUR"
+#snp_population = args[["Population"]]
+snp_population = "EUR"
 
 snp_ref_files = paste0(SNP_ref,snp_population)
 
 #Loading the summary statistics file
-gwas_data_dir = args[["sum_stats"]]
-#gwas_data_dir = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/ms_data/new_discovery"
+#gwas_data_dir = args[["sum_stats"]]
+gwas_data_dir = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/ms_data/new_discovery"
 gwas_data = read.table(gwas_data_dir, sep = "\t", header = TRUE)
-
-if(sum(c("P","CHR","SNP","POS") %in% colnames(gwas_data)) < 4){
-  req_list = c("P","CHR","SNP","POS")
-  req_not_found = req_list[which(!(req_list %in% colnames(gwas_data)))]
-  stop(paste0("Required columns missing in Sum Stats:",req_not_found))
-  
-}
-
-
 gwas_data = gwas_data[!is.na(gwas_data$P),]
 gwas_data = gwas_data[gwas_data$P < 1e-02,]
 
@@ -107,16 +98,9 @@ gwas_data$CHR = gsub("chr", "", tolower(gwas_data$CHR))
 
 
 #Loading the lead SNP data
-loci_head_dir = args[["lead_snps"]]
-#loci_head_dir = "/Users/naderhosseininaghavi/rprojects_whole/ms_pbmc/gwas_data/bmi_chip/lead_SNPs_filt.txt"
+#loci_head_dir = args[["lead_snps"]]
+loci_head_dir = "/Users/naderhosseininaghavi/rprojects_whole/ms_pbmc/gwas_data/bmi_chip/lead_SNPs_filt.txt"
 loci_head = read.table(loci_head_dir, sep = "\t", header = TRUE)
-
-if(sum(c("SNP") %in% colnames(loci_head)) < 1){
-  req_list = c("SNP")
-  req_not_found = req_list[which(!(req_list %in% colnames(loci_head)))]
-  stop(paste0("Required columns missing in Lead SNPs:",req_not_found))
-  
-}
 
 
 gwas_data['SEGNUM'] = 'None'
@@ -137,8 +121,8 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
   #Getting the allele frequeny file from reference panel SNP data using Plink
   freq_file_out = paste0(output_dir,"Plink2")
   #Getting the directory of Plink2 software
-  plink2_bin = args[["plink2_bin"]]
-  #plink2_bin = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/code/plink2"
+  #plink2_bin = args[["plink2_bin"]]
+  plink2_bin = "/Users/naderhosseininaghavi/rprojects_whole/Final_new_pip/code/plink2"
   fun <- paste0(
     shQuote(plink2_bin, type=shell),
     " --bfile ", shQuote(snp_ref_files, type=shell),
@@ -227,18 +211,14 @@ colnames(final_gwas_data) = c("SNPID", "CHR", "POS", "Z", "F", "N", "SEGNUMBER",
 
 #Setting the sample number
 #sample_number = args[["sample_num"]]
-sample_number = 1000
+sample_number = 115803
 
 final_gwas_data$SNPID = filt_gwas_data$SNP
 final_gwas_data$CHR = paste0("chr", filt_gwas_data$CHR)
 final_gwas_data$POS = filt_gwas_data$POS
 final_gwas_data$Z = filt_gwas_data$Z
 final_gwas_data$F = filt_gwas_data$MAF
-if("N" %in% colnames(final_gwas_data)){
-    final_gwas_data$N = rep(sample_number, nrow(final_gwas_data))
-}else{
-    final_gwas_data$N = filt_gwas_data$N
-}
+final_gwas_data$N = rep(sample_number, nrow(final_gwas_data)) 
 final_gwas_data$SEGNUMBER = filt_gwas_data$SEGNUM
 final_gwas_data$A1 = filt_gwas_data$A1
 final_gwas_data$A2 = filt_gwas_data$A2
