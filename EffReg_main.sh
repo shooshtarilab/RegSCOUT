@@ -33,10 +33,12 @@ if [ "$finemap" == "Y" ]; then
     ci_gwas_dir="${output_dir}${suff}"  
 fi
 if [ "$mode" == "ATAC_obj" ]; then
+    Rscript EffTest_plink.R --afreq_ref "$afreq_ref" --finemapped_gwas "$finemapped_gwas" --CI_thr "$CI_thr" --effect_snp_dir "$output_dir" --genome_built "$genome_built"
     Rscript Peak_cell_extract.R --seurat_obj "$seurat_obj" --output_dir "$output_dir" --peak_th "$peak_th"
     Rscript peak_interaction_extract.R --genome_built "$genome_built" --seurat_obj "$seurat_obj" --output_dir "$output_dir"
     Rscript Peak_Gene_SNP_Integration.R --output_dir "$output_dir" --prom_th_up "$prom_th_up"  --prom_th_down "$prom_th_down"  --genecode_dir "$genecode_dir"
 
 elif [ "$mode" == "peak_table" ]; then
+    Rscript EffTest_plink.R --afreq_ref "$afreq_ref" --finemapped_gwas "$finemapped_gwas" --CI_thr "$CI_thr" --effect_snp_dir "$output_dir" --genome_built "$genome_built"
     Rscript Peak_Gene_SNP_Integration.R --output_dir "$output_dir" --prom_th_up "$prom_th_up"  --prom_th_down "$prom_th_down"  --genecode_dir "$genecode_dir"    
 fi
