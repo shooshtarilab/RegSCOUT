@@ -10,7 +10,8 @@ Example peak and cell type table, it must have these 4 columns:
 | chr11 | 2000 | 2600 | naive_CD8_T_cells,naive_CD4_T_cells | 
 | chr18 | 1 | 678 | classical_monocytes,intermediate_monocytes,nonclassical_monocytes | 
 
-Description of the general workflow and required parameters for each step.
+Descriptions of required parameters and of RegSCOUT output can be found below. 
+
 ## Main Parameters:
 ### --mode: 
 This parameter should be used to choose the mode of operation of the pipeline based on input type. If a scATAC-seq Seurat object is provided, this option should be set to ATAC_obj (i.e., --mode ATAC_obj). If peak-by-cell and peak-peak interaction tables are used this mode should be set to peak_table (i.e., --mode peak_table).
@@ -26,7 +27,8 @@ This parameter should be used only when the user wants fine-mapping to be conduc
 This parameter should be used for setting the working directory (the directory address should end with "/"). **This parameter should always be set when using RegSCOUT regardless of the value of --finemap or --mode**. All the output and intermediate files of the pipeline are generated in this directory. If running the pipeline with --mode peak_table, the peak-by-cell and peak-peak interaction tables of the pipeline should be provided in this directory.
 
 *All directories specified in parameters should end with "/"*
-*Please note that case (lower/upper case) matters when naming columns in files provided to RegSCOUT for analysis*
+
+*Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.)*
 
 ## If fine-mapping must be conducted (--finemap Y)
 
@@ -65,3 +67,27 @@ To SNPs have had their posterior probabilities of association (PPAs) assigned by
 
 ### --output_dir: 
 See description above.
+
+### --jaspar_mtx:
+In conducting TF analysis this pipeline uses the JASPAR TF binding profile database. If the user has downloaded position frequency matrices (PFMs) from JASPAR placed into a single file. This <ins>path</ins> to this file can be provided using this parameter. Alternatively, if the user would prefer not to upload such a file, this parameter can be set to none (i.e., --jaspar_mtx none). RegSCOUT in this case will obtain PFMs from JASPAR using the [JASPAR2024 library](https://bioconductor.org/packages/release/data/annotation/html/JASPAR2024.html). 
+
+### --genome_built:
+This parameter can be set to either hg19 or hg38 depending on the human genome build used in the GWAS data provided to RegSCOUT.
+
+### --ci_gwas_dir:
+If the finemap parameter was set to Y, this parameter should not be used as fine-mapping results will automatically be passed to RegSCOUT for downstream steps. If fine-mapping was not conducted using RegSCOUT, this parameter should be set to the <ins>path</ins> to the fine-mapping results. 
+
+### --seurat_obj: 
+The <ins>path</ins> to the Seurat object for the scATAC-seq data to be used in the integrative analysis. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. In addition, cell type labels should be provided as Idents in the Seurat object.   
+
+### --peak_th:
+This parameter is used to define a threshold, above which a open chromatin region is considered to be 'open' in a cell type. For example, if --peak_th is set to 0.1 (i.e., --peak_th 0.1), then greater than 10% of cells in a cell type must have nonzero scATAC-seq read counts at an open chromatin region, for an open chromatin region to be considered 'open' in that cell type.
+
+### --prom_th_up:
+This parameter is used to define the number of bases upstream a gene's transcription start site (TSS) that will be considered part of a gene's promoter. For example, if the user wants this value to be 2000 bases upstream the TSS they would set this parameter as 2000 (i.e., --prom_th_up 2000). 
+
+### --prom_th_down:
+This parameter is used to define the number of bases downstream a gene's TSS that will be considered part of the genes promoter. See example for --prom_th_up.
+
+### --gencode_dir:
+The <ins>path</ins> to the [GENCODE gene annotation](https://www.gencodegenes.org). This gene annotation should be a gff3 file.
