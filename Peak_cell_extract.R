@@ -58,7 +58,6 @@ for (cell in cell_types){
   loci_cluster_matrix[cell_peaks,cell] = 1
   
   print(cell)
-  # 
 }
 
 #Filtering the cell by peak matrix to only include the peaks
