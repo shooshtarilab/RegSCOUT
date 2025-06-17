@@ -402,12 +402,12 @@ if (nrow(promoter_cell_gene) != 0) {
   output_file = paste0(output_file_main, "cell_gene_promoter.png")
   file.remove(output_file)
   png(output_file,width = 8400, height = 2800, res = 300)
-  Heatmap(prom_matrix, name = "Gene presence", col = f1, 
+  print(Heatmap(prom_matrix, name = "Gene presence", col = f1, 
           column_title = "Gene-cell type plot",
           row_names_gp = grid::gpar(fontsize = 6),
           column_names_gp = grid::gpar(fontsize = 16),
           rect_gp = gpar(col= "#84878a"))
-  
+  )
   dev.off()
 } else {
   print('No genes found by overlap of effect-SNPs with promoter peaks')
@@ -434,12 +434,12 @@ if (nrow(enh_cell_gene) != 0) {
   output_file = paste0(output_file_main, "cell_gene_enhancer.png")
   file.remove(output_file)
   png(output_file,width = 1400, height = 6800, res = 300)
-  Heatmap(enh_matrix, name = "Gene presence", col = f1, 
+  print(Heatmap(enh_matrix, name = "Gene presence", col = f1, 
           column_title = "Gene-cell type plot",
           row_names_gp = grid::gpar(fontsize = 2),
           column_names_gp = grid::gpar(fontsize = 16),
           rect_gp = gpar(col= "#84878a"))
-  
+  )
   dev.off()
 } else {
   print('No genes found by overlap of effect-SNPs with putative enhancers')
