@@ -8,7 +8,6 @@ library(xlsx)
 library(R.utils)
 library(ape)
 library(Repitools)
-library(BSgenome.Hsapiens.UCSC.hg38)
 library(reshape2)
 library(dplyr)
 
