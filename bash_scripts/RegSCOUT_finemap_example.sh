@@ -7,7 +7,6 @@
 
 # Load necessary modules (if module system is used)
 chmod +x RegSCOUT_main_mod.sh
-chmod +x /project/6043551/rzhan535/regscout_updated_test/plink2
 module load StdEnv/2023
 module load r/4.4.0
 
