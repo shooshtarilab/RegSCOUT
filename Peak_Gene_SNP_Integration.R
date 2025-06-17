@@ -26,7 +26,7 @@ cell_peak = read_xlsx(path = cell_peak_file)
 
 #Getting the file of effect SNPs and loading them
 eff_snp_file = paste0(output_file_main,"Ci_effect_SNPs.txt")
-eff_snp = read.table(file = eff_snp_file, header = TRUE)
+eff_snp = read.table(file = eff_snp_file, header = TRUE, sep = '\t')
 eff_snp_filt = eff_snp[,c('SNP', 'CHR', 'Pos', 'ppa')]
 eff_snp_filt = eff_snp_filt %>% distinct()
 
