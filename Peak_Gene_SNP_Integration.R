@@ -4,9 +4,9 @@ library(stringr)
 library(readxl)
 library(dplyr)
 library(tidyr)
-library(xlsx)
 library(ComplexHeatmap)
 library(R.utils)
+library(xlsx)
 library(Seurat)
 library(Signac)
 library(ape)
@@ -273,6 +273,36 @@ gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
 
 gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
 
+#Directly overlapping genes' promoters with risk-mediating peaks
+peak_ppa_frame_filt = peak_ppa_frame
+peak_ppa_frame_filt$sumPPA = NULL
+peak_ppa_frame_filt = peak_ppa_frame_filt %>% distinct()
+
+rmp_granges = StringToGRanges(peak_ppa_frame_filt$region)
+
+rmp_promoter_overlap = findOverlaps(rmp_granges, gene_tss_grg)
+
+#Creating a dataframe to record these results
+if (length(rmp_promoter_overlap) != 0) {
+  direct_overlap_df = as.data.frame(matrix(0, nrow = length(rmp_promoter_overlap),
+                                            ncol = 5))
+  colnames(direct_overlap_df) = c("Peak1","Peak2","Promoter",
+                                  "Gene","Cell_Type")
+  
+  direct_overlap_df$Peak1 = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
+  direct_overlap_df$Peak2 = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
+  direct_overlap_df$Promoter = GRangesToString(gene_tss_grg[subjectHits(rmp_promoter_overlap)])
+  direct_overlap_df$Gene = gene_tss_grg$gene_name[subjectHits(rmp_promoter_overlap)]
+  direct_overlap_df$Cell_Type = peak_ppa_frame_filt$cell[queryHits(rmp_promoter_overlap)]
+  direct_overlap_df = direct_overlap_df %>%
+    separate_rows(Cell_Type, sep = ',')
+  
+  #Output this as a spreadsheet
+  direct_overlap_dir = paste0(output_file_main, "direct_rmp_gene_overlaps.csv")
+  write.csv(direct_overlap_df, file = direct_overlap_dir, row.names = FALSE, quote = FALSE)
+} else {
+  print('No genes found by direct overlap of RMPs with promoter peaks')
+}
 
 #Getting the list of all Cicero files in the working directory and
 #loading them and creating the list of cell types based on the file names
@@ -295,17 +325,6 @@ for (i in c(1:length(cell_type_list))){
   peak1_snp_overlap = findOverlaps(cell_peak1_grg, eff_snp_grg)
   cell_cicero_data = cell_cicero_data[unique(queryHits(peak1_snp_overlap)),]
   
-  #Adding some lines having affected peaks repeated in both columns
-  #with coaccessibility 1 to also capture genes with affected promoters
-  cell_cicero_data_rep = as.data.frame(matrix(0, nrow = length(unique(cell_cicero_data$Peak1)),
-                                              ncol = ncol(cell_cicero_data)))
-  colnames(cell_cicero_data_rep) = colnames(cell_cicero_data)
-  
-  cell_cicero_data_rep$Peak1 = unique(cell_cicero_data$Peak1)
-  cell_cicero_data_rep$Peak2 = unique(cell_cicero_data$Peak1)
-  cell_cicero_data_rep$coaccess = 1
-  
-  cell_cicero_data = rbind(cell_cicero_data, cell_cicero_data_rep)
   #Now mapping the peak2 of the cell type filtered Cicero data to the
   #promoter regions of genes
   cell_peak2_grg = StringToGRanges(gsub("_","-",cell_cicero_data$Peak2))
@@ -339,9 +358,13 @@ for (i in c(1:length(cell_type_list))){
 coaccess_gene_cell_final = do.call(rbind,coaccess_gene_cell_final)
 
 #Filtering the dataframe to only include gene-cell data
-gene_cell_final = coaccess_gene_cell_final %>%
+gene_cell_final1 = coaccess_gene_cell_final %>%
   select(Cell_Type, Gene)
 
+gene_cell_final2 = direct_overlap_df %>%
+  select(Cell_Type, Gene)
+
+gene_cell_final <- rbind(gene_cell_final1, gene_cell_final2)
 
 #Creating a cell by gene matrix 
 gene_names = unique(gene_cell_final$Gene)
@@ -358,8 +381,8 @@ for (i in 1:nrow(gene_cell_final)) {
 }
 
 #Saving the final table and matrix and a heatmap
-peak_interact_gene_dir = paste0(output_file_main, "Aff_peak_interact_gene.csv")
-write.csv(coaccess_gene_cell_final, file = peak_interact_gene_dir, row.names = FALSE,
+cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.csv")
+write.csv(coaccess_gene_cell_final, file = cic_peak_interact_dir, row.names = FALSE,
           col.names = TRUE, quote = FALSE)
 
 cell_gene_out = paste0(output_file_main, "cell_gene.csv")
@@ -380,8 +403,7 @@ Heatmap(gene_cell_matrix, name = "Gene presence", col = f1,
 
 dev.off()
 
-
-promoter_cell_gene = coaccess_gene_cell_final[coaccess_gene_cell_final$Peak1 == coaccess_gene_cell_final$Peak2,]
+promoter_cell_gene = direct_overlap_df
 if (nrow(promoter_cell_gene) != 0) {
   promoter_cell_gene[["Peak_gene"]] = paste0(promoter_cell_gene$Peak1,"; ",
                                              promoter_cell_gene$Gene)
@@ -409,11 +431,9 @@ if (nrow(promoter_cell_gene) != 0) {
           rect_gp = gpar(col= "#84878a"))
   )
   dev.off()
-} else {
-  print('No genes found by overlap of effect-SNPs with promoter peaks')
-}
+} 
 
-enh_cell_gene = coaccess_gene_cell_final[coaccess_gene_cell_final$Peak1 != coaccess_gene_cell_final$Peak2,]
+enh_cell_gene = coaccess_gene_cell_final
 if (nrow(enh_cell_gene) != 0) {
   enh_cell_gene[["Peak_gene"]] = paste0(enh_cell_gene$Peak1,"; ",
                                         enh_cell_gene$Gene)     
