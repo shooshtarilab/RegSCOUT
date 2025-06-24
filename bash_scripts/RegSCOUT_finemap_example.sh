@@ -21,4 +21,4 @@ module load r/4.4.0
   --sample_num present \
   --Population EUR \
   --fgwas_src /home/rzhan535/fgwas/src/fgwas \
-  --CI_thr 95 \
+  --CI_thr 0.95 \
