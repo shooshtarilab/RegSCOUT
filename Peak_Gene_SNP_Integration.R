@@ -285,12 +285,11 @@ rmp_promoter_overlap = findOverlaps(rmp_granges, gene_tss_grg)
 #Creating a dataframe to record these results
 if (length(rmp_promoter_overlap) != 0) {
   direct_overlap_df = as.data.frame(matrix(0, nrow = length(rmp_promoter_overlap),
-                                            ncol = 5))
-  colnames(direct_overlap_df) = c("Peak1","Peak2","Promoter",
+                                            ncol = 4))
+  colnames(direct_overlap_df) = c("RMP","Promoter",
                                   "Gene","Cell_Type")
   
-  direct_overlap_df$Peak1 = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
-  direct_overlap_df$Peak2 = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
+  direct_overlap_df$RMP = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
   direct_overlap_df$Promoter = GRangesToString(gene_tss_grg[subjectHits(rmp_promoter_overlap)])
   direct_overlap_df$Gene = gene_tss_grg$gene_name[subjectHits(rmp_promoter_overlap)]
   direct_overlap_df$Cell_Type = peak_ppa_frame_filt$cell[queryHits(rmp_promoter_overlap)]
