@@ -17,6 +17,12 @@ library(circlize)
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
+#Defining default parameter values
+defaults <- list(
+  prom_th_up = 2000,
+  prom_th_down = 2000
+)
+
 #Getting the working directory
 output_file_main = args[["output_dir"]]
 print("Step passed")
@@ -225,8 +231,8 @@ dev.off()
 print("Affected peaks and TFs extraction finished!")
 
 #Loading the gene reference data from genecode files
-prom_th_up = as.numeric(args[["prom_th_up"]])
-prom_th_down = as.numeric(args[["prom_th_down"]])
+prom_th_up = if (!is.null(args[["prom_th_up"]])) as.integer(args[["prom_th_up"]]) else defaults$prom_th_up
+prom_th_down = if (!is.null(args[["prom_th_down"]])) as.integer(args[["prom_th_down"]]) else defaults$prom_th_down
 gene_annot_dir = args[["gencode_dir"]]
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
 gene_type_list = str_split(gene_annot$attributes, "gene_type=", simplify = TRUE)
@@ -402,9 +408,9 @@ Heatmap(gene_cell_matrix, name = "Gene presence", col = f1,
 
 dev.off()
 
-promoter_cell_gene = direct_overlap_df
-if (nrow(promoter_cell_gene) != 0) {
-  promoter_cell_gene[["Peak_gene"]] = paste0(promoter_cell_gene$Peak1,"; ",
+if (length(rmp_promoter_overlap) != 0) {
+  promoter_cell_gene = direct_overlap_df
+  promoter_cell_gene[["Peak_gene"]] = paste0(promoter_cell_gene$RMP,"; ",
                                              promoter_cell_gene$Gene)
   
   prom_matrix = promoter_cell_gene[,c("Peak_gene","Cell_Type")]
