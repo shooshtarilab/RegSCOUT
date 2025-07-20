@@ -11,9 +11,13 @@ Default parameters have been added to most aspects of the pipeline where they co
 
 ### New parameters in earlier stages of pipeline
 *LD_thr* -> in fgwas_data_prep: allows user to set the threshold for LD filtering, default is 0.25
+
 *CI_thr* -> not a new parameter, but there was an error in earlier versions of the bash script where it was set to 95 (please change this to 0.95 or a different cutoff if desired), the default is 0.95.
+
 *locus_region* -> in fgwas_data_prep: defines the size of the locus region, setting this to 1000000 (meaning 1Mbp upstream/downstream a lead SNP) defines a 2 Mbp region around each lead SNP. Default value is 1000000 (1Mbp).
+
 *cic_genomic_window* -> in peak_interaction_extract: defines the maximum distance apart two open chromatin regions can be for cicero to calculate a co-accessibility score. Default is 2000000 (2Mbp).
+
 *coaccess_th* -> in peak_interaction_extract: the cutoff threshold for the co-accessibility value between two peaks, for that peak-peak association to be output in this step. Default is 0.05.
 
 ### Hi-C and eQTL analysis
