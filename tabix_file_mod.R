@@ -1,4 +1,6 @@
 library(Rsamtools)
+library(biomaRt)
+library(dplyr)
 
 # read in tabix dataset
 eqtl_dir <- '/Users/richardzhang/Desktop/OneDrive/Desktop/Thesis_Project/RegSCOUT_github_update/eqtl_test_data/QTD000115.cc.tsv.gz'
@@ -16,31 +18,27 @@ eqtl_df <- eqtl_df[,c('chromosome', 'position', 'gene_id', 'rsid')]
 
 # once the dataframe has been filtered for significance and certain columns, biomaRt can be used to bring in gene names 
 # from ensembl ids if desired
-# converting gene_ids to gene symbols, something along these lines, this is taken directly from hossein's code and 
-# has not been modified for use in this Rscript, minor changes may be required
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl") # sometimes ensembl servers are busy and this function won't work, usually waiting a bit before running this function again helps there
 
-# ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl") 
-# 
-# gene_ids = c()
-# for (i in 1:length(eqtl_results)) {
-#   gene_ids = c(gene_ids, eqtl_results[[i]]$gene_id)
-# }
-# 
-# gene_ids = unique(gene_ids)
-# attributes_ensemble = listAttributes(ensembl)
-# 
-# gene_names = getBM(attributes = c("ensembl_gene_id", "external_gene_name"),
-#                    filters = "ensembl_gene_id",
-#                    values = gene_ids,
-#                    mart = ensembl)
-# 
-# for (i in 1:length(eqtl_results)) {
-#   eqtl_results[[i]] = merge(eqtl_results[[i]], gene_names, by.x = "gene_id", by.y = "ensembl_gene_id")
-# }
-# 
-# for (i in 1:length(eqtl_results)) {
-#   eqtl_results[[i]] = eqtl_results[[i]][,c("gene_id","external_gene_name", "pvalue", "rsid")]
-# }
+# get list of ensembl gene ids from eqtl dataframe
+gene_ids = unique(c(eqtl_df$gene_id))
+
+# getting gene names using biomaRt
+gene_names = getBM(attributes = c("ensembl_gene_id", "external_gene_name"),
+                   filters = "ensembl_gene_id",
+                   values = gene_ids,
+                   mart = ensembl)
+gene_names$external_gene_name[gene_names$external_gene_name == ''] <- NA # replace blank gene names with NA
+
+# adding gene names to eqtl_df, for those ensembl ids where gene names not found, keeping the ensembl id
+eqtl_df <- eqtl_df %>%
+  left_join(
+    gene_names,
+    by = c("gene_id" = "ensembl_gene_id")
+  )
+
+eqtl_df$external_gene_name[is.na(eqtl_df$external_gene_name)] <- eqtl_df$gene_id[is.na(eqtl_df$external_gene_name)]
+eqtl_df <- eqtl_df[,c('chromosome', 'position', 'external_gene_name', 'rsid')] %>% distinct()
 
 # storing column names in variable
 column_names <- paste("#", paste(colnames(eqtl_df), collapse = "\t"))
