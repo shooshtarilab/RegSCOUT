@@ -151,7 +151,11 @@ for (i in c(1:length(results_pval_sig$snpid))){
   temp_pos = ci_gwas_data$pos[ci_effect_index]
   temp_chr = ci_gwas_data$chr[ci_effect_index]
   temp_locus = ci_gwas_data$chunk[ci_effect_index]
-  temp_TF = substring(results_pval_sig$motif[i], 10)
+  if (jaspar_mtx == "none") { # accounting for difference in motif naming between downloaded file and that read in using the JASPAR2024 package
+    temp_TF = results_pval_sig$motif[i]
+  } else {
+    temp_TF = substring(results_pval_sig$motif[i], 10)
+  }
   temp_pval = results_pval_sig$pval_diff[i]
   temp_pval_corr = results_pval_sig$results_pval_val_cor[i]
   temp_log_ratio = results_pval_sig$log_lik_ratio[i]
