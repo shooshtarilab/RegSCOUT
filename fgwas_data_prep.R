@@ -189,7 +189,7 @@ for (i in c(1:length(new_loci_head$SNP))){
   #Assigning locus id to the SNPs
   if (length(snp_list_loc) > 0) {
     new_gwas_data[(new_gwas_data$SNP %in% snp_list_loc),'SEGNUM'] = seg_index
-    seg_index + 1 # ensuring segnumber values always start at zero
+    seg_index = seg_index + 1 # ensuring segnumber values always start at zero
     
     #Providing lead SNP and locus region information
     new_gwas_data[(new_gwas_data$SNP %in% snp_list_loc),'lead_snp'] = new_lead_snp
