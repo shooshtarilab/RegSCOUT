@@ -4,7 +4,6 @@ library(stringr)
 library(R.utils)
 library(GenomicRanges)
 library(Rsamtools)
-library(liftOver)
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -95,11 +94,6 @@ for (i in 1:num_eqtl) {
       # defining genomic ranges for SNPs
       snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
                                 ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
-
-      if (genome_build == "hg19"){
-        hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
-        snp_granges = unlist(liftOver(snp_granges,hg19to38))
-      }
       
       snp_granges@seqnames@values <- gsub("^chr", "", snp_granges@seqnames@values)
       eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
