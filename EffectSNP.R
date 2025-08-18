@@ -17,6 +17,7 @@ output_dir = args[["output_dir"]]
 jaspar_mtx_dir <- if (!is.null(args[["jaspar_mtx"]])) args[["jaspar_mtx"]] else defaults$jaspar_mtx
 
 if (jaspar_mtx_dir == 'none') {
+  jaspar_mtx = defaults$jaspar_mtx
   # load required libraries for obtaining JASPAR matrix
   library(JASPAR2024)
   
@@ -27,6 +28,7 @@ if (jaspar_mtx_dir == 'none') {
     opts = list(species = 9606, all_versions = FALSE)
   )
 } else {
+  jaspar_mtx = "yes"
   jaspar_pwm <- readJASPARMatrix(jaspar_mtx_dir, matrixClass = c("PFM", "PWM", "PWMProb"))
 }
 
@@ -119,6 +121,7 @@ results_pval <- do.call(rbind, all_results)
 
 # save this dataframe as RDS
 saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+# results_pval = readRDS("/home/ubunkun/Lab/RA_project/RegSCOUT/EAS/atSNP_10runs_results.RDS")
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff
