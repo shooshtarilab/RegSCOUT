@@ -6,7 +6,6 @@ library(GenomicRanges)
 library(Rsamtools)
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
-
 # read output directory
 output_dir = args[["output_dir"]]
 
