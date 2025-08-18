@@ -4,6 +4,7 @@ library(stringr)
 library(R.utils)
 library(GenomicRanges)
 library(Rsamtools)
+library(liftOver)
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -11,7 +12,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 output_dir = args[["output_dir"]]
 
 # read in SNP, rmp information
-snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.xlsx")
+snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.xlsx") # rmp region, cell type adn TFSNP
 snp_rmp_df <- read_xlsx(snp_rmp_dir)
 
 # modify this dataframe
@@ -33,6 +34,8 @@ snp_rmp_df <- snp_rmp_df %>%
     by = c("snp" = "SNP")
   )
 
+genome_build = args[["genome-built"]]
+
 # read in user instructions
 eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
 user_instruct <- read_xlsx(eqtl_instruct_dir)
@@ -43,13 +46,14 @@ eqtl_results_list <- list()
 # iterating over number of rows of user_instruct
 num_eqtl <- nrow(user_instruct)
 
+count = 1 # needed
 for (i in 1:num_eqtl) {
   current_row <- user_instruct[i,]
   eqtl_dir <- current_row$eqtl_dir
   tabix <- current_row$tabix
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
   
-  if (!tabix) {
+  if (!as.logical(tabix)) {
     # read in eqtl dataset
     eqtl_dataset <- read.table(file = eqtl_dir, sep = '\t', header = TRUE)
     
@@ -80,37 +84,46 @@ for (i in 1:num_eqtl) {
     # save the dataframe
     write.table(eqtl_results, file = paste0(output_dir, "eqtl_analysis", i, "_results.txt"), row.names = F, quote = F,
                 sep = '\t')
-  } else if (tabix) { # if tabix files are provided
+  } else { # if tabix files are provided
     # read in eqtl dataset
     eqtl_dataset <- TabixFile(eqtl_dir)
     
-    # filter snp_rmp_df
-    snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% atac_cell_types,]
-    
-    # defining genomic ranges for SNPs
-    snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
-                               ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
-    eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
-    
-    # add metadata from snp_rmp_filt for each matched row
-    eqtl_results_meta <- lapply(seq_along(eqtl_tabix), function(j) {
-      lines <- eqtl_tabix[[j]]
-      split_lines <- strsplit(lines, "\t")
-      eqtl_results_df <- as.data.frame(do.call(rbind, split_lines), stringsAsFactors = FALSE)
-      meta_row <- snp_rmp_filt[j, , drop = FALSE]
-      add_meta <- meta_row[rep(1, nrow(eqtl_results_df)), , drop = FALSE]
-      cbind(add_meta, eqtl_results_df)
-    })
-    
-    # create a dataframe and save it in list
-    eqtl_results_df <- do.call(rbind, eqtl_results_meta)
-    eqtl_results_df <- eqtl_results_df[,c('snp', 'rmp', 'cell', 'V3')] 
-    colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V3'] <- 'gene'
-    eqtl_results_list[[i]] <- eqtl_results_df
-    
-    # save the dataframe
-    write.table(eqtl_results_df, file = paste0(output_dir, "eqtl_analysis", i, "_results.txt"), row.names = F, quote = F,
-                sep = '\t')
+    for (cell_type in atac_cell_types){
+      # filter snp_rmp_df
+      snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% cell_type,]
+
+      # defining genomic ranges for SNPs
+      snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
+                                ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
+
+      if (genome_build == "hg19"){
+        hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
+        snp_granges = unlist(liftOver(snp_granges,hg19to38))
+      }
+      
+      snp_granges@seqnames@values <- gsub("^chr", "", snp_granges@seqnames@values)
+      eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
+      
+      # add metadata from snp_rmp_filt for each matched row
+      eqtl_results_meta <- lapply(seq_along(eqtl_tabix), function(j) {
+        lines <- eqtl_tabix[[j]]
+        split_lines <- strsplit(lines, "\t")
+        eqtl_results_df <- as.data.frame(do.call(rbind, split_lines), stringsAsFactors = FALSE)
+        meta_row <- snp_rmp_filt[j, , drop = FALSE]
+        add_meta <- meta_row[rep(1, nrow(eqtl_results_df)), , drop = FALSE]
+        cbind(add_meta, eqtl_results_df)
+      })
+      
+      # create a dataframe and save it in list
+      eqtl_results_df <- do.call(rbind, eqtl_results_meta)
+      eqtl_results_df <- eqtl_results_df[,c('snp', 'rmp', 'cell', 'V3')] 
+      colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V3'] <- 'gene'
+      eqtl_results_list[[count]] <- eqtl_results_df
+      # save the dataframe
+      write.table(eqtl_results_df, file = paste0(output_dir, "eqtl_analysis", count,"_",cell_type, "_results.txt"), row.names = F, quote = F,
+                  sep = '\t')
+      count = count + 1
+    }
   }
 }
 
