@@ -321,7 +321,7 @@ scintact_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_grang
   for (cell_type in names(cell_type_combos)) { 
     column_name <- cell_type_combos[[cell_type]]
     all_results_df <- all_results_df %>%
-      filter(!(cell == cell_type & get(column_name) < signif_th))
+      filter(!(cell == cell_type & get(column_name) >= signif_th))
   }
   
   # finalize this dataframe
@@ -456,7 +456,7 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
   for (cell_type in names(cell_type_combos)) { 
     column_name <- cell_type_combos[[cell_type]]
     overlap_df_filt <- overlap_df_filt %>%
-      filter(!(cell == cell_type & get(column_name) < signif_th))
+      filter(!(cell == cell_type & get(column_name) >= signif_th))
   }
   
   # cleaning up dataframe
