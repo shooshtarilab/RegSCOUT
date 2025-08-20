@@ -21,18 +21,18 @@
   --locus_region 1000000 \
   --LD_thr 0.25 \
   --Population EAS \
-  --fgwas_src /home/ubunkun/Lab/RA_project/oldpipe/2_GWAS_finemapping/fgwas-0.3.6/src/fgwas \
+  --fgwas_src /home/ubunkun/anaconda3/envs/bio-R/bin/fgwas \
   --CI_thr 0.95 \
   --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/ \
   --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt\
   --coaccess_th 0.05 \
   --genome_built hg19 \
-  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3 \
+  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz \
   --peak_th 0.1 \
   --prom_th_up 2000 \
   --prom_th_down 2000 \
   --cic_genomic_window 2000000 \
-  --histone_mark_analysis Y \
+  --histone_mark_analysis N \
   --hist_mark_instruct_dir "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_marks_instructions.xlsx" \
   --tf_expr_analysis atac \
   --scrna_instruct_dir "" \

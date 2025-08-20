@@ -66,7 +66,7 @@ fi
 
 if [ "$hic_eqtl_analysis" == "Y" ]; then
     Rscript HiC_Analysis.R --output_dir "$output_dir" --hic_instruct_dir "$hic_instruct_dir" --prom_th_up "$prom_th_up" prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir"
-    Rscript eQTL_Analysis.R --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir"
+    Rscript eQTL_Analysis.R --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" --genome_built "$genome_built"
     Rscript final_outputs.R --output_dir "$output_dir" --finemap "$finemap" --ci_gwas_dir "$ci_gwas_dir" --hic_eqtl_analysis "$hic_eqtl_analysis" --histone_mark_analysis "$histone_mark_analysis" --tf_expr_analysis "$tf_expr_analysis" --gene_ppa_th "$gene_ppa_th"
 
 elif [ -z "$hic_eqtl_analysis" ]; then

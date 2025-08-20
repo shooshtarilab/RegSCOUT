@@ -17,7 +17,7 @@ output_dir = args[["output_dir"]]
 hist_mark_instruct_dir <- args[["hist_mark_instruct_dir"]]
 
 # loading in user instructions
-user_instruct <- read_xlsx(hist_mark_instruct_dir)
+user_instruct <- read_xlsx(hist_mark_ihist_data_listnstruct_dir)
 
 # organizing user instructions
 atac_cell_types <- user_instruct$atac_cell_types

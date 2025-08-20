@@ -33,7 +33,7 @@ snp_rmp_df <- snp_rmp_df %>%
     by = c("snp" = "SNP")
   )
 
-genome_build = args[["genome-built"]]
+genome_build = args[["genome_built"]]
 
 # read in user instructions
 eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
@@ -100,7 +100,8 @@ for (i in 1:num_eqtl) {
         snp_granges = unlist(liftOver(snp_granges,hg19to38))
       }
       
-      snp_granges@seqnames@values <- gsub("^chr", "", snp_granges@seqnames@values)
+      # snp_granges@seqnames@values <- gsub("^chr", "", snp_granges@seqnames@values)
+
       eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
       
       # add metadata from snp_rmp_filt for each matched row

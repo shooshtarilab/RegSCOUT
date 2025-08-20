@@ -121,7 +121,8 @@ results_pval <- do.call(rbind, all_results)
 
 # save this dataframe as RDS
 saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
-# results_pval = readRDS("/home/ubunkun/Lab/RA_project/RegSCOUT/EAS/atSNP_10runs_results.RDS")
+
+# results_pval = readRDS("/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/atSNP_10runs_results.RDS")
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff

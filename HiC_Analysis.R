@@ -318,10 +318,21 @@ scintact_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_grang
   cell_type_combos <- setNames(as.list(hic_ct), atac_ct)
   
   all_results_df <- all_rmp_gene_df
-  for (cell_type in names(cell_type_combos)) { 
-    column_name <- cell_type_combos[[cell_type]]
-    all_results_df <- all_results_df %>%
-      filter(!(cell == cell_type & get(column_name) >= signif_th))
+  
+  # checking to see if chicago scores or p-values are provided
+  if (signif_th >= 1) {
+    message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
+    for (cell_type in names(cell_type_combos)) { 
+      column_name <- cell_type_combos[[cell_type]]
+      all_results_df <- all_results_df %>%
+        filter(!(cell == cell_type & get(column_name) < signif_th))
+    }
+  } else {
+    for (cell_type in names(cell_type_combos)) { 
+      column_name <- cell_type_combos[[cell_type]]
+      all_results_df <- all_results_df %>%
+        filter(!(cell == cell_type & get(column_name) > signif_th))
+    }
   }
   
   # finalize this dataframe
@@ -428,7 +439,8 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
     seqnames = rmp_df_filt$chr,
     ranges = IRanges(start = rmp_df_filt$start, end = rmp_df_filt$end)
   )
-  
+  rmp_granges@seqinfo@seqnames <- gsub("^chr", "", rmp_granges@seqinfo@seqnames)
+
   # identify overlaps and create dataframe for results
   overlaps <- findOverlaps(rmp_granges, hic_granges)
   
@@ -453,11 +465,22 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
   cell_type_combos <- setNames(as.list(hic_ct), atac_ct)
   
   overlap_df_filt <- overlap_df
-  for (cell_type in names(cell_type_combos)) { 
-    column_name <- cell_type_combos[[cell_type]]
-    overlap_df_filt <- overlap_df_filt %>%
-      filter(!(cell == cell_type & get(column_name) >= signif_th))
-  }
+  
+  # checking if p-values or chicago scores are provided
+    if (signif_th >= 1) {
+      message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
+      for (cell_type in names(cell_type_combos)) { 
+        column_name <- cell_type_combos[[cell_type]]
+        overlap_df_filt <- overlap_df_filt %>%
+          filter(!(cell == cell_type & get(column_name) < signif_th))
+      }
+    } else {
+      for (cell_type in names(cell_type_combos)) { 
+        column_name <- cell_type_combos[[cell_type]]
+        overlap_df_filt <- overlap_df_filt %>%
+          filter(!(cell == cell_type & get(column_name) > signif_th))
+      }
+    }
   
   # cleaning up dataframe
   overlap_df_filt <- overlap_df_filt %>%

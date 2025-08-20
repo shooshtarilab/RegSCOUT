@@ -238,7 +238,7 @@ if (!is.null(hic_eqtl_req)) {
 # adding in histone mark information if histone mark analysis was requested by user
 hist_mark_req <- args[["histone_mark_analysis"]]
 
-if (!is.null(hist_mark_req)) {
+if (tolower(hist_mark_req) == "y") {
   hist_mark_results <- read.table(paste0(output_dir, 'all_histone_mark_results.txt'), sep = '\t', header = T)
   
   # remove unnecessary columns for this step 
@@ -292,7 +292,7 @@ if (!is.null(hic_eqtl_req)) {
   final_output$gene <- NULL
 }
 
-write_xlsx(final_output, paste0(output_dir, "final_table.xlsx"), row.names = FALSE)
+write_xlsx(final_output, paste0(output_dir, "final_table.xlsx"))
 
 # now creating the prioritized table
 final_table <- final_output
