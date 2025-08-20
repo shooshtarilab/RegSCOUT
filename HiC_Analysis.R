@@ -441,7 +441,8 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
     seqnames = rmp_df_filt$chr,
     ranges = IRanges(start = rmp_df_filt$start, end = rmp_df_filt$end)
   )
-  
+  rmp_granges@seqinfo@seqnames <- gsub("^chr", "", rmp_granges@seqinfo@seqnames)
+
   # identify overlaps and create dataframe for results
   overlaps <- findOverlaps(rmp_granges, hic_granges)
   

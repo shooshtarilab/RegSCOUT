@@ -16,10 +16,10 @@
   --mode peak_table \
   --ci_gwas_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt \
   --plink2_bin /home/ubunkun/anaconda3/envs/bio-R/bin/plink2 \
-  --output_dir  /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/ \
-  --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/common_input/combined_755_motifs_jaspar2024.txt \
-  --genome_built hg38 \
-  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/common_input/gencode.v48.annotation.gff3 \
+  --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/ \
+  --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
+  --genome_built hg19 \
+  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/gencode.v48.annotation.gff3.gz \
   --prom_th_up 2000 \
   --prom_th_down 2000 \
   --histone_mark_analysis N \
@@ -28,9 +28,8 @@
   --scrna_instruct_dir "" \
   --tf_rna_quantile_th 0.25 \
   --hic_eqtl_analysis Y \
-  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/hic_instructions_MULTI.xlsx \
-  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/eqtl_instructions_MULTI.xlsx \
+  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.xlsx \
+  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.xlsx \
   --gene_ppa_th 0.05 \
 
-# change EffectSNP cores from 10 to 1
 
