@@ -412,6 +412,8 @@ bulk_promoter_capture_analysis <- function(hic_data, rmp_data, atac_ct) {
   
   # finalizing dataframe
   colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitName'] <- "gene"
+
+  overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
   
   overlap_df_filt <- overlap_df_filt %>%
     separate_rows(gene, sep = ";") %>%
@@ -489,8 +491,7 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
       oeRegion = paste(oeChr, oeStart, oeEnd, sep = "-")
     ) %>%
     select(-rmpChr, -rmpStart, -rmpEnd, -oeChr, -oeStart, -oeEnd,
-           -hic_idx, -rmp_idx, -baitChr, -baitStart, -baitEnd, -tCD8, -tCD4, 
-           -tB) %>%
+           -hic_idx, -rmp_idx, -baitChr, -baitStart, -baitEnd) %>%
     arrange(cell)
   
   # removing NAs in baitNames
@@ -498,6 +499,8 @@ scpromoter_capture_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, sig
   
   # rename baitName and cell column and make it so there is one gene per row
   colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitName'] <- "gene"
+
+  overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
   
   overlap_df_filt <- overlap_df_filt %>%
     separate_rows(gene, sep = ";") %>%
