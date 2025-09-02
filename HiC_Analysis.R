@@ -80,7 +80,7 @@ rmp_df <- rmp_df %>%
   distinct()
 
 ## defining functions for each type of Hi-C analysis (PC-HiC or intact HiC and single cell or bulk)
-bulk_intact_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {estsetes
+bulk_intact_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
   # filter hic dataset for certain columns, we assume all interactions in this Hi-C dataset are significant
   columns_to_keep <- c('Chr1', 'Start1', 'End1', 'Chr2', 'Start2', 'End2')
   hic_data <- hic_data[,columns_to_keep]
