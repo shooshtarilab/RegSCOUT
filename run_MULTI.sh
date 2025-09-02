@@ -15,11 +15,10 @@
   ./RegSCOUT_main.sh \
   --mode peak_table \
   --ci_gwas_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt \
-  --plink2_bin /home/ubunkun/anaconda3/envs/bio-R/bin/plink2 \
   --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/ \
   --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
   --genome_built hg19 \
-  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/gencode.v48.annotation.gff3.gz \
+  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz \
   --prom_th_up 2000 \
   --prom_th_down 2000 \
   --histone_mark_analysis N \
