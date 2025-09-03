@@ -26,7 +26,7 @@ jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
 if (jaspar_mtx_dir == 'none') {
   jaspar_mtx = defaults$jaspar_mtx
   # load required libraries for obtaining JASPAR matrix
-  library(JASPAR2024)
+  suppressPackageStartupMessages(library(JASPAR2024))
   
   jaspar_sql = JASPAR2024()
   
@@ -55,14 +55,6 @@ for (i in c(1:length(jaspar_pwm_list))){
 ci_gwas_dir = args[["ci_gwas_dir"]]
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
 
-if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
-  req_list = c("id","chr","pos","PPA","chunk")
-  req_not_found = req_list[which(!(req_list %in% colnames(ci_gwas_data)))]
-  stop(paste0("Required columns missing in CI SNPs:",req_not_found))
-}
-
-# head(ci_gwas_data)
-
 # Preparing CI SNPs for motif analysis
 genome_build = if (nzchar(args[["genome_build"]])) {
   args[["genome_build"]]
@@ -72,7 +64,7 @@ genome_build = if (nzchar(args[["genome_build"]])) {
 }
 
 # if (genome_build == "hg19"){
-#   library(BSgenome.Hsapiens.UCSC.hg19)
+#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
 #   eff_snp = ci_gwas_data
   
 #   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
@@ -93,7 +85,7 @@ genome_build = if (nzchar(args[["genome_build"]])) {
 #                               , mutation = FALSE)
 #   file.remove(snp_table_dir)
 # }else if(genome_build == "hg38"){
-#   library(BSgenome.Hsapiens.UCSC.hg38)
+#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
   
 #   eff_snp = ci_gwas_data
   
@@ -206,6 +198,4 @@ write.table(file = final_ci_effect_dir, Ci_effect_SNPs, col.names = TRUE, row.na
             quote = FALSE, sep = "\t")
 
 
-print("Effect-SNP identification complete!")
-
-message("Finished EffectSNP.R")
+message("Effect-SNP identification complete!")

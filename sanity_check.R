@@ -1,11 +1,8 @@
 suppressPackageStartupMessages(library(R.utils))
-
+suppressPackageStartupMessages(library(tools))
 args = commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Helper function that determines what input file format the user used
-# Supports csv, tsv, txt
-library(tools)
-
 # Function to read file based on extension
 read_file <- function(file_path) {
   ext <- file_ext(file_path)
@@ -18,7 +15,6 @@ read_file <- function(file_path) {
   }
   return(df)
 }
-
 
 check_binary = function(binary) {
   path = Sys.which(binary)
@@ -140,19 +136,21 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
   message("Histone mark instructions columns present.")
 }
 
-if (tolower(args[["hic_eqtl_analysis"]]) == "y") {
+if (tolower(args[["hic_analysis"]]) == "y") {
   hic_instruct_dir = args[["hic_instruct_dir"]]
   check_path(hic_instruct_dir)
   hic_instruct = read_file(hic_instruct_dir)
   colnames(hic_instruct) = tolower(colnames(hic_instruct))
-  req_list = c("hic_dir","hic_type","bulk","atac_cell_types","hic_cell_types")
+  req_list = c("hic_dir","genes_present","bulk","atac_cell_types","hic_cell_types")
   missing_cols = setdiff(req_list, colnames(hic_instruct))
   if (length(missing_cols) > 0) {
     stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
   }
   message("HI-C instructions columns present.")
-# need to check if cell type columns matches
+}
 
+# need to check if cell type columns matches
+if (tolower(args[["eqtl_analysis"]]) == "y") {
   eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
   check_path(eqtl_instruct_dir)
   eqtl_instruct = read_file(eqtl_instruct_dir)
@@ -163,6 +161,14 @@ if (tolower(args[["hic_eqtl_analysis"]]) == "y") {
     stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
   }
   message("eQTL instructions columns present.")
+}
+
+tf_setting = args[["tf_expr_analysis"]]
+tf_setting = tolower(tf_setting)
+tf_list = c("atac","rna","both","none")
+if (!(tf_setting %in% tf_list)) {
+  stop("Invalid TF option: '", tf_setting, 
+       "'. Allowed values are: ", paste(tf_list, collapse = ", "))
 }
 
 if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
@@ -179,7 +185,6 @@ if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
 }
 
 # Settings output
-
 settings_msg <- paste(
   "------------------------------------\n",
   "| RegSCOUT Settings                |\n",
@@ -187,7 +192,8 @@ settings_msg <- paste(
   "| Finemapping             : %-6s |\n",
   "| TF Expression Analysis  : %-6s |\n",
   "| Histone Marker Analysis : %-6s |\n",
-  "| Hi-C & eQTL Analysis.   : %-6s |\n",
+  "| Hi-C Analysis           : %-6s |\n",
+  "| eQTL Analysis           : %-6s |\n",
   "------------------------------------\n",
   sep = ""
 )
@@ -196,4 +202,6 @@ cat(sprintf(settings_msg,
   if (tolower(args[["finemap"]]) == "yes") toupper(args[["finemap"]]) else "N",
   args[["tf_expr_analysis"]],
   toupper(args[["histone_mark_analysis"]]),
-  toupper(args[["hic_eqtl_analysis"]])))
+  toupper(args[["hic_analysis"]]),
+  toupper(args[["eqtl_analysis"]])
+))

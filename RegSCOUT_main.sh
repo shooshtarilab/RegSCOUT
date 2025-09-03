@@ -45,10 +45,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 Rscript sanity_check.R --output_dir "$output_dir" --mode "$mode" --genome_build "$genome_build" --finemap "$finemap" --gencode_dir "$gencode_dir" \
-    --SNP_ref "$SNP_ref" --Population "$Population" --sum_stats "$sum_stats" --lead_snps "$lead_snps" --plink2_bin "$plink2_bin" \
-    --fgwas_src "$fgwas_src" --ci_gwas_dir "$ci_gwas_dir" --hic_eqtl_analysis "$hic_eqtl_analysis" --hic_instruct_dir "$hic_instruct_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
+    --snp_ref_dir "$snp_ref_dir" --population "$population" --sum_stats_dir "$sum_stats_dir" --lead_snps_dir "$lead_snps_dir" --plink2_dir "$plink2_dir" \
+    --fgwas_dir "$fgwas_dir" --ci_gwas_dir "$ci_gwas_dir" --hic_analysis "$hic_analysis" --eqtl_analysis "$eqtl_analysis" --hic_instruct_dir "$hic_instruct_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
     --tf_expr_analysis "$tf_expr_analysis" --scrna_instruct_dir "$scrna_instruct_dir" --hist_mark_instruct_dir "$hist_mark_instruct_dir" \
-    --histone_mark_analysis "$histone_mark_analysis"
+    --histone_mark_analysis "$histone_mark_analysis" --seurat_obj_dir "$seurat_obj_dir"
 
 if [ "$finemap" == "Y" ]; then
     Rscript fgwas_data_prep.R --output_dir "$output_dir" --snp_ref_dir "$snp_ref_dir" --population "$population" --sum_stats_dir "$sum_stats_dir" --lead_snps_dir "$lead_snps_dir" --plink2_dir "$plink2_dir" --sample_num "$sample_num" --locus_region "$locus_region" --ld_th "$ld_th"
@@ -81,9 +81,10 @@ if [ "$hic_analysis" == "Y" ]; then
 fi 
 
 if [ "$eqtl_analysis" == "Y" ]; then
-    Rscript eQTL_Analysis.R --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir"
+    Rscript eQTL_Analysis.R --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" --genome_build "$genome_build"
 fi 
 
-if [ -z "$mode" ]; then
+if [ -n "$mode" ]; then
     Rscript final_outputs.R --output_dir "$output_dir" --finemap "$finemap" --ci_gwas_dir "$ci_gwas_dir" --tf_score_th "$tf_score_th" --gene_score_th "$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th"
 fi
+

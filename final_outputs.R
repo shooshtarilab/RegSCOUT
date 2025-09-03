@@ -5,18 +5,10 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(R.utils))
-library(tibble)
-library(stringr)
-library(tidyr)
-library(dplyr)
-library(readxl)
-library(GenomicRanges)
-library(ape)
-library(writexl)
-library(R.utils)
-library(ComplexHeatmap)
-library(circlize)
+suppressPackageStartupMessages(library(ComplexHeatmap))
+suppressPackageStartupMessages(library(circlize))
 
+message("Running final outputs")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
@@ -57,7 +49,8 @@ if (user_finemap == "Y") {
 }
 
 ## preparing tf data for effect_snps located on rmps (associating SNPs with TFs)
-risk_regions_ratio = read.table(paste0(output_dir, 'risk_regions_ratio.txt'), header = TRUE)
+risk_regions_ratio <- read.table(paste0(output_dir, 'risk_regions_ratio.txt'),header=TRUE)
+
 risk_regions_ratio <- risk_regions_ratio %>%
   mutate(
     tf = str_extract(TFSNP, "^.+(?=-[^-]+$)"), # accounts for TFs e.g., NKX6-2 with dash in name
@@ -163,7 +156,7 @@ for (i in 1:nrow(final_output)) {
 final_output <- final_output %>% separate_rows(rmp, sep = ", ")
 
 # loading in rmps and their PPAs (associated with the E-SNPs that overlap them)
-risk_regions_ppa = read.table(paste0(output_dir, "risk_regions_ppa.txt"), header = TRUE)
+risk_regions_ppa <- read.table(paste0(output_dir, "risk_regions_ppa.txt"),header=FALSE)
 
 # adding in rmp information
 for (i in 1:nrow(final_output)) {
@@ -176,10 +169,10 @@ for (i in 1:nrow(final_output)) {
 }
 
 # adding promoter-linked rmps genes information, if any were found
-direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.xlsx")
+direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.txt")
 
 if (file.exists(direct_ovlp_res_dir)) {
-  rmp_promoter <- read_xlsx(direct_ovlp_res_dir)
+  rmp_promoter <- read.table(direct_ovlp_res_dir, header = TRUE)
   
   rmp_promoter <- rmp_promoter[,c("RMP", "Gene")] %>% distinct()
   
@@ -200,10 +193,10 @@ if (file.exists(direct_ovlp_res_dir)) {
 final_output <- final_output %>% separate_rows(cell_type, sep = ",")
 
 # reading in cicero information, if results were found
-cicero_dir <- paste0(output_dir, "cic_peak_interact_gene.xlsx")
+cicero_dir <- paste0(output_dir, "cic_peak_interact_gene.txt")
 
 if (file.exists(cicero_dir)) {
-  cicero <- read_xlsx(cicero_dir)
+  cicero <- read.table(cicero_dir, header = TRUE)
   
   # renaming certain columns
   colnames(cicero)[colnames(cicero) == "Peak1"] <- 'rmp'
@@ -284,7 +277,6 @@ if (file.exists(hic_results_dir)) {
 # adding in histone mark information if histone mark analysis was requested by user
 his_mark_results_dir <- paste0(output_dir, "all_histone_mark_results.txt")
 
-if (tolower(hist_mark_req) == "y") {
 if (file.exists(his_mark_results_dir)) {
   hist_mark_results <- read.table(paste0(output_dir, 'all_histone_mark_results.txt'), sep = '\t', header = T)
   
@@ -343,8 +335,7 @@ if (file.exists(eqtl_results_dir)) {
   final_output$eqtl_gene <- NULL
 }
 
-write.table(final_output, file = paste0(output_dir, "final_table.txt") ,row.names = FALSE, quote = FALSE, sep = "\t")
-write_xlsx(final_output, paste0(output_dir, "final_table.xlsx"))
+write.table(final_output, paste0(output_dir, "final_table.txt"), quote = FALSE, sep = "\t")
 
 # now creating the prioritized table
 final_table <- final_output
@@ -687,7 +678,7 @@ if (file.exists(tf_expr_results_dir)) {
   }
 }
 
-write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
+write.table(final_table_new, file = paste0(output_dir, "complete_table.txt"), row.names = FALSE, quote = FALSE, sep = "\t")
 
 # now performing gene filtering, prioritization
 # first determining if filtering by tf score is desired
@@ -818,13 +809,6 @@ print("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized t
 print(summary_stat)
 
 # save prioritized table
-write.table(prioritized_table, paste0(output_dir, "prioritized_table.txt"),row.names = FALSE, quote = FALSE, sep = "\t")
-
-
-
-
-write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
-
-
+write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
 
 print('Final tables created!')

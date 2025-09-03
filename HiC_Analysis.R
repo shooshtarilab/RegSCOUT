@@ -6,9 +6,10 @@ suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Signac))
 suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(tools))
 
+message("Running HiC Analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
-library(tools)
 
 # Function to read file based on extension
 read_file <- function(file_path) {
@@ -893,11 +894,10 @@ num_hic <- nrow(user_instruct)
 for (i in 1:num_hic) {
   current_row <- user_instruct[i,]
   hic_dir <- current_row$hic_dir
-  
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
-  genes_present <- as.logical(current_row$genes_present)
-  bulk <- as.logical(current_row$bulk)
+  genes_present <- as.logical(trimws(current_row$genes_present))
+  bulk <- as.logical(trimws(current_row$bulk))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
   
   if (is.na(current_row$hic_cell_types)) {
@@ -964,7 +964,7 @@ if (length(hic_results_list) == 0) {
   write.table(all_results, file = paste0(output_dir, "all_hic_results.txt"), row.names = F, quote = F,
               sep = '\t')
   
-  print('Hi-C analysis complete!')
+  message('Hi-C analysis complete!')
 }
 
 

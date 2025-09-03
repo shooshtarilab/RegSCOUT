@@ -3,10 +3,14 @@ suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
+suppressPackageStartupMessages(library(liftOver))
 
+
+message("Running eQTL analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]
+genome_build = args[["genome_build"]]
 
 # read in SNP, rmp information
 snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt") # rmp region, cell type adn TFSNP
@@ -35,7 +39,7 @@ eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
 if (!file.exists(eqtl_instruct_dir)) {
   stop("eQTL analysis requested but eQTL instructions spreadsheet not found, please ensure path is correct/provided. Or if eQTL analysis is not desired please do not use --hic_eqtl_analysis parameter.")
 } 
-user_instruct <- read_xlsx(eqtl_instruct_dir)
+user_instruct <- read.table(eqtl_instruct_dir, header = TRUE)
 
 # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
 rmp_cell_types <- unique(snp_rmp_df$cell)
@@ -116,9 +120,15 @@ for (i in 1:num_eqtl) {
     # filter snp_rmp_df
     snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% atac_cell_types,]
     
+
     # defining genomic ranges for SNPs
     snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
                                ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
+    if (genome_build == "hg19"){
+      hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
+      snp_granges = unlist(liftOver(snp_granges,hg19to38))
+    }
+    
     eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
     
     # add metadata from snp_rmp_filt for each matched row
@@ -161,7 +171,7 @@ if (length(eqtl_results_list) == 0) {
   write.table(all_results, file = paste0(output_dir, "all_eqtl_results.txt"), row.names = F, quote = F,
               sep = '\t')
   
-  print('eQTL analysis complete!')
+  message('eQTL analysis complete!')
 }
 
   

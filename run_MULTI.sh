@@ -26,7 +26,8 @@
   --tf_expr_analysis atac \
   --scrna_instruct_dir "" \
   --tf_rna_quantile_th 0.25 \
-  --hic_eqtl_analysis Y \
+  --hic_analysis Y \
+  --eqtl_analysis Y \
   --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv \
   --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv \
   --gene_ppa_th 0.05 \
