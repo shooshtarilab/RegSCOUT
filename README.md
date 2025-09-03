@@ -20,6 +20,14 @@ A thorough description of each step of the RegSCOUT pipeline and of RegSCOUT out
 ## Pipeline Overview
 ![Pipeline Overview](https://github.com/shooshtarilab/RegSCOUT/blob/main/images/Workflow_schematic.png)
 
+Above is a general overview of the RegSCOUT workflow. Each step will be explained below with a description of inputs and outputs. A table of all parameters included in RegSCOUT including which steps the parameter is relevant to, potential values, default value, and general purpose of the parameter can also be found below.
+
+## Table of All Parameters
+| Parameter | Purpose | Default Value | Relevant Steps |
+| --------------------- | ----------------------------------------------------- | ---------------- | ---------------------- |
+| --snp_ref_dir | Specifies the directory containing the bfiles used for PLINK preprocessing of GWAS data and LD analysis. | No default, must be set by user. | GWAS Pre-Processing |
+| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold | 0.95 | Fine-mapping |
+
 ## Fine-mapping
 
 ## Main Parameters:
