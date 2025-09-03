@@ -17,16 +17,11 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 defaults <- list(
   coaccess_th = 0.05,
   cic_genomic_window = 2000000,
-  peak_th = 0.1,
-  genome_build = "hg38"
+  peak_th = 0.1
 )
 
 #Getting the genome built of the scATAC-seq data
-genome_build = if (nzchar(args[["genome_build"]])) {
-  args[["genome_build"]]
-} else {
-  defaults$genome_build
-}
+genome_build = args[["genome_build"]]
 
 #Loading the reference genome object based on the genome built of the data 
 if (genome_build == "hg19"){
