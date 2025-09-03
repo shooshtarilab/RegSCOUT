@@ -25,7 +25,9 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 ## Table of All Parameters
 | Parameter | Purpose | Default Value | Relevant Steps |
 | --------------------- | ----------------------------------------------------- | ---------------- | ---------------------- |
-| --snp_ref_dir | Specifies the directory containing the bfiles used for PLINK preprocessing of GWAS data and LD analysis. | No default, must be set by user. | GWAS Pre-Processing |
+| --snp_ref_dir | Specifies the directory containing the bfiles used for PLINK preprocessing of GWAS data and LD analysis. | No default, must be set by user. | 1 |
+| --population | Specifies the population/ancestry that the bfiles were created from (e.g., EUR, EAS). | No default, must be set by user. | 1 |
+| --sum_stats_dir | Specifies the path to the GWAS summary statistics | No default, must be set by user | 1 |
 | --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold | 0.95 | Fine-mapping |
 
 ## Fine-mapping
