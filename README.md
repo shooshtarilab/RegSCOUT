@@ -11,7 +11,7 @@ When using RegSCOUT please ensure that all files provided to this pipeline are i
 
 ## Table of Contents
 A thorough description of each step of the RegSCOUT pipeline and of RegSCOUT output can be found below. 
-1. [Fine-mapping] (#--mode)
+1. [Fine-mapping] (#--mode:)
 
 ## Main Parameters:
 ### --mode: 
