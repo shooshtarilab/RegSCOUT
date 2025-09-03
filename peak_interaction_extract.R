@@ -10,7 +10,6 @@ suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ape))
 
-
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -18,41 +17,32 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 defaults <- list(
   coaccess_th = 0.05,
   cic_genomic_window = 2000000,
-  peak_th = 0.1
+  peak_th = 0.1,
+  genome_build = "hg38"
 )
 
 #Getting the genome built of the scATAC-seq data
-genome_built = args[["genome_built"]]
+genome_build = if (nzchar(args[["genome_build"]])) {
+  args[["genome_build"]]
+} else {
+  defaults$genome_build
+}
 
 #Loading the reference genome object based on the genome built of the data 
-if (genome_built == "hg19"){
+if (genome_build == "hg19"){
   library(BSgenome.Hsapiens.UCSC.hg19)
   genome = "BSgenome.Hsapiens.UCSC.hg19"  
   hg_19_ref = BSgenome.Hsapiens.UCSC.hg19@seqinfo
   hg_19_dat = as.data.frame(matrix(NA, nrow = length(hg_19_ref@seqnames), ncol = 2))
   hg_19_dat$V1 = hg_19_ref@seqnames
   hg_19_dat$V2 = hg_19_ref@seqlengths
-}else if(genome_built == "hg38"){
+}else if(genome_build == "hg38"){
   library(BSgenome.Hsapiens.UCSC.hg38)
   genome = "BSgenome.Hsapiens.UCSC.hg38" 
   hg_38_ref = BSgenome.Hsapiens.UCSC.hg38@seqinfo
   hg_38_dat = as.data.frame(matrix(NA, nrow = length(hg_38_ref@seqnames), ncol = 2))
   hg_38_dat$V1 = hg_38_ref@seqnames
   hg_38_dat$V2 = hg_38_ref@seqlengths
-}else if(genome_built == "mm9"){
-  library(BSgenome.Mmusculus.UCSC.mm9)
-  genome = "BSgenome.Mmusculus.UCSC.mm9" 
-  mm_9_ref = BSgenome.Mmusculus.UCSC.mm9@seqinfo
-  mm_9_dat = as.data.frame(matrix(NA, nrow = length(mm_9_ref@seqnames), ncol = 2))
-  mm_9_dat$V1 = mm_9_ref@seqnames
-  mm_9_dat$V2 = mm_9_ref@seqlengths
-}else if(genome_built == "mm10"){
-  library(BSgenome.Mmusculus.UCSC.mm10)
-  genome = "BSgenome.Mmusculus.UCSC.mm10"
-  mm_10_ref = BSgenome.Mmusculus.UCSC.mm10@seqinfo
-  mm_10_dat = as.data.frame(matrix(NA, nrow = length(mm_10_ref@seqnames), ncol = 2))
-  mm_10_dat$V1 = mm_10_ref@seqnames
-  mm_10_dat$V2 = mm_10_ref@seqlengths
 }
 
 #Loading the scATAC-seq object 
@@ -97,9 +87,26 @@ row.names(pd) = colnames(indata)
 #Running the Cicero in each cell type separately
 print("Cell type specific loop started!")
 
-coaccess_th = if (!is.null(args[["coaccess_th"]])) as.numeric(args[["coaccess_th"]]) else defaults$coaccess_th
-cic_genomic_window = if (!is.null(args[["cic_genomic_window"]])) as.integer(args[["cic_genomic_window"]]) else defaults$cic_genomic_window
-th = if (!is.null(args[["peak_th"]])) as.numeric(args[["peak_th"]]) else defaults$peak_th
+coaccess_th = if (nzchar(args[["coaccess_th"]])) {
+  as.numeric(args[["coaccess_th"]])
+} else {
+  message("Using default coaccess_th value: ", defaults$coaccess_th)
+  defaults$coaccess_th
+} 
+
+cic_genomic_window = if (nzchar(args[["cic_genomic_window"]])) {
+  as.integer(args[["cic_genomic_window"]])
+} else {
+  message("Using default cic_genomic_window value: ", defaults$cic_genomic_window)
+  defaults$cic_genomic_window
+} 
+
+peak_th = if (nzchar(args[["peak_th"]])) {
+  as.numeric(args[["peak_th"]])
+} else {
+  message("Using default peak_th value: ", defaults$peak_th)
+  defaults$peak_th
+}
 
 for (cell in levels(pbmc)){
   #Extracting the peaks in the current cell type and filtering the matrix
@@ -110,7 +117,7 @@ for (cell in levels(pbmc)){
   indata_cell = indata[,cell_idx]
   
   #Filtering the non relevant peaks in the data of the current cell type
-  indata_temp = indata_cell[rowSums(indata_cell)>th*ncol(indata_cell),]
+  indata_temp = indata_cell[rowSums(indata_cell)>peak_th*ncol(indata_cell),]
   
   
   print_message= paste0("number of rows=", nrow(indata_temp),
@@ -142,19 +149,19 @@ for (cell in levels(pbmc)){
       umap_coords <- reducedDims(input_cds)$UMAP
       cicero_cds <- make_cicero_cds(input_cds, reduced_coordinates = umap_coords,
                                     k = 30)
-      if (genome_built == "hg19"){
+      if (genome_build == "hg19"){
         conns <- run_cicero(cicero_cds, genomic_coords = hg_19_dat, sample_num = 10000,
                             window = cic_genomic_window)
         
-      }else if(genome_built == "hg38"){
+      }else if(genome_build == "hg38"){
         conns <- run_cicero(cicero_cds, genomic_coords = hg_38_dat, sample_num = 10000,
                             window = cic_genomic_window)
         
-      }else if(genome_built == "mm9"){
+      }else if(genome_build == "mm9"){
         conns <- run_cicero(cicero_cds, genomic_coords = mm_9_dat, sample_num = 10000,
                             window = cic_genomic_window)
         
-      }else if(genome_built == "mm10"){
+      }else if(genome_build == "mm10"){
         conns <- run_cicero(cicero_cds, genomic_coords = mm_10_dat, sample_num = 10000,
                             window = cic_genomic_window)
       }},

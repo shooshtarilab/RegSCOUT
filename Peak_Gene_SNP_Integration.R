@@ -23,10 +23,11 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
-print("Step passed")
+
 #Getting the cell by peak table
-cell_peak_file = paste0(output_file_main,"cell_peak.txt")
-cell_peak = read.table(cell_peak_file, header = TRUE)
+cell_peak_file = paste0(output_file_main,"cell_peak.xlsx")
+cell_peak = read_xlsx(path = cell_peak_file)
+peaks_cell_types = unique(unlist(str_split(cell_peak$`cell sub-types`, ",")))
 
 #Getting the file of effect SNPs and loading them
 eff_snp_file = paste0(output_file_main,"Ci_effect_SNPs.txt")
@@ -44,6 +45,10 @@ eff_snp_granges = StringToGRanges(eff_snp_list)
 
 peak_eff_overlaps = findOverlaps(peak_granges,eff_snp_granges)
 
+if (length(peak_eff_overlaps) == 0) {
+  stop("No co-localization between effect-SNPs and cell type-specific open chromatin regions found. One possible reason for this is a mismatch between genome builds of scATAC-seq and GWAS datasets.")
+}
+
 peak_ppa_frame = as.data.frame(matrix(0,nrow = length(peak_eff_overlaps),
                                       ncol = 3))
 colnames(peak_ppa_frame) = c("region","PPA","cell")
@@ -60,8 +65,17 @@ peak_ppa_frame = peak_ppa_frame %>%
 peak_ppa_frame = peak_ppa_frame %>% select(-PPA)
 peak_ppa_frame = unique(peak_ppa_frame)
 
-peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.txt")
-write.table(as.data.frame(peak_ppa_frame), file = peak_ppa_frame_dir ,row.names = FALSE, quote = FALSE, sep = "\t")
+rmp_cell_types = unique(unlist(str_split(peak_ppa_frame$cell, ",")))
+cell_type_diff = setdiff(peaks_cell_types, rmp_cell_types)
+
+# check to see whether there were any cases where an RMP was not identified in a cell type
+if (length(cell_type_diff) > 0) {
+  message("Note: No risk-mediating peaks were identified in these cell types: ", paste(cell_type_diff, collapse = ", "), ". One possible reason for this is a mismatch between genome builds of scATAC-seq and GWAS datasets.")
+}
+
+peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.xlsx")
+write.xlsx(as.data.frame(peak_ppa_frame), file = peak_ppa_frame_dir, col.names = TRUE,
+           row.names = FALSE)
 
 peak_cluster_matrix = peak_ppa_frame[,c("region","cell")]
 peak_cluster_matrix <- peak_cluster_matrix %>%
@@ -78,15 +92,22 @@ write.table(peak_cluster_matrix, peak_cluster_matrix_file, sep = "\t", row.names
 f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "red"))
 
 
-heatmap_peaks <- Heatmap(peak_cluster_matrix, name = "Percentage accessibility", col = f1, 
-                         column_title = "Cell Types", row_title = "Risk-mediating Peaks",
-                         row_names_gp = grid::gpar(fontsize = 4),
-                         column_names_gp = grid::gpar(fontsize = 15),
-                         rect_gp = gpar(col= "#84878a"),
-                         heatmap_legend_param = list(title = "Accessibility", at = c(0, 1), 
-                                                     labels = c("0", "1"), 
-                                                     color_bar = "vertical", 
-                                                     legend_width = unit(16, "cm")))
+heatmap_peaks <- Heatmap(
+  peak_cluster_matrix, name = "Percentage accessibility", col = f1, 
+  column_title = "Cell Type", row_title = "Risk-Mediating Peak",
+  column_title_gp = grid::gpar(fontsize = 14),
+  row_title_gp = grid::gpar(fontsize = 14),
+  row_names_gp = grid::gpar(fontsize = 11),
+  column_names_gp = grid::gpar(fontsize = 13),
+  rect_gp = gpar(col= "#84878a"),
+  column_title_side = "bottom",
+  heatmap_legend_param = list(title = "Presence", at = c(0, 1), 
+                              labels = c("0", "1"), 
+                              color_bar = "vertical", 
+                              legend_width = unit(16, "cm")),
+  width = unit(1 * ncol(peak_cluster_matrix), "cm"),
+  height = unit(1 * nrow(peak_cluster_matrix), "cm")
+  )
 
 
 # guideline bar based on sumPPA
@@ -99,25 +120,29 @@ risk_regions = as.matrix(risk_regions)
 roworder <- order(match(rownames(risk_regions), rownames(peak_cluster_matrix)))
 risk_regions <- risk_regions[roworder, , drop = FALSE]
 
-f2 = colorRamp2(seq(0, max(risk_regions[,1], na.rm = TRUE), length = 2), c("#EEEEEE","blue"))
+f2 = colorRamp2(seq(0, max(risk_regions[,1], na.rm = TRUE), length = 2), c("#EEEEEE","#54278f"))
 
 # create a separate heatmap for the ppa
-heatmap_ppa <- Heatmap(risk_regions, name = "SumPPA", col = f2, 
-                       heatmap_legend_param = list(title = "SumPPA", 
-                                                   at = c(0, max(risk_regions, na.rm = TRUE)), 
-                                                   labels = c("0", round(max(risk_regions, na.rm = TRUE))), 
-                                                   color_bar = "vertical", 
-                                                   legend_width = unit(16, "cm")),
-                       row_names_gp = grid::gpar(fontsize = 4),
-                       column_names_gp = grid::gpar(fontsize = 15),
-                       # Add cell_fun argument to display values inside the heatmap cells
-                       layer_fun = function(j, i, x, y, width, height, fill) {
-                         grid::grid.text(sprintf("%.3f", risk_regions[i, j]), x, y, gp = grid::gpar(fontsize = 4))
-                       })
+heatmap_ppa <- Heatmap(
+  risk_regions, name = "SumPPA", col = f2, 
+  heatmap_legend_param = list(title = "SumPPA", 
+                              at = c(0, max(risk_regions, na.rm = TRUE)), 
+                              labels = c("0", round(max(risk_regions, na.rm = TRUE))), 
+                              color_bar = "vertical", 
+                              legend_width = unit(16, "cm")),
+  row_names_gp = grid::gpar(fontsize = 11),
+  column_names_gp = grid::gpar(fontsize = 13),
+  # Add cell_fun argument to display values inside the heatmap cells
+  layer_fun = function(j, i, x, y, width, height, fill) {
+    grid::grid.text(sprintf("%.3f", risk_regions[i, j]), x, y, gp = grid::gpar(fontsize = 8))
+  },
+  width = unit(1 * ncol(risk_regions), 'cm'),
+  height = unit(1 * nrow(risk_regions), 'cm')
+)
 
 # combine the two heatmaps and save it 
 output_peak_file = paste0(output_file_main,"cell_peak.png")
-png(output_peak_file, width = 2400, height = 8000, res = 300)
+png(output_peak_file, width = ncol(risk_regions) + ncol(peak_cluster_matrix) + 10, height = nrow(peak_cluster_matrix) + 10, units = 'cm', res = 300)
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
 dev.off()
@@ -158,8 +183,9 @@ cell_tf_snp$cell = cell_peak_filt$cell_sub_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
 cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
 
-peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.txt")
-write.table(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir, row.names = FALSE, quote = FALSE, sep = "\t")
+peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.xlsx")
+write.xlsx(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir, col.names = TRUE,
+           row.names = FALSE)
 
 tf_cluster_matrix = cell_tf_snp[,c("TFSNP","cell")]
 tf_cluster_matrix <- tf_cluster_matrix %>% distinct() 
@@ -173,27 +199,34 @@ TF_cluster_matrix_file = paste0(output_file_main,"TF_cluster_matrix.txt")
 write.table(tf_cluster_matrix, TF_cluster_matrix_file, sep = "\t", row.names = TRUE)
 
 
-f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "red"))
+f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "blue"))
 
 
-heatmap_TFs <- Heatmap(tf_cluster_matrix, name = "Percentage accessibility", col = f1, 
-                       column_title = "Cell Types", row_title = "Risk-mediating TFs",
-                       row_names_gp = grid::gpar(fontsize = 4),
-                       column_names_gp = grid::gpar(fontsize = 15),
-                       rect_gp = gpar(col= "#84878a"),
-                       heatmap_legend_param = list(title = "Accessibility", at = c(0, 1), 
-                                                   labels = c("0", "1"), 
-                                                   color_bar = "vertical", 
-                                                   legend_width = unit(16, "cm")))  
+heatmap_TFs <- Heatmap(
+  tf_cluster_matrix, name = "Percentage accessibility", col = f1, 
+  column_title = "Cell Type", row_title = "SNP-TF Pair",
+  column_title_gp = grid::gpar(fontsize = 14),
+  row_title_gp = grid::gpar(fontsize = 14),
+  row_names_gp = grid::gpar(fontsize = 11),
+  column_names_gp = grid::gpar(fontsize = 13),
+  rect_gp = gpar(col= "#84878a"),
+  column_title_side = "bottom",
+  heatmap_legend_param = list(title = "Presence", at = c(0, 1), 
+                              labels = c("0", "1"), 
+                              color_bar = "vertical", 
+                              legend_width = unit(16, "cm")),
+  width = unit(1 * ncol(tf_cluster_matrix), "cm"),
+  height = unit(1 * nrow(tf_cluster_matrix), "cm")
+)  
 
 
-# guideline bar based on sumPPA
+# guideline bar based on sum log like ratio
 risk_tfs = cell_tf_snp[,c("TFSNP", "log_lik_ratio")]
 risk_tfs = unique(risk_tfs)
 rownames(risk_tfs) = NULL
 risk_tfs <- risk_tfs %>%
   group_by(TFSNP) %>%
-  summarize(log_lik_ratio = sum(log_lik_ratio), .groups = 'drop')
+  summarize(log_lik_ratio = max(abs(log_lik_ratio)), .groups = 'drop')
 risk_tfs = tibble::column_to_rownames(risk_tfs, var = "TFSNP")
 risk_tfs = as.matrix(risk_tfs)
 
@@ -201,25 +234,29 @@ risk_tfs = as.matrix(risk_tfs)
 roworder <- order(match(rownames(risk_tfs), rownames(tf_cluster_matrix)))
 risk_tfs <- risk_tfs[roworder, , drop = FALSE]
 
-f2 = colorRamp2(seq(0, max(risk_tfs[,1], na.rm = TRUE), length = 2), c("#EEEEEE","blue"))
+f2 = colorRamp2(seq(0, max(risk_tfs[,1], na.rm = TRUE), length = 2), c("#EEEEEE","#e6550d"))
 
 # create a separate heatmap for the ppa
-heatmap_ppa <- Heatmap(risk_tfs, name = "Log_lik_ratio", col = f2, 
-                       heatmap_legend_param = list(title = "Log_lik_ratio", 
-                                                   at = c(0, max(risk_tfs, na.rm = TRUE)), 
-                                                   labels = c("0", round(max(risk_tfs, na.rm = TRUE))), 
-                                                   color_bar = "vertical", 
-                                                   legend_width = unit(16, "cm")),
-                       row_names_gp = grid::gpar(fontsize = 4),
-                       column_names_gp = grid::gpar(fontsize = 15),
-                       # Add cell_fun argument to display values inside the heatmap cells
-                       layer_fun = function(j, i, x, y, width, height, fill) {
-                         grid::grid.text(sprintf("%.3f", risk_tfs[i, j]), x, y, gp = grid::gpar(fontsize = 4))
-                       })
+heatmap_ppa <- Heatmap(
+  risk_tfs, name = "Log_like_ratio", col = f2, 
+  heatmap_legend_param = list(title = "Log_like_ratio", 
+                              at = c(0, max(risk_tfs, na.rm = TRUE)), 
+                              labels = c("0", round(max(risk_tfs, na.rm = TRUE))), 
+                              color_bar = "vertical", 
+                              legend_width = unit(16, "cm")),
+  row_names_gp = grid::gpar(fontsize = 11),
+  column_names_gp = grid::gpar(fontsize = 13),
+  # Add cell_fun argument to display values inside the heatmap cells
+  layer_fun = function(j, i, x, y, width, height, fill) {
+    grid::grid.text(sprintf("%.3f", risk_tfs[i, j]), x, y, gp = grid::gpar(fontsize = 8))
+  },
+  width = unit(1 * ncol(risk_tfs), 'cm'),
+  height = unit(1 * nrow(risk_tfs), 'cm')
+)
 
 # combine the two heatmaps and save it 
-output_tf_file = paste0(output_file_main,"cell_tf.png")
-png(output_tf_file, width = 2400, height = 8000, res = 300)
+output_tf_file = paste0(output_file_main,"cell_snp_tf.png")
+png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 dev.off()
@@ -227,8 +264,20 @@ dev.off()
 print("Affected peaks and TFs extraction finished!")
 
 #Loading the gene reference data from genecode files
-prom_th_up = if (!is.null(args[["prom_th_up"]])) as.integer(args[["prom_th_up"]]) else defaults$prom_th_up
-prom_th_down = if (!is.null(args[["prom_th_down"]])) as.integer(args[["prom_th_down"]]) else defaults$prom_th_down
+prom_th_up = if (nzchar(args[["prom_th_up"]])) {
+  as.integer(args[["prom_th_up"]])
+} else {
+  message("Using default prom_th_up value: ", defaults$prom_th_up)
+  defaults$prom_th_up
+} 
+
+prom_th_down = if (nzchar(args[["prom_th_down"]])) {
+  as.integer(args[["prom_th_down"]])
+} else {
+  message("Using default prom_th_down value: ", defaults$prom_th_down)
+  defaults$prom_th_down
+}
+
 gene_annot_dir = args[["gencode_dir"]]
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
 transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
@@ -295,7 +344,7 @@ if (length(rmp_promoter_overlap) != 0) {
   direct_overlap_dir = paste0(output_file_main, "direct_rmp_gene_overlaps.txt")
   write.table(direct_overlap_df, file = direct_overlap_dir ,row.names = FALSE, quote = FALSE, sep = "\t")
 } else {
-  print('No genes found by direct overlap of RMPs with promoter peaks')
+  message('No genes found by direct overlap of RMPs with promoter peaks.')
 }
 
 #Getting the list of all Cicero files in the working directory and
@@ -349,9 +398,18 @@ for (i in c(1:length(cell_type_list))){
 
 #The dataframe having the list of SNP-affected links matching 
 #Promoter regions of genes for each cell type
-coaccess_gene_cell_final = do.call(rbind,coaccess_gene_cell_final)
-coaccess_gene_cell_final$Peak1 = gsub("_","-",coaccess_gene_cell_final$Peak1)
-coaccess_gene_cell_final$Peak2 = gsub("_","-",coaccess_gene_cell_final$Peak2)
+#Checking to see if there were any results for cicero
+if (is.null(coaccess_gene_cell_final)) {
+  message('No genes found by overlap of effect-SNPs with putative enhancers using Cicero.')
+} else {
+  coaccess_gene_cell_final = do.call(rbind,coaccess_gene_cell_final)
+  coaccess_gene_cell_final$Peak1 = gsub("_","-",coaccess_gene_cell_final$Peak1)
+  coaccess_gene_cell_final$Peak2 = gsub("_","-",coaccess_gene_cell_final$Peak2)
+  
+  #Saving the final table
+  cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.xlsx")
+  write_xlsx(coaccess_gene_cell_final, path = cic_peak_interact_dir)
+}
 
 #Filtering the dataframe to only include gene-cell data
 gene_cell_final1 = coaccess_gene_cell_final %>%
@@ -377,8 +435,8 @@ for (i in 1:nrow(gene_cell_final)) {
 }
 
 #Saving the final table and matrix and a heatmap
-cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
-write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir ,row.names = FALSE, quote = FALSE, sep = "\t")
+cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.xlsx")
+write_xlsx(coaccess_gene_cell_final, path = cic_peak_interact_dir)
 
 cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
 write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
@@ -412,23 +470,10 @@ if (length(rmp_promoter_overlap) != 0) {
   
   prom_matrix_file = paste0(output_file_main,"Gene_promoter_matrix.txt")
   write.table(prom_matrix, prom_matrix_file, sep = "\t", row.names = TRUE)
-  
-  f1 = c("0" = "white", "1" = "red")
-  
-  output_file = paste0(output_file_main, "cell_gene_promoter.png")
-  file.remove(output_file)
-  png(output_file,width = 8400, height = 2800, res = 300)
-  print(Heatmap(prom_matrix, name = "Gene presence", col = f1, 
-          column_title = "Gene-cell type plot",
-          row_names_gp = grid::gpar(fontsize = 6),
-          column_names_gp = grid::gpar(fontsize = 16),
-          rect_gp = gpar(col= "#84878a"))
-  )
-  dev.off()
-} 
+}
 
-enh_cell_gene = coaccess_gene_cell_final
-if (nrow(enh_cell_gene) != 0) {
+if (!is.null(coaccess_gene_cell_final)) {
+  enh_cell_gene = coaccess_gene_cell_final
   enh_cell_gene[["Peak_gene"]] = paste0(enh_cell_gene$Peak1,"; ",
                                         enh_cell_gene$Gene)     
   
@@ -442,24 +487,7 @@ if (nrow(enh_cell_gene) != 0) {
   
   enh_matrix_file = paste0(output_file_main,"Gene_enhancer_matrix.txt")
   write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE)
-  
-  f1 = c("0" = "white", "1" = "red")
-  
-  output_file = paste0(output_file_main, "cell_gene_enhancer.png")
-  file.remove(output_file)
-  png(output_file,width = 1400, height = 6800, res = 300)
-  print(Heatmap(enh_matrix, name = "Gene presence", col = f1, 
-          column_title = "Gene-cell type plot",
-          row_names_gp = grid::gpar(fontsize = 2),
-          column_names_gp = grid::gpar(fontsize = 16),
-          rect_gp = gpar(col= "#84878a"))
-  )
-  dev.off()
-} else {
-  print('No genes found by overlap of effect-SNPs with putative enhancers')
 }
 
 
 print("Directly mapped genes and cicero genes identified!")
-
-

@@ -7,14 +7,20 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx = "none"
+  jaspar_mtx = "none",
+  genome_build = "hg38"
 )
 
 # read output directory
 output_dir = args[["output_dir"]]
 
 # read in and prepare JASPAR matrix file
-jaspar_mtx_dir <- if (!is.null(args[["jaspar_mtx"]])) args[["jaspar_mtx"]] else defaults$jaspar_mtx
+jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx"]])) {
+  args[["jaspar_mtx"]]
+} else {
+  message("Using default jaspar_mtx value: ", defaults$jaspar_mtx)
+  defaults$jaspar_mtx
+}
 
 if (jaspar_mtx_dir == 'none') {
   jaspar_mtx = defaults$jaspar_mtx
@@ -56,12 +62,17 @@ if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
 
 # head(ci_gwas_data)
 
-# # Preparing CI SNPs for motif analysis
-# genome_built = args[["genome_built"]]
+# Preparing CI SNPs for motif analysis
+genome_build = if (nzchar(args[["genome_build"]])) {
+  args[["genome_build"]]
+} else {
+  message("Using default genome_build value: ", defaults$genome_build)
+  defaults$genome_build
+}
 
-# if (genome_built == "hg19"){
-#   library(BSgenome.Hsapiens.UCSC.hg19)
-#   eff_snp = ci_gwas_data
+if (genome_build == "hg19"){
+  library(BSgenome.Hsapiens.UCSC.hg19)
+  eff_snp = ci_gwas_data
   
 #   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
 #   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
@@ -75,13 +86,13 @@ if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
 #   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
 #               row.names = FALSE, quote = FALSE)
   
-#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
-#                               , half.window.size = 30, default.par = TRUE
-#                               , mutation = FALSE)
-#   file.remove(snp_table_dir)
-# }else if(genome_built == "hg38"){
-#   library(BSgenome.Hsapiens.UCSC.hg38)
+  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+                              genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
+                              , half.window.size = 30, default.par = TRUE
+                              , mutation = FALSE)
+  file.remove(snp_table_dir)
+}else if(genome_build == "hg38"){
+  library(BSgenome.Hsapiens.UCSC.hg38)
   
 #   eff_snp = ci_gwas_data
   
@@ -155,7 +166,7 @@ for (i in c(1:length(results_pval_sig$snpid))){
   temp_pos = ci_gwas_data$pos[ci_effect_index]
   temp_chr = ci_gwas_data$chr[ci_effect_index]
   temp_locus = ci_gwas_data$chunk[ci_effect_index]
-  if (jaspar_mtx == "none") { # accounting for difference in motif naming between downloaded file and that read in using the JASPAR2024 package
+  if (jaspar_mtx_dir == "none") { # accounting for difference in motif naming between downloaded file and that read in using the JASPAR2024 package
     temp_TF = results_pval_sig$motif[i]
   } else {
     temp_TF = substring(results_pval_sig$motif[i], 10)

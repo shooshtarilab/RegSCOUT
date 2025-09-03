@@ -80,51 +80,61 @@ confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, pro
   
   # Find overlaps
   TF_peak_overlap <- findOverlaps(gene_tss_grg, peaks_granges)
-  TF_peak_overlap_df <- as.data.frame(TF_peak_overlap)
-  TF_peak_overlap_df$gene_name <- gene_tss_grg$gene_name[TF_peak_overlap_df$queryHits]
-  TF_peak_overlap_df$gene_chr <- as.character(seqnames(gene_tss_grg)[TF_peak_overlap_df$queryHits])
-  TF_peak_overlap_df$gene_start <- start(gene_tss_grg)[TF_peak_overlap_df$queryHits]
-  TF_peak_overlap_df$gene_end <- end(gene_tss_grg)[TF_peak_overlap_df$queryHits]
-  TF_peak_overlap_df$peak_chr <- as.character(seqnames(peaks_granges)[TF_peak_overlap_df$subjectHits])
-  TF_peak_overlap_df$peak_start <- start(peaks_granges)[TF_peak_overlap_df$subjectHits]
-  TF_peak_overlap_df$peak_end <- end(peaks_granges)[TF_peak_overlap_df$subjectHits]
-  TF_peak_overlap_df$peak_cell <- peaks_granges$cell[TF_peak_overlap_df$subjectHits]
   
-  # simplify overlap dataframe
-  tf_peak <- TF_peak_overlap_df %>%
-    select(gene_name, peak_cell) %>%
-    separate_rows(peak_cell, sep = ",") %>%
-    distinct()
-  colnames(tf_peak) <- c('tf', 'cell')
-  
-  tf_peak_complete <- tf_peak
-  
-  # account for TF heterodimers
-  if (length(heterodimer_list) > 0) {
-    heterodimer_parts <- strsplit(heterodimer_list, "::")
+  if (length(TF_peak_overlap) == 0) {
+    return('none')
+  } else {
+    TF_peak_overlap_df <- as.data.frame(TF_peak_overlap)
+    TF_peak_overlap_df$gene_name <- gene_tss_grg$gene_name[TF_peak_overlap_df$queryHits]
+    TF_peak_overlap_df$gene_chr <- as.character(seqnames(gene_tss_grg)[TF_peak_overlap_df$queryHits])
+    TF_peak_overlap_df$gene_start <- start(gene_tss_grg)[TF_peak_overlap_df$queryHits]
+    TF_peak_overlap_df$gene_end <- end(gene_tss_grg)[TF_peak_overlap_df$queryHits]
+    TF_peak_overlap_df$peak_chr <- as.character(seqnames(peaks_granges)[TF_peak_overlap_df$subjectHits])
+    TF_peak_overlap_df$peak_start <- start(peaks_granges)[TF_peak_overlap_df$subjectHits]
+    TF_peak_overlap_df$peak_end <- end(peaks_granges)[TF_peak_overlap_df$subjectHits]
+    TF_peak_overlap_df$peak_cell <- peaks_granges$cell[TF_peak_overlap_df$subjectHits]
     
-    for (i in 1:length(heterodimer_parts)) {
-      current_hd <- heterodimer_parts[[i]]
-      tf1 <- current_hd[1]
-      tf2 <- current_hd[2]
-      tf_peak_df1 <- tf_peak[tf_peak$tf == tf1,]
-      tf_peak_df2 <- tf_peak[tf_peak$tf == tf2,]
-      if (nrow(tf_peak_df1) > 0 & nrow(tf_peak_df2) > 0) {
-        cell_overlap <- intersect(tf_peak_df1$cell, tf_peak_df2$cell)
-        hd_row <- as.data.frame(matrix(nrow = length(cell_overlap), ncol = 2))
-        colnames(hd_row) <- c('tf', 'cell')
-        hd_row$tf <- heterodimer_list[i]
-        hd_row$cell <- cell_overlap
-        # adding this information to tf_peak_complete
-        tf_peak_complete <- rbind(tf_peak_complete, hd_row)
+    # simplify overlap dataframe
+    tf_peak <- TF_peak_overlap_df %>%
+      select(gene_name, peak_cell) %>%
+      separate_rows(peak_cell, sep = ",") %>%
+      distinct()
+    colnames(tf_peak) <- c('tf', 'cell')
+    
+    tf_peak_complete <- tf_peak
+    
+    # account for TF heterodimers
+    if (length(heterodimer_list) > 0) {
+      heterodimer_parts <- strsplit(heterodimer_list, "::")
+      
+      for (i in 1:length(heterodimer_parts)) {
+        current_hd <- heterodimer_parts[[i]]
+        tf1 <- current_hd[1]
+        tf2 <- current_hd[2]
+        tf_peak_df1 <- tf_peak[tf_peak$tf == tf1,]
+        tf_peak_df2 <- tf_peak[tf_peak$tf == tf2,]
+        if (nrow(tf_peak_df1) > 0 & nrow(tf_peak_df2) > 0) {
+          cell_overlap <- intersect(tf_peak_df1$cell, tf_peak_df2$cell)
+          hd_row <- as.data.frame(matrix(nrow = length(cell_overlap), ncol = 2))
+          colnames(hd_row) <- c('tf', 'cell')
+          hd_row$tf <- heterodimer_list[i]
+          hd_row$cell <- cell_overlap
+          # adding this information to tf_peak_complete
+          tf_peak_complete <- rbind(tf_peak_complete, hd_row)
+        }
       }
     }
+    
+    # now identifying which cell type-specific TFs identified previously are also potentially expressed in the cell type
+    expr_prio_tf <- dplyr::intersect(prio_tf_table, tf_peak_complete)
+    
+    # check if the result of dplyr intersect is an empty data frame
+    if (nrow(expr_prio_tf) == 0) {
+      return('none')
+    } else {
+      return(expr_prio_tf)
+    }
   }
-  
-  # now identifying which cell type-specific TFs identified previously are also potentially expressed in the cell type
-  expr_prio_tf <- dplyr::intersect(prio_tf_table, tf_peak_complete)
-  
-  return(expr_prio_tf)
 }
 
 # defining multiple functions to conduct scRNA-seq analysis for TF expression
@@ -204,25 +214,35 @@ tf_expression_analysis_ct <- function(seurat_obj, TF_list, quant_val, cell_types
   # obtain TF expression data
   expr_data = expr_data[rownames(expr_data) %in% TF_list,]
   
-  # calculating gene expression frequencies
-  results <- rowSums(expr_data > 0) / ncol(expr_data)
-  
-  # changing values to either 0 (if % expression does not pass quantile threshold) or 1 (if it does)
-  threshold = quant_val
-  results_thr <- as.numeric(results > threshold)
-  names(results_thr) <- names(results)
-  
-  # creating dataframe
-  num_col <- length(cell_types)
-  row_names <- names(results)
-  results_df <- data.frame(matrix(rep(results_thr, times = num_col), ncol = num_col))
-  colnames(results_df) <- cell_types
-  rownames(results_df) <- row_names
-  results_df <- results_df[rowSums(results_df) > 0, , drop = F] 
-  
-  results_df <- rownames_to_column(results_df, var = "TFs_prio")
-  
-  return(results_df)
+  # check to see if expression data has not been filtered out due to TF_list
+  if (nrow(expr_data) == 0) {
+    return('none')
+  } else {
+    # calculating gene expression frequencies
+    results <- rowSums(expr_data > 0) / ncol(expr_data)
+    
+    # changing values to either 0 (if % expression does not pass quantile threshold) or 1 (if it does)
+    threshold = quant_val
+    results_thr <- as.numeric(results > threshold)
+    names(results_thr) <- names(results)
+    
+    # check to see that at least one TF passes threshold
+    if (sum(results_thr) == 0) {
+      return('none')
+    } else {
+      # creating dataframe
+      num_col <- length(cell_types)
+      row_names <- names(results)
+      results_df <- data.frame(matrix(rep(results_thr, times = num_col), ncol = num_col))
+      colnames(results_df) <- cell_types
+      rownames(results_df) <- row_names
+      results_df <- results_df[rowSums(results_df) > 0, , drop = F] 
+      
+      results_df <- rownames_to_column(results_df, var = "TFs_prio")
+      
+      return(results_df)
+    }
+  }
 }
 
 # function 3b: creating function for TF expression analysis, use function based on structure of seurat
@@ -232,34 +252,45 @@ tf_expression_analysis <- function(seurat_obj, TF_list, quant_vector, matrix_loc
   row.names(results_df) <- TF_list
   colnames(results_df) <- cell_types
   
-  # for loop to fill results_df
-  i = 1
-  for (cell in cell_types) {
-    cell_labels_filt = WhichCells(object = seurat_obj, idents = cell)
-    expr_data = FetchData(seurat_obj, TF_list, cells = cell_labels_filt, layer = matrix_location)
-    
-    # for loop to iterate through each gene
-    for (gene in colnames(expr_data)) {
-      temp_list = expr_data[,gene]
-      times_expr = sum(temp_list > 0)
-      threshold = quant_vector[cell] # defining a threshold based on desired quantile
-      if (times_expr/nrow(expr_data) > threshold){ 
-        results_df[gene,i] = 1
-      } else {
-        results_df[gene,i] = 0
+  # ensure TFs in TF list are present in seurat object
+  tf_overlap = intersect(rownames(seurat_obj), TF_list)
+  
+  if (length(tf_overlap) == 0) {
+    return('none')
+  } else {
+    # for loop to fill results_df
+    i = 1
+    for (cell in cell_types) {
+      cell_labels_filt = WhichCells(object = seurat_obj, idents = cell)
+      
+      expr_data = FetchData(seurat_obj, TF_list, cells = cell_labels_filt, layer = matrix_location)
+      
+      # for loop to iterate through each gene
+      for (gene in colnames(expr_data)) {
+        temp_list = expr_data[,gene]
+        times_expr = sum(temp_list > 0)
+        threshold = quant_vector[cell] # defining a threshold based on desired quantile
+        if (times_expr/nrow(expr_data) > threshold){ 
+          results_df[gene,i] = 1
+        } else {
+          results_df[gene,i] = 0
+        }
       }
+      
+      i = i + 1
     }
     
-    i = i + 1
+    # remove rows where all NA in results dataframe (only occurs if TF not found), and all TFs that were not expressed in any cell type
+    filt_results_df <- results_df[!rowSums(is.na(results_df)) == ncol(results_df),]
+    filt_results_df <- filt_results_df[rowSums(filt_results_df) > 0,] 
+    
+    if (nrow(filt_results_df) == 0) {
+      return('none')
+    } else {
+      filt_results_df <- rownames_to_column(filt_results_df, var = "TFs_prio")
+      return(filt_results_df)
+    }
   }
-  
-  # remove rows where all NA in results dataframe (only occurs if TF not found), and all TFs that were not expressed in any cell type
-  filt_results_df <- results_df[!rowSums(is.na(results_df)) == ncol(results_df),]
-  filt_results_df <- filt_results_df[rowSums(filt_results_df) > 0,] 
-  
-  filt_results_df <- rownames_to_column(filt_results_df, var = "TFs_prio")
-  
-  return(filt_results_df)
 }
 
 # function 4: creating a function to filter these TF heterodimers such that only those that are expressed are left
@@ -376,29 +407,41 @@ if (tf_expr_req == "atac") {
   TF_heterodimers <- TF_heterodimers[grepl("::", TF_heterodimers, fixed = T)]
   
   # obtain promoter region definitions and directories necessary for analysis
-  prom_thr_up = if (!is.null(args[["prom_th_up"]])) as.integer(args[["prom_th_up"]]) else defaults$prom_th_up
-  prom_thr_down = if (!is.null(args[["prom_th_down"]])) as.integer(args[["prom_th_down"]]) else defaults$prom_th_down
+  prom_thr_up = if (nzchar(args[["prom_th_up"]])) {
+    as.integer(args[["prom_th_up"]])
+  } else {
+    defaults$prom_th_up
+  } 
+  prom_thr_down = if (nzchar(args[["prom_th_down"]])) {
+    as.integer(args[["prom_th_down"]])
+  } else {
+    defaults$prom_th_down
+  }
   gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
                                                peak_file_dir, gene_annot_path, tf_table_filt)
   
-  # convert this dataframe into binary matrix
-  tf_expr_results$value = "atac"
-  
-  tf_expr_mtx <- pivot_wider(tf_expr_results,
-                             names_from = cell,
-                             values_from = value,
-                             values_fill = "none")
-  
-  tf_expr_mtx <- column_to_rownames(tf_expr_mtx, var = "tf")
-  tf_expr_mtx <- as.matrix(tf_expr_mtx)
-  
-  # save this matrix
-  write.table(tf_expr_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
-              sep = '\t')
-  
+  # accounting for if there are no results found
+  if (is.data.frame(tf_expr_results)) {
+    # convert this dataframe into binary matrix
+    tf_expr_results$value = "atac"
+    
+    tf_expr_mtx <- pivot_wider(tf_expr_results,
+                               names_from = cell,
+                               values_from = value,
+                               values_fill = "none")
+    
+    tf_expr_mtx <- column_to_rownames(tf_expr_mtx, var = "tf")
+    tf_expr_mtx <- as.matrix(tf_expr_mtx)
+    
+    # save this matrix
+    write.table(tf_expr_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
+                sep = '\t')
+  } else {
+    message("Note: No TF expression suggested through scATAC-seq analysis. One possible reason for this is a mismatch between genome builds of scATAC-seq and GENCODE data.")
+  }
 } else if (tf_expr_req == "rna") {
   # load the necessary libraries
   library(Seurat)
@@ -407,8 +450,31 @@ if (tf_expr_req == "atac") {
   
   # obtain user instructions
   scrna_instruct_dir <- args[["scrna_instruct_dir"]]
+  
+  # checking to see if scRNA-seq instructions provided
+  if (!file.exists(scrna_instruct_dir)) {
+    stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
+  } 
+  
   user_instruct <- read_xlsx(scrna_instruct_dir)
-  quantile_th <- if (!is.null(args[["tf_rna_quantile_th"]])) as.numeric(args[["tf_rna_quantile_th"]]) else defaults$quantile_th
+  
+  # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
+  rmp_cell_types <- unique(tf_table_filt$cell)
+  peak_cell_types <- unique(unlist(str_split(user_instruct$atac_cell_types, ',')))
+  missing_cell_types <- setdiff(peak_cell_types, rmp_cell_types)
+  
+  if (length(missing_cell_types) > 0) { # removing missing cell types from user instructions
+    message("Note: TF expression analysis will not be conducted on cell types in which no SNPs co-localizing with risk-mediating peaks were identified: ", paste(missing_cell_types, collapse = ", "), ". Analysis not being conducted may also occur if a cell type name in the atac_cell_types column does not match with the corresponding cell type name provided in the scATAC-seq object (i.e., B cell vs b_cell).")
+  }
+  
+  # obtaining some user input
+  user_instruct$one_cell_type_seurat <- as.logical(user_instruct$one_cell_type_seurat)
+  quantile_th <- if (nzchar(args[["tf_rna_quantile_th"]])) {
+    as.numeric(args[["tf_rna_quantile_th"]])
+  } else {
+    message("Using default quantile_th value: ", defaults$quantile_th)
+    defaults$quantile_th
+  }
   
   # creating list of results for scRNA-seq
   scrna_results_list <- list()
@@ -443,14 +509,18 @@ if (tf_expr_req == "atac") {
       percent_df <- gene_percent_expr_ct(scrna_dataset, matrix_loc)
       quant_value <- as.numeric(quant_per_celltype(percent_df, quantile_th))
       expression_df <- tf_expression_analysis_ct(scrna_dataset, TFs, quant_value, atac_cell_types, matrix_loc)
-      if (length(TF_heterodimers) > 0) { 
-        expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
-        tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expr_df_hd, atac_cell_types)
-      } else { # accounting for case where there are no heterodimers
-        expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
-        tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expression_df, atac_cell_types)
+      if (is.data.frame(expression_df)) {
+        if (length(TF_heterodimers) > 0) { 
+          expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
+          tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expr_df_hd, atac_cell_types)
+        } else { # accounting for case where there are no heterodimers
+          expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
+          tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expression_df, atac_cell_types)
+        }
+        scrna_results_list[[length(scrna_results_list) + 1]] <- tfs_prio_expr
+      } else {
+        message("Note: No scRNA-seq TF analysis results found for row with scRNA-seq directory '", scrna_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. scRNA-seq dataset may not contain any JASPAR TFs prioritized in the effect-SNP stage or no TFs passed the expression threshold.")
       }
-      scrna_results_list[[length(scrna_results_list) + 1]] <- tfs_prio_expr
     }
   } 
   
@@ -489,35 +559,43 @@ if (tf_expr_req == "atac") {
       percent_df <- gene_percent_expr(scrna_dataset, matrix_loc)
       quant_vec <- quant_per_celltype(percent_df, quantile_th)
       expression_df <- tf_expression_analysis(scrna_dataset, TFs, quant_vec, matrix_loc)
-      if (length(TF_heterodimers) > 0) { 
-        expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
-        tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expr_df_hd, atac_cell_types, rna_cell_types)
-      } else { # accounting for case where there are no heterodimers
-        expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
-        tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expression_df, atac_cell_types, rna_cell_types)
+      if (is.data.frame(expression_df)) {
+        if (length(TF_heterodimers) > 0) { 
+          expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
+          tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expr_df_hd, atac_cell_types, rna_cell_types)
+        } else { # accounting for case where there are no heterodimers
+          expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
+          tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expression_df, atac_cell_types, rna_cell_types)
+        }
+        scrna_results_list[[length(scrna_results_list) + 1]] <- tfs_prio_expr
+      } else {
+        message("Note: No scRNA-seq TF analysis results found for row with scRNA-seq directory '", scrna_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. scRNA-seq dataset may not contain any JASPAR TFs prioritized in the effect-SNP stage or no TFs passed the expression threshold.")
       }
-      scrna_results_list[[length(scrna_results_list) + 1]] <- tfs_prio_expr
     }
   }
   
-  # creating one unified dataframe
-  all_results <- bind_rows(scrna_results_list) %>% distinct()
-  
-  # create a binary matrix
-  all_results_mtx <- all_results %>%
-    mutate(present = 'rna') %>%
-    pivot_wider(
-      names_from = cell,
-      values_from = present,
-      values_fill = 'none'
-    ) %>%
-    column_to_rownames("tf") %>%
-    as.matrix()
-  
-  # save this matrix
-  write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
-              sep = '\t')
-  
+  # check to see if any results were obtained
+  if (length(scrna_results_list) == 0) {
+    message('scRNA-seq analysis complete, no results were found over all scRNA-seq datasets.')
+  } else {
+    # creating one unified dataframe
+    all_results <- bind_rows(scrna_results_list) %>% distinct()
+    
+    # create a binary matrix
+    all_results_mtx <- all_results %>%
+      mutate(present = 'rna') %>%
+      pivot_wider(
+        names_from = cell,
+        values_from = present,
+        values_fill = 'none'
+      ) %>%
+      column_to_rownames("tf") %>%
+      as.matrix()
+    
+    # save this matrix
+    write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
+                sep = '\t')
+  }
 } else if (tf_expr_req == "both") {
   # load the necessary libraries
   library(Seurat)
@@ -530,8 +608,30 @@ if (tf_expr_req == "atac") {
   # first conducting RNA-seq analysis
   # obtain user instructions
   scrna_instruct_dir <- args[["scrna_instruct_dir"]]
+  
+  # checking to see if scRNA-seq instructions provided
+  if (!file.exists(scrna_instruct_dir)) {
+    stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
+  } 
+  
   user_instruct <- read_xlsx(scrna_instruct_dir)
-  quantile_th <- args[["tf_rna_quantile_th"]]
+  
+  # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
+  rmp_cell_types <- unique(tf_table_filt$cell)
+  peak_cell_types <- unique(unlist(str_split(user_instruct$atac_cell_types, ',')))
+  missing_cell_types <- setdiff(peak_cell_types, rmp_cell_types)
+  
+  if (length(missing_cell_types) > 0) { # removing missing cell types from user instructions
+    message("Note: TF expression analysis will not be conducted on cell types in which no SNPs co-localizing with risk-mediating peaks were identified: ", paste(missing_cell_types, collapse = ", "), ". Analysis not being conducted may also occur if a cell type name in the atac_cell_types column does not match with the corresponding cell type name provided in the scATAC-seq object (i.e., B cell vs b_cell).")
+  }
+  
+  user_instruct$one_cell_type_seurat <- as.logical(user_instruct$one_cell_type_seurat)
+  quantile_th <- if (nzchar(args[["tf_rna_quantile_th"]])) {
+    as.numeric(args[["tf_rna_quantile_th"]])
+  } else {
+    message("Using default quantile_th value: ", defaults$quantile_th)
+    defaults$quantile_th
+  }
   
   # creating list of all TF expression analysis results
   tf_expr_results_list <- list()
@@ -566,14 +666,18 @@ if (tf_expr_req == "atac") {
       percent_df <- gene_percent_expr_ct(scrna_dataset, matrix_loc)
       quant_value <- as.numeric(quant_per_celltype(percent_df, quantile_th))
       expression_df <- tf_expression_analysis_ct(scrna_dataset, TFs, quant_value, atac_cell_types, matrix_loc)
-      if (length(TF_heterodimers) > 0) { 
-        expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
-        tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expr_df_hd, atac_cell_types)
-      } else { # accounting for case where there are no heterodimers
-        expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
-        tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expression_df, atac_cell_types)
+      if (is.data.frame(expression_df)) {
+        if (length(TF_heterodimers) > 0) { 
+          expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
+          tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expr_df_hd, atac_cell_types)
+        } else { # accounting for case where there are no heterodimers
+          expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
+          tfs_prio_expr <- finalize_tfs_prio_expr_ct(tf_table_ct, expression_df, atac_cell_types)
+        }
+        tf_expr_results_list[[length(tf_expr_results_list) + 1]] <- tfs_prio_expr
+      } else {
+        message("Note: No scRNA-seq TF analysis results found for row with scRNA-seq directory '", scrna_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. scRNA-seq dataset may not contain any JASPAR TFs prioritized in the effect-SNP stage or no TFs passed the expression threshold.")
       }
-      tf_expr_results_list[[length(tf_expr_results_list) + 1]] <- tfs_prio_expr
     }
   } 
   
@@ -612,14 +716,18 @@ if (tf_expr_req == "atac") {
       percent_df <- gene_percent_expr(scrna_dataset, matrix_loc)
       quant_vec <- quant_per_celltype(percent_df, quantile_th)
       expression_df <- tf_expression_analysis(scrna_dataset, TFs, quant_vec, matrix_loc)
-      if (length(TF_heterodimers) > 0) { 
-        expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
-        tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expr_df_hd, atac_cell_types, rna_cell_types)
-      } else { # accounting for case where there are no heterodimers
-        expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
-        tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expression_df, atac_cell_types, rna_cell_types)
+      if (is.data.frame(expression_df)) {
+        if (length(TF_heterodimers) > 0) { 
+          expr_df_hd <- heterodimers_expr(TF_heterodimers, expression_df)
+          tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expr_df_hd, atac_cell_types, rna_cell_types)
+        } else { # accounting for case where there are no heterodimers
+          expression_df <- column_to_rownames(expression_df, var = 'TFs_prio')
+          tfs_prio_expr <- finalize_tfs_prio_expr(tf_table_ct, expression_df, atac_cell_types, rna_cell_types)
+        }
+        tf_expr_results_list[[length(tf_expr_results_list) + 1]] <- tfs_prio_expr
+      } else {
+        message("Note: No scRNA-seq TF analysis results found for row with scRNA-seq directory '", scrna_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. scRNA-seq dataset may not contain any JASPAR TFs prioritized in the effect-SNP stage or no TFs passed the expression threshold.")
       }
-      tf_expr_results_list[[length(tf_expr_results_list) + 1]] <- tfs_prio_expr
     }
   }
   
@@ -633,53 +741,103 @@ if (tf_expr_req == "atac") {
   TF_heterodimers <- TF_heterodimers[grepl("::", TF_heterodimers, fixed = T)]
   
   # obtain promoter region definitions and directories necessary for analysis
-  prom_thr_up = if (!is.null(args[["prom_th_up"]])) as.integer(args[["prom_th_up"]]) else defaults$prom_th_up
-  prom_thr_down = if (!is.null(args[["prom_th_down"]])) as.integer(args[["prom_th_down"]]) else defaults$prom_th_down
+  prom_thr_up = if (nzchar(args[["prom_th_up"]])) {
+    as.integer(args[["prom_th_up"]])
+  } else {
+    defaults$prom_th_up
+  } 
+  prom_thr_down = if (nzchar(args[["prom_th_down"]])) {
+    as.integer(args[["prom_th_down"]])
+  } else {
+    defaults$prom_th_down
+  }
   gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
                                                peak_file_dir, gene_annot_path, tf_table_filt)
-  tf_expr_results$conf <- 'atac'
   
-  # creating one unified dataframe
-  all_results <- bind_rows(tf_expr_results_list) %>% distinct()
-  all_results$conf <- "rna"
-  all_results <- bind_rows(all_results, tf_expr_results)
-  
-  # creating  matrix
-  all_results_val <- all_results %>%
-    group_by(tf, cell) %>%
-    summarise(
-      support_type = paste(sort(unique(conf)), collapse = ","),
-      .groups = "drop"
-    ) %>%
-    mutate(
-      value = case_when(
-        support_type == "atac" ~ "atac",
-        support_type == "rna" ~ "rna",
-        support_type == "atac,rna" ~ "both"
-      )
-    ) %>%
-    select(tf, cell, value) %>% 
-    distinct()
-  
-  all_results_mtx <- all_results_val %>%
-    pivot_wider(
-      names_from = cell,
-      values_from = value,
-      values_fill = "none"
-    ) %>%
-    column_to_rownames(var = 'tf') %>%
-    as.matrix()
-  
-  # save this matrix
-  write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
-              sep = '\t')
+  # bringing both analyses together
+  if (is.data.frame(tf_expr_results) & length(tf_expr_results_list) > 0) { # both rna-seq and atac-seq results are available
+    tf_expr_results$conf <- 'atac'
+    
+    # creating one unified dataframe
+    all_results <- bind_rows(tf_expr_results_list) %>% distinct()
+    all_results$conf <- "rna"
+    all_results <- bind_rows(all_results, tf_expr_results)
+    
+    # creating matrix
+    all_results_val <- all_results %>%
+      group_by(tf, cell) %>%
+      summarise(
+        support_type = paste(sort(unique(conf)), collapse = ","),
+        .groups = "drop"
+      ) %>%
+      mutate(
+        value = case_when(
+          support_type == "atac" ~ "atac",
+          support_type == "rna" ~ "rna",
+          support_type == "atac,rna" ~ "both"
+        )
+      ) %>%
+      select(tf, cell, value) %>% 
+      distinct()
+    
+    all_results_mtx <- all_results_val %>%
+      pivot_wider(
+        names_from = cell,
+        values_from = value,
+        values_fill = "none"
+      ) %>%
+      column_to_rownames(var = 'tf') %>%
+      as.matrix()
+    
+    # save this matrix
+    write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
+                sep = '\t')
+    
+    print('TF expression analysis complete!')
+  } else if (is.data.frame(tf_expr_results)) { # just atac-seq results available
+    # convert this dataframe into matrix
+    tf_expr_results$value = "atac"
+    
+    tf_expr_mtx <- pivot_wider(tf_expr_results,
+                               names_from = cell,
+                               values_from = value,
+                               values_fill = "none")
+    
+    tf_expr_mtx <- column_to_rownames(tf_expr_mtx, var = "tf")
+    tf_expr_mtx <- as.matrix(tf_expr_mtx)
+    
+    # save this matrix
+    write.table(tf_expr_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
+                sep = '\t')
+    
+    print('TF expression analysis complete! Results found for scATAC-seq analysis. No results found for scRNA-seq analysis.')
+  } else if (length(tf_expr_results_list) > 0) { # just rna-seq results available
+    # creating one unified dataframe
+    all_results <- bind_rows(tf_expr_results_list) %>% distinct()
+    
+    # create a matrix
+    all_results_mtx <- all_results %>%
+      mutate(present = 'rna') %>%
+      pivot_wider(
+        names_from = cell,
+        values_from = present,
+        values_fill = 'none'
+      ) %>%
+      column_to_rownames("tf") %>%
+      as.matrix()
+    
+    # save this matrix
+    write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
+                sep = '\t')
+    
+    print('TF expression analysis complete! No results found for scATAC-seq analysis. Results found for scRNA-seq analysis.')
+  } else { # no results found
+    message('TF expression analysis complete, no results were found over both the scRNA-seq and scATAC-seq analyses.')
+  }
 } 
 
-
-
-print("TF expression analysis complete!")
 

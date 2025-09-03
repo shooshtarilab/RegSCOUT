@@ -4,7 +4,8 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #defining defaults for parameters
 defaults <- list(
-  CI_thr = 0.95
+  ci_th = 0.95,
+  ci_ppa_th = 0.01
 )
 
 output_dir = args[["output_dir"]]
@@ -45,9 +46,14 @@ fgwas_data = fgwas_data[which(nchar(as.character(fgwas_data$A1)) == 1 & nchar(as
 ci_data[["a1"]] = fgwas_data$A1
 ci_data[["a2"]] = fgwas_data$A2
 
-# obtaining smallest number of SNPs whose PPAs sum up to CI_thr
+# obtaining smallest number of SNPs whose PPAs sum up to ci_th
 print("Extracting CI SNPs")
-ci_th = if (!is.null(args[["CI_thr"]])) as.numeric(args[["CI_thr"]]) else defaults$CI_thr
+ci_th = if (nzchar(args[["ci_th"]])) {
+  as.numeric(args[["ci_th"]])
+} else {
+  message("Using default ci_th value: ", defaults$ci_th)
+  defaults$ci_th
+} 
 
 ci_final_list = list()
 region_list = unique(ci_data$chunk)
@@ -75,8 +81,15 @@ ci_gwas_data = ci_data[ci_data$id %in% ci_final_list,]
 chr_list = paste0("chr", c(1:22))
 ci_gwas_data = ci_gwas_data[ci_gwas_data$chr %in% chr_list,]
 
-# removing all SNPs with PPA <= 0.01
-ci_gwas_data = ci_gwas_data[ci_gwas_data$PPA > 0.01,]
+# removing all SNPs with PPA <= CI PPA threshold
+ci_ppa_th = if (nzchar(args[["ci_ppa_th"]])) {
+  as.numeric(args[["ci_ppa_th"]])
+} else {
+  message("Using default ci_ppa_th value: ", defaults$ci_ppa_th)
+  defaults$ci_ppa_th
+} 
+
+ci_gwas_data = ci_gwas_data[ci_gwas_data$PPA > ci_ppa_th,]
 
 ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
