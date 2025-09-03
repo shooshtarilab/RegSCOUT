@@ -6,22 +6,33 @@ gene_annot_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotat
 finemap="Y"
 # plink2_bin="/home/ubunkun/anaconda3/envs/bio-R/bin/plnk2"
 # fgwas_src="/home/ubunkun/anaconda3/envs/bio-R/bin/fgwas"
-sumstats="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132224_buildGRCh37_p.tsv"
+sum_stats="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132224_buildGRCh37_p.tsv"
 lead_snp="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/lead_snps_EAS.txt"
 SNP_ref="/home/ubunkun/Lab/RA_project/RegSCOUT/EAS/"
 Population="EAS"
-
+histone_mark_analysis="Y"
+tf_expr_analysis="atac"
+hic_eqtl_analysis="Y"
+hist_mark_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_mark.txt"
+hic_eqtl_analysis="Y"
+hic_instruct_dir="
+"
 Rscript sanity_check.R \
  output_dir=$output_dir \
  ci_gwas_dir=$ci_gwas_dir \
  genome_built=$genome_built \
  gencode_dir=$gene_annot_dir \
  finemap=$finemap \
- sumstats=$sumstats \
- lead_snps=$lead_snps \
- SNP_ref=$SNP_ref
- Population=$Population
+ sum_stats=$sum_stats \
+ lead_snp=$lead_snp \
+ SNP_ref=$SNP_ref \
+ Population=$Population \
+ histone_mark_analysis=$histone_mark_analysis \
+ tf_expr_analysis=$tf_expr_analysis \
+ hic_eqtl_analysis=$hic_eqtl_analysis \
+ hist_mark_instruct_dir=$hist_mark_instruct_dir
+
 
 # Rscript EffectSNP.R output_dir=$output_dir ci_gwas_dir=$ci_gwas_dir genome_built=$genome_built
 
-#
+# scrna_instruct_dir hic_instruct_dir eqtl_instruct_dir seurat_obj

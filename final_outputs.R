@@ -47,8 +47,7 @@ if (!is.null(user_finemap)) {
 
 
 ## preparing tf data for effect_snps located on rmps (associating SNPs with TFs)
-risk_regions_ratio <- read_xlsx(paste0(output_dir, 'risk_regions_ratio.xlsx'))
-
+risk_regions_ratio = read.table(paste0(output_dir, 'risk_regions_ratio.txt'), header = TRUE)
 risk_regions_ratio <- risk_regions_ratio %>%
   mutate(
     tf = str_extract(TFSNP, "^.+(?=-[^-]+$)"), # accounts for TFs e.g., NKX6-2 with dash in name
@@ -134,7 +133,7 @@ for (i in 1:nrow(final_output)) {
 final_output <- final_output %>% separate_rows(rmp, sep = ", ")
 
 # loading in rmps and their PPAs (associated with the E-SNPs that overlap them)
-risk_regions_ppa <- read_xlsx(paste0(output_dir, "risk_regions_ppa.xlsx"))
+risk_regions_ppa = read.table(paste0(output_dir, "risk_regions_ppa.txt"), header = TRUE)
 
 # adding in rmp information
 for (i in 1:nrow(final_output)) {
@@ -147,7 +146,7 @@ for (i in 1:nrow(final_output)) {
 }
 
 # adding promoter-linked rmps genes information
-rmp_promoter <- read_xlsx(paste0(output_dir, "direct_rmp_gene_overlaps.xlsx"))
+rmp_promoter = read.table(paste0(output_dir, "direct_rmp_gene_overlaps.txt"),header=TRUE)
 rmp_promoter <- rmp_promoter[,c("RMP", "Gene")] %>% distinct()
 
 rmp_gene <- rmp_promoter %>% group_by(RMP) %>% summarise(gene = paste0(Gene, collapse = ", "))
@@ -164,7 +163,7 @@ for (i in 1:nrow(final_output)) {
 final_output <- final_output %>% separate_rows(cell_type, sep = ",")
 
 # reading in cicero information
-cicero <- read_xlsx(paste0(output_dir, "cic_peak_interact_gene.xlsx"))
+cicero = read.table(paste0(output_dir, "cic_peak_interact_gene.txt"), header = TRUE)
 
 # renaming certain columns
 colnames(cicero)[colnames(cicero) == "Peak1"] <- 'rmp'
@@ -292,7 +291,7 @@ if (!is.null(hic_eqtl_req)) {
   final_output$gene <- NULL
 }
 
-write_xlsx(final_output, paste0(output_dir, "final_table.xlsx"))
+write.table(final_output, file = paste0(output_dir, "final_table.txt") ,row.names = FALSE, quote = FALSE, sep = "\t")
 
 # now creating the prioritized table
 final_table <- final_output
@@ -433,7 +432,8 @@ if (TF_conf_req == "both") {
     )
 }
 
-write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
+write.table(final_table_new, file = paste0(output_dir, "complete_table.txt") ,row.names = FALSE, quote = FALSE, sep = "\t")
+
 
 # now performing gene filtering, prioritization
 if (!is.null(hic_eqtl_req)) {
@@ -458,8 +458,7 @@ print("Number of unique SNPs, genes, cell types, and TFs in prioritized table:")
 print(summary_stat)
 
 # save prioritized table
-write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
-
+write.table(prioritized_table, paste0(output_dir, "prioritized_table.txt"),row.names = FALSE, quote = FALSE, sep = "\t")
 
 
 

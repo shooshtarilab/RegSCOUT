@@ -1,4 +1,3 @@
-library(readxl)
 library(dplyr)
 library(stringr)
 library(R.utils)
@@ -8,11 +7,11 @@ library(Rsamtools)
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]
+output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # read in SNP, rmp information
-snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.xlsx") # rmp region, cell type adn TFSNP
-snp_rmp_df <- read_xlsx(snp_rmp_dir)
-
+snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt") # rmp region, cell type adn TFSNP
+snp_rmp_df = read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
 # modify this dataframe
 snp_rmp_df$log_lik_ratio <- NULL
 colnames(snp_rmp_df)[colnames(snp_rmp_df) == "region"] <- "rmp"
@@ -33,10 +32,11 @@ snp_rmp_df <- snp_rmp_df %>%
   )
 
 genome_build = args[["genome_built"]]
-
+genome_build = "hg19"
 # read in user instructions
 eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
-user_instruct <- read_xlsx(eqtl_instruct_dir)
+eqtl_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv"
+user_instruct <- read.table(eqtl_instruct_dir, header = TRUE)
 
 # creating list of results for eQTL
 eqtl_results_list <- list()
@@ -95,7 +95,10 @@ for (i in 1:num_eqtl) {
                                 ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
       
       # snp_granges@seqnames@values <- gsub("^chr", "", snp_granges@seqnames@values)
-
+      if (genome_build == "hg19"){
+        hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
+        snp_granges = unlist(liftOver(snp_granges,hg19to38))
+      }
       eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
       
       # add metadata from snp_rmp_filt for each matched row
@@ -111,6 +114,7 @@ for (i in 1:num_eqtl) {
       # create a dataframe and save it in list
       eqtl_results_df <- do.call(rbind, eqtl_results_meta)
       eqtl_results_df <- eqtl_results_df[,c('snp', 'rmp', 'cell', 'V3')] 
+
       colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V3'] <- 'gene'
       eqtl_results_list[[count]] <- eqtl_results_df
       # save the dataframe

@@ -53,7 +53,7 @@ if [ "$mode" == "ATAC_obj" ]; then
 
 elif [ "$mode" == "peak_table" ]; then
     Rscript EffectSNP.R --jaspar_mtx "$jaspar_mtx" --output_dir "$output_dir" --ci_gwas_dir "$ci_gwas_dir" --genome_built "$genome_built"
-    Rscript Peak_Gene_SNP_Integration.R --output_dir "$output_dir" --prom_th_up "$promth_up"_  --prom_th_down "$prom_th_down"  --gencode_dir "$gencode_dir"    
+    Rscript Peak_Gene_SNP_Integration.R --output_dir "$output_dir" --prom_th_up "$prom_th_up"  --prom_th_down "$prom_th_down"  --gencode_dir "$gencode_dir"    
 fi
 
 if [ "$tf_expr_analysis" == "atac" ] || [ "$tf_expr_analysis" == "rna" ] || [ "$tf_expr_analysis" == "both" ]; then

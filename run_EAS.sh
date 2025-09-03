@@ -33,13 +33,13 @@
   --prom_th_down 2000 \
   --cic_genomic_window 2000000 \
   --histone_mark_analysis N \
-  --hist_mark_instruct_dir "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_marks_instructions.xlsx" \
+  --hist_mark_instruct_dir "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_marks_instructions.txt" \
   --tf_expr_analysis atac \
   --scrna_instruct_dir "" \
   --tf_rna_quantile_th 0.25 \
   --hic_eqtl_analysis Y \
-  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.xlsx \
-  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.xlsx \
+  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.txt \
+  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.txt \
   --gene_ppa_th 0.05 \
 
 

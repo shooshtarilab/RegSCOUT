@@ -12,7 +12,7 @@
 
 # Call your existing Bash script with all required arguments
 
-  ./RegSCOUT_main.sh \
+./RegSCOUT_main.sh \
   --mode peak_table \
   --ci_gwas_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt \
   --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/ \
@@ -27,8 +27,8 @@
   --scrna_instruct_dir "" \
   --tf_rna_quantile_th 0.25 \
   --hic_eqtl_analysis Y \
-  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.xlsx \
-  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.xlsx \
+  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv \
+  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv \
   --gene_ppa_th 0.05 \
 
 
