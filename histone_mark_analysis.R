@@ -19,6 +19,33 @@ hist_mark_instruct_dir <- args[["hist_mark_instruct_dir"]]
 # loading in user instructions
 user_instruct <- read_xlsx(hist_mark_instruct_dir)
 
+# reading in risk-mediating peak regions
+peak_cluster_matrix = read.table(paste0(output_dir, "peak_cluster_matrix.txt"), header = TRUE, sep = "\t")
+
+# getting list of cell types in atac and in rmp data and checking to see if no RMPs were found in a cell type
+rmp_cell_types <- colnames(peak_cluster_matrix)
+peak_cell_types <- unique(unlist(str_split(user_instruct$atac_cell_types, ",")))
+missing_cell_types <- setdiff(peak_cell_types, rmp_cell_types)
+
+if (length(missing_cell_types) > 0) { # removing missing cell types from user instructions
+  user_instruct <- user_instruct %>%
+    rowwise() %>%
+    mutate(
+      atac_cell_types = str_split(atac_cell_types, ",")[[1]] %>%
+        setdiff(missing_cell_types) %>%
+        paste(collapse = ",")
+    ) %>%
+    filter(atac_cell_types != "") %>%
+    ungroup()
+  
+  message("Note: Histone mark analysis will not be conducted on cell types in which no risk-mediating peaks were identified: ", paste(missing_cell_types, collapse = ", "), ". Analysis not being conducted may also occur if a cell type name in the atac_cell_types column does not match with the corresponding cell type name provided in the scATAC-seq object (i.e., B cell vs b_cell).")
+}
+
+# check to see if any instructions entries are left
+if (nrow(user_instruct) == 0) {
+  stop("No histone mark instruction entries remain after removing ATAC cell types requested but not found in risk-mediating peak results. Histone mark analysis will not be conducted.")
+}
+
 # organizing user instructions
 atac_cell_types <- user_instruct$atac_cell_types
 hist_mark_cell_types <- user_instruct$chromHMM_cell_types
@@ -38,14 +65,11 @@ for (i in seq_along(hist_dirs)) {
 hist_granges <- list()
 
 for (cell in names(hist_data_list)) {
-    hist_granges[[cell]] <- GRanges(seqnames = hist_data_list[[cell]]$chr, ranges = IRanges(start = hist_data_list[[cell]]$start, end = hist_data_list[[cell]]$end))
-    hist_granges[[cell]]$state = hist_data_list[[cell]]$state
+  hist_granges[[cell]] <- GRanges(seqnames = hist_data_list[[cell]]$chr, ranges = IRanges(start = hist_data_list[[cell]]$start, end = hist_data_list[[cell]]$end))
+  hist_granges[[cell]]$state = hist_data_list[[cell]]$state
 }
 
-# reading in risk-mediating peak regions
-peak_cluster_matrix = read.delim(paste0(output_dir, "peak_cluster_matrix.txt"), header = TRUE, sep = "\t")
-
-# preparing cell subtype specific RMP data
+# preparing cell type specific RMP data
 result_matrices <- list()
 
 rmp_cell_types <- unique(unlist(strsplit(atac_cell_types, split = ","))) # may only have chromHMM data for a subset of atac cell types
@@ -92,6 +116,12 @@ for (cell_type in names(match_cell_types)) {
   
   rmp_hist_index <- findOverlaps(rmp_grange, hist_grange)
   
+  # check if results were found
+  if (length(rmp_hist_index) == 0) {
+    message('Note: No histone mark analysis results found for ', cell_type, '. One possible reason for this is a mismatch between genome builds of histone mark and other datasets provided as input to RegSCOUT.')
+    next
+  }
+  
   query_hits <- queryHits(rmp_hist_index)
   subject_hits <- subjectHits(rmp_hist_index)
   
@@ -124,15 +154,20 @@ for (cell_type in names(match_cell_types)) {
   rmp_labels_list[[cell_type]] <- rmp_hist
 }
 
-# adding cell type labels to each dataframe
-rmp_labels_list <- imap(rmp_labels_list, ~ mutate(.x, cell = .y))
-
-# bind all results together
-all_results <- bind_rows(rmp_labels_list)
-
-# save this dataframe
-write.table(all_results, file = paste0(output_dir, "all_histone_mark_results.txt"), row.names = F, quote = F,
-            sep = '\t')
-
-
-print('Histone mark analysis complete!')
+# checking to see if any results were found overall
+if (length(rmp_labels_list) == 0) {
+  message('Histone mark analysis complete, no results were found over all histone mark datasets.')
+} else {
+  # adding cell type labels to each dataframe
+  rmp_labels_list <- imap(rmp_labels_list, ~ mutate(.x, cell = .y))
+  
+  # bind all results together
+  all_results <- bind_rows(rmp_labels_list)
+  
+  # save this dataframe
+  write.table(all_results, file = paste0(output_dir, "all_histone_mark_results.txt"), row.names = F, quote = F,
+              sep = '\t')
+  
+  
+  print('Histone mark analysis complete!')
+}

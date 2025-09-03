@@ -60,19 +60,19 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 defaults <- list(
   sample_num = "present",
   locus_region = 1000000,
-  LD_thr = 0.25
+  ld_th = 0.25
 )
 
 #Setting the output directory
 output_dir = args[["output_dir"]]
 
 #Getting the Plink files for reference SNPs
-SNP_ref = args[["SNP_ref"]]
+snp_ref = args[["snp_ref"]]
 
 #Getting the population 
-snp_population = args[["Population"]]
+snp_population = args[["population"]]
 
-snp_ref_files = paste0(SNP_ref,snp_population)
+snp_ref_files = paste0(snp_ref,snp_population)
 
 #Loading the summary statistics file
 gwas_data_dir = args[["sum_stats"]]
@@ -145,9 +145,19 @@ new_gwas_data$locus_chr <- NA
 new_gwas_data$locus_start <- NA
 new_gwas_data$locus_end <- NA
 
-locus_region <- if (!is.null(args[["locus_region"]])) as.integer(args[["locus_region"]]) else defaults$locus_region
+locus_region <- if (nzchar(args[["locus_region"]])) {
+  as.integer(args[["locus_region"]])
+} else {
+  message("Using default locus_region value: ", defaults$locus_region)
+  defaults$locus_region
+}
 
-LD_thr <- if (!is.null(args[["LD_thr"]])) as.numeric(args[["LD_thr"]]) else defaults$LD_thr
+ld_th <- if (nzchar(args[["ld_th"]])) {
+  as.numeric(args[["ld_th"]])
+} else {
+  message("Using default ld_th value: ", defaults$ld_th)
+  defaults$ld_th
+}
 
 seg_index <- 0
 
@@ -183,7 +193,7 @@ for (i in c(1:length(new_loci_head$SNP))){
   
   #Filtering the SNPs with ld value of less than 0.25 with the lead SNP
   ld_signal = ld_mat[,new_lead_snp]
-  found_index = abs(ld_signal) > LD_thr
+  found_index = abs(ld_signal) > ld_th
   snp_list_loc = snp_list[found_index]
   
   #Assigning locus id to the SNPs
@@ -224,7 +234,12 @@ colnames(final_gwas_data) = c("SNPID", "CHR", "POS", "Z", "F", "N", "SEGNUMBER",
                               "A1","A2")
 
 #Getting value of sample_num flag
-sample_num <- if (!is.null(args[["sample_num"]])) args[["sample_num"]] else defaults$sample_num
+sample_num <- if (nzchar(args[["sample_num"]])) {
+  args[["sample_num"]]
+} else {
+  message("Using default sample_num value: ", defaults$sample_num)
+  defaults$sample_num
+}
 
 final_gwas_data$SNPID = filt_gwas_data$SNP
 final_gwas_data$CHR = paste0("chr", filt_gwas_data$CHR)

@@ -10,13 +10,14 @@ library(ape)
 library(Repitools)
 library(reshape2)
 library(dplyr)
-
+#
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  peak_th = 0.1
+  peak_th = 0.1, 
+  cell_count_th = 3
 )
 
 #Loading the scATAC-seq object 
@@ -24,18 +25,24 @@ pbmc_dir = args[["seurat_obj"]]
 pbmc_name = load(pbmc_dir)
 pbmc = get(pbmc_name)
 rm(pbmc_name)
-print("Seurat object loaded")
 
-#Removing the cell types with less than 3 cells in them
+#Removing the cell types with less than a certain number of cells in them
+cell_count_th <- if (nzchar(args[["cell_count_th"]])) {
+  as.numeric(args[["cell_count_th"]])
+} else {
+  message("Using default cell_count_th value: ", defaults$cell_count_th)
+  defaults$cell_count_th
+}
+
 for (cell in levels(x = pbmc)){
-  if(ncol(subset(x = pbmc, idents = cell)) < 3){
-    print(paste0(cell, " had less than 3 cells"))
+  if(ncol(subset(x = pbmc, idents = cell)) < cell_count_th){
+    print(paste0(cell, " had less than ", cell_count_th, " cells"))
     pbmc= subset(x = pbmc, idents = cell, invert = TRUE)
   }else{
-    print(paste0(cell, " had equal or more than 3 cells"))
+    print(paste0(cell, " had equal or more than ", cell_count_th, " cells"))
   }
 }
-print("Cell types with less than 3 cells removed!")
+print(paste0("Cell types with less than ", cell_count_th, " cells removed!"))
 
 #Getting the list of cell types
 cell_types = unique(Idents(pbmc))
@@ -50,18 +57,27 @@ pbmc_counts = pbmc@assays$peaks$counts
 
 #Extracting cell type specific peaks
 print("Extracting cell-type specific regions:")
-th = if (!is.null(args[["peak_th"]])) as.numeric(args[["peak_th"]]) else defaults$peak_th
+peak_th = if (nzchar(args[["peak_th"]])) {
+  as.numeric(args[["peak_th"]])
+} else {
+  message("Using default peak_th value: ", defaults$peak_th)
+  defaults$peak_th
+}
+
 for (cell in cell_types){
   cell_index = Idents(pbmc) == cell
   cell_counts = pbmc_counts[,cell_index]
-
+  
+  if (inherits(pbmc_counts, "dgCMatrix")) { # account for sparse matrices
+    cell_counts@x = rep(1,length(cell_counts@x))
+  } else {
+    cell_counts[which(cell_counts>0)] = 1
+  }
   cell_counts[which(cell_counts>0)] = 1
   cell_counts_perc = rowSums(cell_counts)/ncol(cell_counts)
-  cell_peaks = names(cell_counts_perc)[cell_counts_perc>th]
+  cell_peaks = names(cell_counts_perc)[cell_counts_perc > peak_th]
   
   loci_cluster_matrix[cell_peaks,cell] = 1
-  
-  print(cell)
 }
 
 #Filtering the cell by peak matrix to only include the peaks
@@ -95,8 +111,6 @@ output_file_main = args[["output_dir"]]
 
 #Saving the final table in the output directory
 output_file = paste0(output_file_main, "cell_peak.xlsx")
-head(final_peak_cell_df)
-print(output_file)
 write.xlsx(final_peak_cell_df, file = output_file, col.names = TRUE,
            row.names = FALSE)
-print('finished peak cell extract')
+print('Finished extracting cell type-specific open chromatin regions!')
