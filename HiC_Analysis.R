@@ -1,15 +1,29 @@
 library(ape)
-library(readxl)
+library(liftOver)
 library(dplyr)
 library(tidyr)
-library(readxl)
 library(stringr)
 library(GenomicRanges)
 library(Signac)
 library(R.utils)
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
+library(tools)
 
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -23,7 +37,7 @@ defaults <- list(
 hic_instruct_dir <- args[["hic_instruct_dir"]]
 
 # loading in user instructions
-user_instruct <- read_xlsx(hic_instruct_dir)
+user_instruct <- read_file(hic_instruct_dir)
 
 # load in gencode gene annotation and processing it
 prom_th_up = if (!is.null(args[["prom_th_up"]])) as.integer(args[["prom_th_up"]]) else defaults$prom_th_up
@@ -68,7 +82,7 @@ gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
 gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
 
 # load in RMP information
-rmp_df <- read_xlsx(paste0(output_dir, 'risk_regions_ppa.xlsx'))
+rmp_df = read_file(paste0(output_dir, 'risk_regions_ppa.txt'))
 
 # create separate chr, start, end columns for RMPs
 rmp_df <- rmp_df %>%
@@ -521,7 +535,7 @@ for (i in 1:num_hic) {
   hic_dir <- current_row$hic_dir
   
   # read in hic dataset and associated information
-  hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
+  hic_dataset <- read_file(hic_dir)
   hic_type <- current_row$hic_type
   bulk <- as.logical(str_to_upper(current_row$bulk))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))

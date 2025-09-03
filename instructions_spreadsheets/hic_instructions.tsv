@@ -1,0 +1,3 @@
+hic_dir	hic_type	bulk	atac_cell_types	hic_cell_types	signif_threshold
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/hic_files/NK_intHIC.bedpe	intact	FALSE	adaptive_NK,cyto_nk	NA	NA
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/hic_files/PCHiC_peak_matrix_cutoff5.tsv	promoter capture	FALSE	naive_cd8_t,naive_cd4_t,cyto_cd8_t,mem_b	tCD8,tCD4,tCD8,tB	5

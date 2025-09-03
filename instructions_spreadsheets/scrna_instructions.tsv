@@ -1,0 +1,5 @@
+scrna_dir	atac_cell_types	rna_cell_types	one_cell_type_seurat	matrix_loc
+/Users/richardzhang/Desktop/OneDrive/Desktop/Thesis_Project/Seurat_objects/rnaseq/midgestation_human_2017.Rdata	nEN,earlyEN	nENs,RG	FALSE	counts
+/Users/richardzhang/Desktop/OneDrive/Desktop/Thesis_Project/Seurat_objects/rnaseq/Adult_cell_type_specific/Oligodendrocyte_Precursors.Rdata	ulEN,dlEN	ENs,ENs	TRUE	data
+/Users/richardzhang/Desktop/OneDrive/Desktop/Thesis_Project/Seurat_objects/rnaseq/Adult_cell_type_specific/Astrocytes.Rdata	RG	NA	TRUE	data
+/Users/richardzhang/Desktop/OneDrive/Desktop/Thesis_Project/Seurat_objects/rnaseq/midgestation_human_Zhu.Rdata	AstroOligo,IN_MGE,IN_CGE,RG,ulEN,IPC,dlEN,Microglia,EndoMural	Astro/OPCs,IN-MGEs,IN-CGEs,RG,ENs,IPCs,ENs,Microglia,Endo/Mural Cells	FALSE	data

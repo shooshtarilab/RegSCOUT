@@ -1,0 +1,12 @@
+chromHMM_dir	atac_cell_types	chromHMM_cell_types
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/dendritic_cells/ENCFF022ZIV.bed	cDC,pDC	dc_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/monocytes/ENCFF269WBG.bed	cMono,ncMono,iMono	mono_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/b_mem_cells/ENCFF476DBW.bed	mem_b	b_mem_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/b_nai_cells/ENCFF478AZW.bed	naive_b	b_nai_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/act_cd4_cells/ENCFF342HTO.bed	act_cd4_t	act_cd4_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/act_cd8_cells/ENCFF555HRT.bed	cyto_cd8_t	act_cd8_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/cd4_nai_cells/ENCFF462ZAZ.bed	naive_cd4_t	cd4_nai_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/cd4_reg_cells/ENCFF255WPS.bed	tReg	cd4_reg_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/cd8_nai_cells/ENCFF890OEH.bed	naive_cd8_t	cd8_nai_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/cd8_mem_cells/ENCFF358UZU.bed	mem_cd8_t	cd8_mem_his
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/ChromHMM/nk_cells/ENCFF953PSB.bed	adaptive_NK,cyto_nk	nk_his

@@ -133,5 +133,4 @@ all_results <- bind_rows(rmp_labels_list)
 write.table(all_results, file = paste0(output_dir, "all_histone_mark_results.txt"), row.names = F, quote = F,
             sep = '\t')
 
-
 print('Histone mark analysis complete!')
