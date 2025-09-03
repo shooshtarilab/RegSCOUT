@@ -95,8 +95,4 @@ ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
             row.names = FALSE, quote = FALSE)
 
-<<<<<<< HEAD
-#blag
-=======
-## test conflict
->>>>>>> 244bfb0372deab87c69610761ec5daa5849152a5
+print('Fine-mapping Complete!')
