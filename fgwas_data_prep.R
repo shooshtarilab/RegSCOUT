@@ -105,7 +105,7 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
   #Getting the allele frequency file from reference panel SNP data using Plink
   freq_file_out = paste0(output_dir,"Plink2")
   #Getting the directory of Plink2 software
-  plink2_bin = args[["plink2_bin"]]
+  plink2_bin = args[["plink2_dir"]]
   fun <- paste0(
     shQuote(plink2_bin, type=shell),
     " --bfile ", shQuote(snp_ref_files, type=shell),
