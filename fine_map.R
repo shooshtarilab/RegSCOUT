@@ -10,7 +10,7 @@ defaults <- list(
 
 output_dir = args[["output_dir"]]
 
-fgwas_src = args[["fgwas_src"]]
+fgwas_src = args[["fgwas_dir"]]
 
 fgwas_file = paste0(output_dir,"final_gwas_data.txt")
 ci_suff = "CI"
