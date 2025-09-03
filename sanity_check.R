@@ -197,3 +197,4 @@ cat(sprintf(settings_msg, toupper(args[["finemap"]]),
   args[["tf_expr_analysis"]],
   toupper(args[["histone_mark_analysis"]]),
   toupper(args[["hic_eqtl_analysis"]])))
+#
