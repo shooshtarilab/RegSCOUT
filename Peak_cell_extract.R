@@ -21,7 +21,7 @@ defaults <- list(
 )
 
 #Loading the scATAC-seq object 
-pbmc_dir = args[["seurat_obj"]]
+pbmc_dir = args[["seurat_obj_dir"]]
 pbmc_name = load(pbmc_dir)
 pbmc = get(pbmc_name)
 rm(pbmc_name)
