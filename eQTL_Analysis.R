@@ -7,7 +7,6 @@ library(Rsamtools)
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]
-output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # read in SNP, rmp information
 snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt") # rmp region, cell type adn TFSNP
@@ -32,10 +31,9 @@ snp_rmp_df <- snp_rmp_df %>%
   )
 
 genome_build = args[["genome_built"]]
-genome_build = "hg19"
+
 # read in user instructions
 eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
-eqtl_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv"
 user_instruct <- read.table(eqtl_instruct_dir, header = TRUE)
 
 # creating list of results for eQTL
