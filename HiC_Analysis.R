@@ -97,7 +97,7 @@ gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
 gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
 
 # load in RMP information
-rmp_df <- read_xlsx(paste0(output_dir, 'risk_regions_ppa.xlsx'))
+rmp_df <- read.table(paste0(output_dir, 'risk_regions_ppa.txt'), header = TRUE)
 
 # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
 rmp_cell_types <- unique(unlist(str_split(rmp_df$cell, ',')))

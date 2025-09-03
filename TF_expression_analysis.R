@@ -1,5 +1,4 @@
 suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(readxl))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
@@ -17,7 +16,7 @@ defaults <- list(
 )
 
 # read in TF, SNP, and rmp information
-tf_table <- read_xlsx(paste0(output_dir, "risk_regions_ratio.xlsx"))
+tf_table <- read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
 tf_table <- tf_table %>%
   mutate(
     tf = str_extract(TFSNP, "^.+(?=-[^-]+$)"),
@@ -418,7 +417,7 @@ if (tf_expr_req == "atac") {
     defaults$prom_th_down
   }
   gene_annot_path = args[["gencode_dir"]]
-  peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
+  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
                                                peak_file_dir, gene_annot_path, tf_table_filt)
@@ -456,7 +455,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read_xlsx(scrna_instruct_dir)
+  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -614,7 +613,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read_xlsx(scrna_instruct_dir)
+  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -752,7 +751,7 @@ if (tf_expr_req == "atac") {
     defaults$prom_th_down
   }
   gene_annot_path = args[["gencode_dir"]]
-  peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
+  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 

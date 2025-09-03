@@ -110,7 +110,8 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
     shQuote(plink2_bin, type=shell),
     " --bfile ", shQuote(snp_ref_files, type=shell),
     " --freq ", 
-    " --out ", shQuote(freq_file_out, type=shell)
+    " --out ", shQuote(freq_file_out, type=shell),
+    " --silent "
   )
   system(fun)
   

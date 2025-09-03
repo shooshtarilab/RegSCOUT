@@ -16,8 +16,8 @@
   --mode peak_table \
   --ci_gwas_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt \
   --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/ \
-  --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
-  --genome_built hg19 \
+  --jaspar_mtx_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
+  --genome_build hg19 \
   --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz \
   --prom_th_up 2000 \
   --prom_th_down 2000 \

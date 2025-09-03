@@ -113,12 +113,12 @@ if (tolower(args[["finemap"]]) == "y") {
 output_dir = args[["output_dir"]]
 check_path(output_dir)
 
-# genome_built 
-genome_build = args[["genome_built"]]
+# genome_build
+genome_build = args[["genome_build"]]
 genome_build = tolower(genome_build)
 req_builds = c("hg19","hg38")
 if (!(genome_build %in% req_builds)) {
-  stop("Invalid genome_build: '", genome_build, 
+  stop("Invalid genome build: '", genome_build, 
        "'. Allowed values are: ", paste(req_builds, collapse = ", "))
 }
 message("Using genome_build: ", genome_build)

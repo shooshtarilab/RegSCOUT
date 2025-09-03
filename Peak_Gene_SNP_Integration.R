@@ -15,6 +15,18 @@ message("Running Peak_Gene_SNP_Integration")
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE,nrows=0)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE,nrows=0)
+  } else {
+    df = read.table(file_path, header = TRUE,nrows=0)
+  }
+  return(df)
+}
+
 #Defining default parameter values
 defaults <- list(
   prom_th_up = 2000,
@@ -25,8 +37,8 @@ defaults <- list(
 output_file_main = args[["output_dir"]]
 
 #Getting the cell by peak table
-cell_peak_file = paste0(output_file_main,"cell_peak.xlsx")
-cell_peak = read_xlsx(path = cell_peak_file)
+cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
+cell_peak = read.delim(path = cell_peak_file)
 peaks_cell_types = unique(unlist(str_split(cell_peak$`cell sub-types`, ",")))
 
 #Getting the file of effect SNPs and loading them
@@ -73,9 +85,8 @@ if (length(cell_type_diff) > 0) {
   message("Note: No risk-mediating peaks were identified in these cell types: ", paste(cell_type_diff, collapse = ", "), ". One possible reason for this is a mismatch between genome builds of scATAC-seq and GWAS datasets.")
 }
 
-peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.xlsx")
-write.xlsx(as.data.frame(peak_ppa_frame), file = peak_ppa_frame_dir, col.names = TRUE,
-           row.names = FALSE)
+peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.txt")
+write.table(as.data.frame(peak_ppa_frame), file = peak_ppa_frame_dir, sep = "\t", quote = FALSE)
 
 peak_cluster_matrix = peak_ppa_frame[,c("region","cell")]
 peak_cluster_matrix <- peak_cluster_matrix %>%
@@ -183,9 +194,9 @@ cell_tf_snp$cell = cell_peak_filt$cell_sub_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
 cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
 
-peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.xlsx")
-write.xlsx(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir, col.names = TRUE,
-           row.names = FALSE)
+peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.txt")
+write.table(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir,
+           quote = FALSE, sep="\t")
 
 tf_cluster_matrix = cell_tf_snp[,c("TFSNP","cell")]
 tf_cluster_matrix <- tf_cluster_matrix %>% distinct() 
@@ -407,8 +418,8 @@ if (is.null(coaccess_gene_cell_final)) {
   coaccess_gene_cell_final$Peak2 = gsub("_","-",coaccess_gene_cell_final$Peak2)
   
   #Saving the final table
-  cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.xlsx")
-  write_xlsx(coaccess_gene_cell_final, path = cic_peak_interact_dir)
+  cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
+  write.table(coaccess_gene_cell_final, path = cic_peak_interact_dir, sep= "\t", quote = FALSE)
 }
 
 #Filtering the dataframe to only include gene-cell data
@@ -435,8 +446,8 @@ for (i in 1:nrow(gene_cell_final)) {
 }
 
 #Saving the final table and matrix and a heatmap
-cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.xlsx")
-write_xlsx(coaccess_gene_cell_final, path = cic_peak_interact_dir)
+cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
+write.table(coaccess_gene_cell_final, path = cic_peak_interact_dir, sep="\t", quote= FALSE)
 
 cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
 write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
