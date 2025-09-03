@@ -1,10 +1,10 @@
-library(tibble)
-library(stringr)
-library(tidyr)
-library(dplyr)
-library(GenomicRanges)
-library(ape)
-library(R.utils)
+suppressPackageStartupMessages(library(tibble))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(ape))
+suppressPackageStartupMessages(library(R.utils))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 

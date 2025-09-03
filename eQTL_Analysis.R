@@ -1,8 +1,8 @@
-library(dplyr)
-library(stringr)
-library(R.utils)
-library(GenomicRanges)
-library(Rsamtools)
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(Rsamtools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory

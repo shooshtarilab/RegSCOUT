@@ -1,7 +1,7 @@
-library(atSNP)
-library(TFBSTools)
-library(dplyr)
-library(R.utils)
+suppressPackageStartupMessages(library(atSNP))
+suppressPackageStartupMessages(library(TFBSTools))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(R.utils))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 

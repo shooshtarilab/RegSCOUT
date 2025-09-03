@@ -1,4 +1,4 @@
-library(R.utils)
+suppressPackageStartupMessages(library(R.utils))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 

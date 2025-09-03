@@ -1,7 +1,7 @@
-library(GenomicRanges)
-library(dplyr)
-library(genetics.binaRies)
-library(R.utils)
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(genetics.binaRies))
+suppressPackageStartupMessages(library(R.utils))
 
 ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_alleles=FALSE)
 {

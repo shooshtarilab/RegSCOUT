@@ -39,6 +39,12 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+Rscript sanity_check.R --output_dir "$output_dir" --mode "$mode" --genome_built "$genome_built" --finemap "$finemap" --gencode_dir "$gencode_dir" \
+    --SNP_ref "$SNP_ref" --Population "$Population" --sum_stats "$sum_stats" --lead_snps "$lead_snps" --plink2_bin "$plink2_bin" \
+    --fgwas_src "$fgwas_src" --ci_gwas_dir "$ci_gwas_dir" --hic_eqtl_analysis "$hic_eqtl_analysis" --hic_instruct_dir "$hic_instruct_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
+    --tf_expr_analysis "$tf_expr_analysis" --scrna_instruct_dir "$scrna_instruct_dir" --hist_mark_instruct_dir "$hist_mark_instruct_dir" \
+    --histone_mark_analysis "$histone_mark_analysis"
+
 if [ "$finemap" == "Y" ]; then
     Rscript fgwas_data_prep.R --output_dir "$output_dir" --SNP_ref "$SNP_ref" --Population "$Population" --sum_stats "$sum_stats" --lead_snps "$lead_snps" --plink2_bin "$plink2_bin" --sample_num "$sample_num" --locus_region "$locus_region" --LD_thr "$LD_thr"
     Rscript fine_map.R --output_dir "$output_dir" --fgwas_src "$fgwas_src" --CI_thr "$CI_thr"

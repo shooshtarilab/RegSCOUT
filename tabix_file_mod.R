@@ -1,7 +1,7 @@
-library(Rsamtools)
-library(biomaRt)
-library(dplyr)
-library(data.table)
+suppressPackageStartupMessages(library(Rsamtools))
+suppressPackageStartupMessages(library(biomaRt))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(data.table))
 
 # read in tabix dataset
 eqtl_dir <- '/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files'

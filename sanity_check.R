@@ -96,23 +96,22 @@ if (tolower(args[["finemap"]]) == "y") {
   #   stop("Required columns missing in lead snp file: ", paste(missing_cols, collapse = ", "))
   # }
   # message("Lead snp columns present.")
+} else {
+  # ci_gwas_dir
+  ci_gwas_dir = args[["ci_gwas_dir"]]
+  ci_gwas = read.table(ci_gwas_dir, header = TRUE, nrows = 0)
+  colnames(ci_gwas) = tolower(colnames(ci_gwas))
+  req_list = c("id","chr","pos","ppa","chunk")
+  missing_cols = setdiff(req_list, colnames(ci_gwas))
+  if (length(missing_cols) > 0) {
+    stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
+  }
+  message("Credible interval gwas columns present.")
 }
 
 # output_dir
 output_dir = args[["output_dir"]]
 check_path(output_dir)
-
-# ci_gwas_dir
-ci_gwas_dir = args[["ci_gwas_dir"]]
-ci_gwas = read.table(ci_gwas_dir, header = TRUE, nrows = 0)
-colnames(ci_gwas) = tolower(colnames(ci_gwas))
-req_list = c("id","chr","pos","ppa","chunk")
-missing_cols = setdiff(req_list, colnames(ci_gwas))
-if (length(missing_cols) > 0) {
-  stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
-}
-message("Credible interval gwas columns present.")
-
 
 # genome_built 
 genome_build = args[["genome_built"]]
@@ -182,18 +181,19 @@ if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
 # Settings output
 
 settings_msg <- paste(
-  "----------------------------------\n",
-  "| RegSCOUT Settings              |\n",
-  "|                                |\n",
-  "| Finemapping:            %-6s |\n",
-  "| TF Expression Analysis: %-6s |\n",
-  "| Histone Marker Analysis: %-6s|\n",
-  "| Hi-C & eQTL Analysis:   %-6s |\n",
-  "----------------------------------\n",
+  "------------------------------------\n",
+  "| RegSCOUT Settings                |\n",
+  "|                                  |\n",
+  "| Finemapping             : %-6s |\n",
+  "| TF Expression Analysis  : %-6s |\n",
+  "| Histone Marker Analysis : %-6s |\n",
+  "| Hi-C & eQTL Analysis.   : %-6s |\n",
+  "------------------------------------\n",
   sep = ""
 )
 
-cat(sprintf(settings_msg, toupper(args[["finemap"]]),
+cat(sprintf(settings_msg,
+  if (tolower(args[["finemap"]]) == "yes") toupper(args[["finemap"]]) else "N",
   args[["tf_expr_analysis"]],
   toupper(args[["histone_mark_analysis"]]),
   toupper(args[["hic_eqtl_analysis"]])))

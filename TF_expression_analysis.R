@@ -1,8 +1,8 @@
-library(R.utils)
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(stringr)
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(stringr))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
