@@ -41,21 +41,25 @@ check_path = function(path){
   }
 }
 
+# output_dir
+output_dir = args[["output_dir"]]
+check_path(output_dir)
+
 if (tolower(args[["finemap"]]) == "y") {
   # check if plink_binary and fgwas_src param exists
-  if (!is.null(args[["plink2_bin"]])){
-    check_path(args[["plink2_bin"]])
+  if (!is.null(args[["plink2_dir"]])){ 
+    check_path(args[["plink2_dir"]])
   } else {
     check_binary("plink2") # version checking?
   }
-  if (!is.null(args[["fgwas_src"]])){
-    check_path(args[["fgwas_src"]])
+  if (!is.null(args[["fgwas_dir"]])){
+    check_path(args[["fgwas_dir"]])
   } else {
     check_binary("fgwas")
   }
 
   # sumstats
-  sum_stats_dir = args[["sum_stats"]]
+  sum_stats_dir = args[["sum_stats_dir"]]
   check_path(sum_stats_dir)
   sum_stats = read.table(sum_stats_dir, header = TRUE, nrows = 1)
   colnames(sum_stats) = tolower(colnames(sum_stats))
@@ -67,7 +71,7 @@ if (tolower(args[["finemap"]]) == "y") {
   message("GWAS summary statistics columns present.")
 
   # leadsnps, reminder that I do not like comparing snps between datasets using RSIDs
-  lead_snp_dir = args[["lead_snp"]]
+  lead_snp_dir = args[["lead_snps_dir"]]
   check_path(lead_snp_dir)
   lead_snp = read.table(lead_snp_dir, header = TRUE, nrows = 1)
   colnames(lead_snp) = tolower(colnames(lead_snp))
@@ -77,21 +81,19 @@ if (tolower(args[["finemap"]]) == "y") {
     stop("Required columns missing in lead snp file: ", paste(missing_cols, collapse = ", "))
   }
   message("Lead snp columns present.")
-
+  
   # snp ref, reminder that the user should be able to provide their own B files which is different, so the snp_ref parameter and population parameter may not be necessary.
   # instead, they should specify the path to the B files, rather than by specifying the population
   # ex. (EAS, EUR)
   # .bed, .bim, .fam
-  # snp_ref_dir = args[["SNP_ref"]]
-  # check_path(snp_ref_dir)
-  # snp_ref = read.table(snp_ref_dir, header = TRUE, nrows = 1)
-  # colnames(snp_ref) = tolower(colnames(snp_ref))
-  # req_list = c("EUR, EAS, AFR") # what else?
-  #  missing_cols = setdiff(req_list, colnames(lead_snp))
-  # if (length(missing_cols) > 0) {
-  #   stop("Required columns missing in lead snp file: ", paste(missing_cols, collapse = ", "))
-  # }
-  # message("Lead snp columns present.")
+  snp_ref_dir = args[["snp_ref_dir"]]
+  check_path(snp_ref_dir)
+  prefix_name = args[["population"]]
+  extension_list = c(".bed",".bim",".fam") # plink2 also have an alternative extension name for binary files, see pgen
+  for (ext in extension_list){
+    filename = paste0(prefix_name, ext)
+    check_path(paste0(output_dir,filename))
+  }
 } else {
   # ci_gwas_dir
   ci_gwas_dir = args[["ci_gwas_dir"]]
@@ -104,10 +106,6 @@ if (tolower(args[["finemap"]]) == "y") {
   }
   message("Credible interval gwas columns present.")
 }
-
-# output_dir
-output_dir = args[["output_dir"]]
-check_path(output_dir)
 
 # genome_build
 genome_build = args[["genome_build"]]
