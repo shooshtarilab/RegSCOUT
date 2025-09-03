@@ -8,7 +8,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx = "none",
+  jaspar_mtx_dir = "none",
   genome_build = "hg38"
 )
 
@@ -16,11 +16,11 @@ defaults <- list(
 output_dir = args[["output_dir"]]
 
 # read in and prepare JASPAR matrix file
-jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx"]])) {
-  args[["jaspar_mtx"]]
+jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
+  args[["jaspar_mtx_dir"]]
 } else {
-  message("Using default jaspar_mtx value: ", defaults$jaspar_mtx)
-  defaults$jaspar_mtx
+  message("Using default jaspar_mtx_dir value: ", defaults$jaspar_mtx_dir)
+  defaults$jaspar_mtx_dir
 }
 
 if (jaspar_mtx_dir == 'none') {

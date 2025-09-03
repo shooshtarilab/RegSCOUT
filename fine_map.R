@@ -10,7 +10,7 @@ defaults <- list(
 
 output_dir = args[["output_dir"]]
 
-fgwas_src = args[["fgwas_src"]]
+fgwas_src = args[["fgwas_dir"]]
 
 fgwas_file = paste0(output_dir,"final_gwas_data.txt")
 ci_suff = "CI"
@@ -94,3 +94,5 @@ ci_gwas_data = ci_gwas_data[ci_gwas_data$PPA > ci_ppa_th,]
 ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
             row.names = FALSE, quote = FALSE)
+
+print('Fine-mapping Complete!')
