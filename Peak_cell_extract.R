@@ -25,7 +25,6 @@ pbmc_dir = args[["seurat_obj"]]
 pbmc_name = load(pbmc_dir)
 pbmc = get(pbmc_name)
 rm(pbmc_name)
-print("Seurat object loaded")
 
 #Removing the cell types with less than a certain number of cells in them
 cell_count_th <- if (nzchar(args[["cell_count_th"]])) {
@@ -79,8 +78,6 @@ for (cell in cell_types){
   cell_peaks = names(cell_counts_perc)[cell_counts_perc > peak_th]
   
   loci_cluster_matrix[cell_peaks,cell] = 1
-  
-  print(cell)
 }
 
 #Filtering the cell by peak matrix to only include the peaks
@@ -114,8 +111,6 @@ output_file_main = args[["output_dir"]]
 
 #Saving the final table in the output directory
 output_file = paste0(output_file_main, "cell_peak.xlsx")
-head(final_peak_cell_df)
-print(output_file)
 write.xlsx(final_peak_cell_df, file = output_file, col.names = TRUE,
            row.names = FALSE)
-print('finished peak cell extract')
+print('Finished extracting cell type-specific open chromatin regions!')
