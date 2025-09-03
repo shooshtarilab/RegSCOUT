@@ -78,6 +78,6 @@ if [ "$eqtl_analysis" == "Y" ]; then
     Rscript eQTL_Analysis.R --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir"
 fi 
 
-if [ -z "$mode" ]; then
+if [ "$mode" == "ATAC_obj" ] || [ "$mode" == "peak_table" ]; then
     Rscript final_outputs.R --output_dir "$output_dir" --finemap "$finemap" --ci_gwas_dir "$ci_gwas_dir" --tf_score_th "$tf_score_th" --gene_score_th "$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th"
 fi
