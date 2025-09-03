@@ -10,13 +10,15 @@ sum_stats="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132224_buildG
 lead_snp="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/lead_snps_EAS.txt"
 SNP_ref="/home/ubunkun/Lab/RA_project/RegSCOUT/EAS/"
 Population="EAS"
+hic_eqtl_analysis="Y"
 histone_mark_analysis="Y"
-tf_expr_analysis="atac"
+hist_mark_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_marks_instructions.tsv"
 hic_eqtl_analysis="Y"
-hist_mark_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hist_mark.txt"
-hic_eqtl_analysis="Y"
-hic_instruct_dir="
-"
+hic_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv"
+eqtl_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv"
+tf_expr_analysis="atc"
+scrna_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/scrna_instructions.tsv"
+
 Rscript sanity_check.R \
  output_dir=$output_dir \
  ci_gwas_dir=$ci_gwas_dir \
@@ -28,9 +30,16 @@ Rscript sanity_check.R \
  SNP_ref=$SNP_ref \
  Population=$Population \
  histone_mark_analysis=$histone_mark_analysis \
- tf_expr_analysis=$tf_expr_analysis \
+ hist_mark_instruct_dir=$hist_mark_instruct_dir \
  hic_eqtl_analysis=$hic_eqtl_analysis \
- hist_mark_instruct_dir=$hist_mark_instruct_dir
+ hic_instruct_dir=$hic_instruct_dir \
+ eqtl_instruct_dir=$eqtl_instruct_dir \
+ tf_expr_analysis=$tf_expr_analysis \
+ scrna_instruct_dir=$scrna_instruct_dir
+ 
+
+
+ 
 
 
 # Rscript EffectSNP.R output_dir=$output_dir ci_gwas_dir=$ci_gwas_dir genome_built=$genome_built

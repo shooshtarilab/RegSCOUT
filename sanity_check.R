@@ -9,25 +9,15 @@ library(tools)
 # Function to read file based on extension
 read_file <- function(file_path) {
   ext <- file_ext(file_path)
-  
-  # Decide based on extension
   if (ext == "csv") {
-    df = read.csv(file_path, header = TRUE)
+    df = read.csv(file_path, header = TRUE,nrows=0)
   } else if (ext == "tsv") {
-    df = read.delim(file_path, header = TRUE)
-  } else if (ext == "txt") {
-    df = read.table(file_path, sep = " ", header = TRUE)
+    df = read.delim(file_path, header = TRUE,nrows=0)
   } else {
-    stop("Unsupported file format: '.", ext, "' in ", file_path)
+    df = read.table(file_path, header = TRUE,nrows=0)
   }
   return(df)
 }
-
-# Example usage
-file_path <- "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsdv"   # user specifies the file path
-df <- read_file(file_path)
-print(df)
-
 
 
 check_binary = function(binary) {
@@ -143,27 +133,67 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
   check_path(hist_mark_instruct_dir)
   hist_mark_instruct = read.table(hist_mark_instruct_dir, header = TRUE, nrows = 0)
   colnames(hist_mark_instruct) = tolower(colnames(hist_mark_instruct))
-  print(head(hist_mark_instruct))
   req_list = c("chromhmm_dir","atac_cell_types","chromhmm_cell_types")
   missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
   if (length(missing_cols) > 0) {
-    stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
+    stop("Required columns missing in histone mark instructions file: ", paste(missing_cols, collapse = ", "))
   }
   message("Histone mark instructions columns present.")
 }
 
-if (tolower(args[["histone_mark_analysis"]]) == "y") {
-  hist_mark_instruct_dir = args[["hist_mark_instruct_dir"]]
-  check_path(hist_mark_instruct_dir)
-  hist_mark_instruct = read.table(hist_mark_instruct_dir, header = TRUE, nrows = 0)
-  print(hist_mark_instruct)
-  colnames(hist_mark_instruct) = tolower(colnames(hist_mark_instruct))
-  req_list = c("chromHMM_dir","atac_cell_types","chromHMM_cell_types")
-  missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
+if (tolower(args[["hic_eqtl_analysis"]]) == "y") {
+  hic_instruct_dir = args[["hic_instruct_dir"]]
+  check_path(hic_instruct_dir)
+  hic_instruct = read_file(hic_instruct_dir)
+  colnames(hic_instruct) = tolower(colnames(hic_instruct))
+  req_list = c("hic_dir","hic_type","bulk","atac_cell_types","hic_cell_types")
+  missing_cols = setdiff(req_list, colnames(hic_instruct))
   if (length(missing_cols) > 0) {
-    stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
+    stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
   }
-  message("Histone mark instructions columns present.")
+  message("HI-C instructions columns present.")
+# need to check if cell type columns matches
+
+  eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
+  check_path(eqtl_instruct_dir)
+  eqtl_instruct = read_file(eqtl_instruct_dir)
+  colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
+  req_list = c("eqtl_dir","atac_cell_types")
+  missing_cols = setdiff(req_list, colnames(eqtl_instruct))
+  if (length(missing_cols) > 0) {
+    stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
+  }
+  message("eQTL instructions columns present.")
 }
 
-output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/EUR"
+if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
+  scrna_instruct_dir = args[["scrna_instruct_dir"]]
+  check_path(scrna_instruct_dir)
+  scrna_instruct = read_file(scrna_instruct_dir)
+  colnames(scrna_instruct) = tolower(colnames(scrna_instruct))
+  req_list = c("scrna_dir","atac_cell_types","rna_cell_types","one_cell_type_seurat","matrix_loc")
+  missing_cols = setdiff(req_list, colnames(scrna_instruct))
+  if (length(missing_cols) > 0) {
+    stop("Required columns missing in scrna instructions file: ", paste(missing_cols, collapse = ", "))
+  }
+  message("scrna instructions columns present.")
+}
+
+# Settings output
+
+settings_msg <- paste(
+  "----------------------------------\n",
+  "| RegSCOUT Settings              |\n",
+  "|                                |\n",
+  "| Finemapping:            %-6s |\n",
+  "| TF Expression Analysis: %-6s |\n",
+  "| Histone Marker Analysis: %-6s|\n",
+  "| Hi-C & eQTL Analysis:   %-6s |\n",
+  "----------------------------------\n",
+  sep = ""
+)
+
+cat(sprintf(settings_msg, toupper(args[["finemap"]]),
+  args[["tf_expr_analysis"]],
+  toupper(args[["histone_mark_analysis"]]),
+  toupper(args[["hic_eqtl_analysis"]])))
