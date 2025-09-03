@@ -7,8 +7,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx_dir = "none",
-  genome_build = "hg38"
+  jaspar_mtx_dir = "none"
 )
 
 # read output directory
@@ -61,12 +60,7 @@ if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
 head(ci_gwas_data)
 
 # Preparing CI SNPs for motif analysis
-genome_build = if (nzchar(args[["genome_build"]])) {
-  args[["genome_build"]]
-} else {
-  message("Using default genome_build value: ", defaults$genome_build)
-  defaults$genome_build
-}
+genome_build = args[["genome_build"]]
 
 if (genome_build == "hg19"){
   library(BSgenome.Hsapiens.UCSC.hg19)
