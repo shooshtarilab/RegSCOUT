@@ -94,3 +94,5 @@ ci_gwas_data = ci_gwas_data[ci_gwas_data$PPA > ci_ppa_th,]
 ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
             row.names = FALSE, quote = FALSE)
+
+#blag
