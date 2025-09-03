@@ -11,7 +11,7 @@ suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(tibble))
 suppressPackageStartupMessages(library(circlize))
 
-
+message("Running Peak_Gene_SNP_Integration")
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -489,5 +489,5 @@ if (!is.null(coaccess_gene_cell_final)) {
   write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE)
 }
 
-
 print("Directly mapped genes and cicero genes identified!")
+message("Finished Peak_Gene_SNP_Integration")

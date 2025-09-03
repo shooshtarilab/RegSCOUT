@@ -3,6 +3,7 @@ suppressPackageStartupMessages(library(TFBSTools))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
 
+message("Running EffectSNP.R")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
@@ -70,9 +71,9 @@ genome_build = if (nzchar(args[["genome_build"]])) {
   defaults$genome_build
 }
 
-if (genome_build == "hg19"){
-  library(BSgenome.Hsapiens.UCSC.hg19)
-  eff_snp = ci_gwas_data
+# if (genome_build == "hg19"){
+#   library(BSgenome.Hsapiens.UCSC.hg19)
+#   eff_snp = ci_gwas_data
   
 #   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
 #   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
@@ -86,13 +87,13 @@ if (genome_build == "hg19"){
 #   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
 #               row.names = FALSE, quote = FALSE)
   
-  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-                              genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
-                              , half.window.size = 30, default.par = TRUE
-                              , mutation = FALSE)
-  file.remove(snp_table_dir)
-}else if(genome_build == "hg38"){
-  library(BSgenome.Hsapiens.UCSC.hg38)
+#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
+#                               , half.window.size = 30, default.par = TRUE
+#                               , mutation = FALSE)
+#   file.remove(snp_table_dir)
+# }else if(genome_build == "hg38"){
+#   library(BSgenome.Hsapiens.UCSC.hg38)
   
 #   eff_snp = ci_gwas_data
   
@@ -206,3 +207,5 @@ write.table(file = final_ci_effect_dir, Ci_effect_SNPs, col.names = TRUE, row.na
 
 
 print("Effect-SNP identification complete!")
+
+message("Finished EffectSNP.R")
