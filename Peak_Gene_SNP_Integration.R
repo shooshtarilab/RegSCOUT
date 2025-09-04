@@ -11,7 +11,6 @@ suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(tibble))
 suppressPackageStartupMessages(library(circlize))
 
-message("Running Peak_Gene_SNP_Integration.R")
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 

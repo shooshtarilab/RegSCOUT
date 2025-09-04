@@ -1,6 +1,5 @@
 suppressPackageStartupMessages(library(R.utils))
 
-message("Running finemap")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #defining defaults for parameters

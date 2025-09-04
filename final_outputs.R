@@ -8,7 +8,6 @@ suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(circlize))
 
-message("Running final outputs")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
@@ -369,9 +368,9 @@ final_table <- final_table %>% distinct()
 
 # calculating gene ppa values
 gene_sum_ppa_df <- final_table[,c('cell_type', 'gene', 'rmp', 'rmp_ppa')] %>% distinct()
-gene_sum_ppa_df <- gene_sum_ppa_df %>%
+gene_sum_ppa_df <- suppressWarnings(gene_sum_ppa_df %>%
   group_by(cell_type, gene) %>%
-  summarise(gene_sum_ppa = sum(rmp_ppa, na.rm = T), .groups = 'drop')
+  summarise(gene_sum_ppa = sum(rmp_ppa, na.rm = T), .groups = 'drop'))
 
 final_table <- final_table %>%
   left_join(gene_sum_ppa_df, by = c("cell_type", "gene"))
@@ -511,8 +510,8 @@ if (file.exists(tf_expr_results_dir)) {
       height = unit(1 * nrow(tf_heatmap_mtx), "cm")
     ) 
     
-    output_tf_file = paste0(output_dir,"cell_tf.png")
-    png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
+    output_tf_file = paste0(output_dir,"cell_tf.svg")
+    svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
     heatmap_TFs
     invisible(dev.off())
     
@@ -640,8 +639,8 @@ if (file.exists(tf_expr_results_dir)) {
       height = unit(1 * nrow(tf_heatmap_mtx), "cm")
     ) 
     
-    output_tf_file = paste0(output_dir,"cell_tf.png")
-    png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
+    output_tf_file = paste0(output_dir,"cell_tf.svg")
+    svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
     heatmap_TFs
     invisible(dev.off())
     
@@ -805,8 +804,8 @@ heatmap_genes <- Heatmap(
   height = unit(1 * nrow(gene_cell_mtx), "cm")
 ) 
 
-output_gene_file = paste0(output_dir,"cell_gene.png")
-png(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10, units = 'cm', res = 300)
+output_gene_file = paste0(output_dir,"cell_gene.svg")
+svg(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10)
 heatmap_genes
 invisible(dev.off())
 
