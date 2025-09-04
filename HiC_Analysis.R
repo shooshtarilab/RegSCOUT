@@ -1,15 +1,30 @@
-library(ape)
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(readxl)
-library(stringr)
-library(GenomicRanges)
-library(Signac)
-library(R.utils)
+suppressPackageStartupMessages(library(ape))
+suppressPackageStartupMessages(library(liftOver))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(Signac))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(tools))
 
+message("Running HiC Analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -28,7 +43,7 @@ if (!file.exists(hic_instruct_dir)) {
 } 
 
 # loading in user instructions
-user_instruct <- read_xlsx(hic_instruct_dir)
+user_instruct <- read_file(hic_instruct_dir)
 
 # load in gencode gene annotation and processing it
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
@@ -83,7 +98,7 @@ gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
 gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
 
 # load in RMP information
-rmp_df <- read_xlsx(paste0(output_dir, 'risk_regions_ppa.xlsx'))
+rmp_df <- read.table(paste0(output_dir, 'risk_regions_ppa.txt'), header = TRUE)
 
 # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
 rmp_cell_types <- unique(unlist(str_split(rmp_df$cell, ',')))
@@ -791,7 +806,8 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
     seqnames = rmp_df_filt$chr,
     ranges = IRanges(start = rmp_df_filt$start, end = rmp_df_filt$end)
   )
-  
+  rmp_granges@seqinfo@seqnames <- gsub("^chr", "", rmp_granges@seqinfo@seqnames)
+
   # identify overlaps and create dataframe for results
   overlaps <- findOverlaps(rmp_granges, hic_granges)
   
@@ -878,11 +894,10 @@ num_hic <- nrow(user_instruct)
 for (i in 1:num_hic) {
   current_row <- user_instruct[i,]
   hic_dir <- current_row$hic_dir
-  
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
-  genes_present <- as.logical(current_row$genes_present)
-  bulk <- as.logical(current_row$bulk)
+  genes_present <- as.logical(trimws(current_row$genes_present))
+  bulk <- as.logical(trimws(current_row$bulk))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
   
   if (is.na(current_row$hic_cell_types)) {
@@ -949,7 +964,7 @@ if (length(hic_results_list) == 0) {
   write.table(all_results, file = paste0(output_dir, "all_hic_results.txt"), row.names = F, quote = F,
               sep = '\t')
   
-  print('Hi-C analysis complete!')
+  message('Hi-C analysis complete!')
 }
 
 

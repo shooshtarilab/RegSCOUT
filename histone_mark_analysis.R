@@ -1,12 +1,11 @@
-library(data.table)
-library(rtracklayer)
-library(GenomicRanges)
-library(stringr)
-library(R.utils)
-library(readxl)
-library(tidyr)
-library(dplyr)
-library(purrr)
+suppressPackageStartupMessages(library(rtracklayer))
+suppressPackageStartupMessages(library(GenomicRange))
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(purrr))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -17,7 +16,7 @@ output_dir = args[["output_dir"]]
 hist_mark_instruct_dir <- args[["hist_mark_instruct_dir"]]
 
 # loading in user instructions
-user_instruct <- read_xlsx(hist_mark_instruct_dir)
+user_instruct <- read.table(hist_mark_instruct_dir, header = TRUE)
 
 # reading in risk-mediating peak regions
 peak_cluster_matrix = read.table(paste0(output_dir, "peak_cluster_matrix.txt"), header = TRUE, sep = "\t")

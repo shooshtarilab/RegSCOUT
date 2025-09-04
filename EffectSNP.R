@@ -1,7 +1,7 @@
-library(atSNP)
-library(TFBSTools)
-library(dplyr)
-library(R.utils)
+suppressPackageStartupMessages(library(atSNP))
+suppressPackageStartupMessages(library(TFBSTools))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(R.utils))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -51,19 +51,11 @@ for (i in c(1:length(jaspar_pwm_list))){
 ci_gwas_dir = args[["ci_gwas_dir"]]
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
 
-if(sum(c("id","chr","pos","PPA","chunk") %in% colnames(ci_gwas_data)) < 5){
-  req_list = c("id","chr","pos","PPA","chunk")
-  req_not_found = req_list[which(!(req_list %in% colnames(ci_gwas_data)))]
-  stop(paste0("Required columns missing in CI SNPs:",req_not_found))
-}
-
-head(ci_gwas_data)
-
 # Preparing CI SNPs for motif analysis
 genome_build = args[["genome_build"]]
 
 if (genome_build == "hg19"){
-  library(BSgenome.Hsapiens.UCSC.hg19)
+  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
   eff_snp = ci_gwas_data
   
   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
@@ -82,7 +74,7 @@ if (genome_build == "hg19"){
                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
                               , half.window.size = 30, default.par = TRUE
                               , mutation = FALSE)
-  file.remove(snp_table_dir)
+  invisible(file.remove(snp_table_dir))
 }else if(genome_build == "hg38"){
   library(BSgenome.Hsapiens.UCSC.hg38)
   
@@ -108,16 +100,17 @@ if (genome_build == "hg19"){
 }
 
 # Calculating Effect SNPs
-results = ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2)
+results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2))
 
 # Initialize an empty list to store the results
 all_results <- list()
 
 # Loop ComputePValues() function 10 times and obtain all results
-for (i in 1:10) {
-  results_pval_i <- ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T)
+for (i in 1:3) {
+  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 10, testing.mc=T)))
   all_results[[i]] <- results_pval_i
-}
+  message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
+} 
 
 # Combine all data frames into one big data frame
 results_pval <- do.call(rbind, all_results)
@@ -187,12 +180,10 @@ Ci_effect_SNPs <- final_effect_snp_frame %>%
   )
 
 Ci_effect_SNPs$log_like_ratio <- -(Ci_effect_SNPs$log_like_ratio) 
-# this allows a positive LLR to mean the SNP increases the binding affinity of a TF 
-# and negative to mean it decreases it
 
 final_ci_effect_dir = paste0(output_dir,"Ci_effect_SNPs.txt")
 write.table(file = final_ci_effect_dir, Ci_effect_SNPs, col.names = TRUE, row.names = FALSE,
             quote = FALSE, sep = "\t")
 
 
-print("Effect-SNP identification complete!")
+message("Effect-SNP identification complete!")

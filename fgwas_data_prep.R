@@ -1,8 +1,9 @@
-library(GenomicRanges)
-library(dplyr)
-library(genetics.binaRies)
-library(R.utils)
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(genetics.binaRies)) # plink v1.9
 
+message("Running fgwas_data_prep")
 ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_alleles=FALSE)
 {
   # Make textfile
@@ -17,7 +18,8 @@ ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_allele
     " --extract ", shQuote(fn, type=shell), 
     " --make-just-bim ", 
     " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell)
+    " --out ", shQuote(fn, type=shell),
+    " --silent"
   )
   system(fun1)
   
@@ -29,7 +31,8 @@ ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_allele
     " --extract ", shQuote(fn, type=shell), 
     " --r square ", 
     " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell)
+    " --out ", shQuote(fn, type=shell),
+    " --silent"
   )
   system(fun2)
   
@@ -39,7 +42,8 @@ ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_allele
     " --extract ", shQuote(fn, type=shell), 
     " --freqx ", 
     " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell)
+    " --out ", shQuote(fn, type=shell),
+    " --silent"
   )
   system(fun3)
   
@@ -68,6 +72,13 @@ output_dir = args[["output_dir"]]
 
 #Getting the Plink files for reference SNPs
 snp_ref = args[["snp_ref_dir"]]
+
+#Getting the directory of Plink2 software
+plink2_bin = args[["plink2_dir"]]
+plink2_bin = ""
+if (!nzchar(plink2_bin)){
+    plink2_bin = Sys.which("plink2")
+}
 
 #Getting the population 
 snp_population = args[["population"]]
@@ -104,13 +115,12 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
   shell <- ifelse(Sys.info()['sysname'] == "Windows", "cmd", "sh")
   #Getting the allele frequency file from reference panel SNP data using Plink
   freq_file_out = paste0(output_dir,"Plink2")
-  #Getting the directory of Plink2 software
-  plink2_bin = args[["plink2_dir"]]
   fun <- paste0(
     shQuote(plink2_bin, type=shell),
     " --bfile ", shQuote(snp_ref_files, type=shell),
     " --freq ", 
-    " --out ", shQuote(freq_file_out, type=shell)
+    " --out ", shQuote(freq_file_out, type=shell),
+    " --silent "
   )
   system(fun)
   
@@ -127,10 +137,9 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
   new_gwas_data = new_gwas_data[match(unique_snp_freq$V2, new_gwas_data$SNP),]
   new_gwas_data[,"A1"] = substr(unique_snp_freq$V3,1,1)
   new_gwas_data[,"A2"] = substr(unique_snp_freq$V4,1,1)
-  
   new_gwas_data["MAF"] = unique_snp_freq$V6
 }
-print("SNP information loaded!")
+message("SNP information loaded!")
 
 #Matching lead SNPs to the GWAS SNPs
 new_loci_head = loci_head[loci_head$SNP %in% new_gwas_data$SNP,]
@@ -180,7 +189,7 @@ for (i in c(1:length(new_loci_head$SNP))){
     bfile = snp_ref_files,
     fn_file = fn_temp
   )
-  
+
   #Only including the SNPs found in the ld data
   ld_found_index = snp_list %in% colnames(ld_mat)
   snp_list = snp_list[ld_found_index]
@@ -208,10 +217,15 @@ for (i in c(1:length(new_loci_head$SNP))){
     new_gwas_data[(new_gwas_data$SNP %in% snp_list_loc),'locus_end'] = new_gwas_data$POS[index] + locus_region
   }
   
-  print(paste0("step ",i," completed"))
+  # print(paste0("step ",i," completed"))
 }
 
-print("SNPs assigned to loci!")
+files_to_delete <-file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
+
+# delete the files
+invisible(file.remove(files_to_delete))
+
+message("SNPs assigned to loci!")
 
 #Filtering the SNPs outside of the loci
 filt_gwas_data = new_gwas_data[new_gwas_data$SEGNUM != 'None',]
@@ -264,7 +278,6 @@ for (j in c(1:i)){
   found_index = final_gwas_data$SEGNUMBER == j
   found_data = final_gwas_data[found_index,]
   final_gwas_data[found_index,] = found_data[order(found_data$POS),]
-  print(j)
 }
 
 #Saving the final table
@@ -272,5 +285,5 @@ final_gwas_data <- final_gwas_data[!is.infinite(final_gwas_data$Z),]
 write.table(final_gwas_data, file = final_gwas_dir, sep = "\t", col.names = TRUE,
             row.names = FALSE, quote = FALSE)
 
-print("SNPs are ready for fine mapping!")
+message("SNPs are ready for fine mapping!")
 

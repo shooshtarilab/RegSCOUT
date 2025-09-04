@@ -1,18 +1,17 @@
-library(GenomicRanges)
-library(ggplot2)
-library(stringr)
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(ComplexHeatmap)
-library(R.utils)
-library(Seurat)
-library(Signac)
-library(ape)
-library(tibble)
-library(circlize)
-library(writexl)
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(ComplexHeatmap))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(Seurat))
+suppressPackageStartupMessages(library(Signac))
+suppressPackageStartupMessages(library(ape))
+suppressPackageStartupMessages(library(tibble))
+suppressPackageStartupMessages(library(circlize))
 
+message("Running Peak_Gene_SNP_Integration.R")
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -24,11 +23,12 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
+output_file_main = "/home/ubunkun/Lab/RA_project/RegSCOUT/EUR/"
 
 #Getting the cell by peak table
-cell_peak_file = paste0(output_file_main,"cell_peak.xlsx")
-cell_peak = read_xlsx(path = cell_peak_file)
-peaks_cell_types = unique(unlist(str_split(cell_peak$`cell sub-types`, ",")))
+cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
+cell_peak = read.delim(cell_peak_file, header = TRUE)
+peaks_cell_types = unique(unlist(str_split(cell_peak$cell_sub_types, ",")))
 
 #Getting the file of effect SNPs and loading them
 eff_snp_file = paste0(output_file_main,"Ci_effect_SNPs.txt")
@@ -55,7 +55,7 @@ peak_ppa_frame = as.data.frame(matrix(0,nrow = length(peak_eff_overlaps),
 colnames(peak_ppa_frame) = c("region","PPA","cell")
 
 peak_ppa_frame$region = peak_list[queryHits(peak_eff_overlaps)]
-peak_ppa_frame$cell = cell_peak$`cell sub-types`[queryHits(peak_eff_overlaps)]
+peak_ppa_frame$cell = cell_peak$cell_sub_types[queryHits(peak_eff_overlaps)]
 peak_ppa_frame$PPA = eff_snp_filt$ppa[subjectHits(peak_eff_overlaps)]
 
 peak_ppa_frame = peak_ppa_frame %>%
@@ -74,8 +74,8 @@ if (length(cell_type_diff) > 0) {
   message("Note: No risk-mediating peaks were identified in these cell types: ", paste(cell_type_diff, collapse = ", "), ". One possible reason for this is a mismatch between genome builds of scATAC-seq and GWAS datasets.")
 }
 
-peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.xlsx")
-write_xlsx(as.data.frame(peak_ppa_frame), path = peak_ppa_frame_dir)
+peak_ppa_frame_dir = paste0(output_file_main,"risk_regions_ppa.txt")
+write.table(as.data.frame(peak_ppa_frame), file = peak_ppa_frame_dir, sep = "\t", quote = FALSE, row.names = FALSE)
 
 peak_cluster_matrix = peak_ppa_frame[,c("region","cell")]
 peak_cluster_matrix <- peak_cluster_matrix %>%
@@ -87,7 +87,7 @@ peak_cluster_matrix = tibble::column_to_rownames(peak_cluster_matrix, var = "reg
 peak_cluster_matrix = as.matrix(peak_cluster_matrix)
 
 peak_cluster_matrix_file = paste0(output_file_main,"peak_cluster_matrix.txt")
-write.table(peak_cluster_matrix, peak_cluster_matrix_file, sep = "\t", row.names = TRUE)
+write.table(peak_cluster_matrix, peak_cluster_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 
 f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "red"))
 
@@ -145,11 +145,11 @@ output_peak_file = paste0(output_file_main,"cell_peak.png")
 png(output_peak_file, width = ncol(risk_regions) + ncol(peak_cluster_matrix) + 10, height = nrow(peak_cluster_matrix) + 10, units = 'cm', res = 300)
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
-dev.off()
+invisible(dev.off())
 
 #Changing the cell by peak matrix so that each line has only one cell type
 cell_peak = cell_peak %>% 
-  separate_rows('cell sub-types', sep=",")
+  separate_rows(cell_sub_types, sep=",")
 
 #Getting the peaks and Effect SNPs as GRanges and overlapping them to find
 #SNP-affected peaks and mapping TFs to those peaks 
@@ -179,12 +179,13 @@ cell_tf_snp$region = paste(cell_peak_filt$chr,
                            cell_peak_filt$start,
                            cell_peak_filt$end,
                            sep = "-")
-cell_tf_snp$cell = cell_peak_filt$`cell sub-types`
+cell_tf_snp$cell = cell_peak_filt$cell_sub_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
 cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
 
-peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.xlsx")
-write_xlsx(as.data.frame(cell_tf_snp), path = peak_ratio_frame_dir)
+peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.txt")
+write.table(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir,
+           quote = FALSE, sep="\t", row.names = FALSE)
 
 tf_cluster_matrix = cell_tf_snp[,c("TFSNP","cell")]
 tf_cluster_matrix <- tf_cluster_matrix %>% distinct() 
@@ -195,7 +196,7 @@ tf_cluster_matrix = tibble::column_to_rownames(tf_cluster_matrix, var = "TFSNP")
 tf_cluster_matrix = as.matrix(tf_cluster_matrix)
 
 TF_cluster_matrix_file = paste0(output_file_main,"TF_cluster_matrix.txt")
-write.table(tf_cluster_matrix, TF_cluster_matrix_file, sep = "\t", row.names = TRUE)
+write.table(tf_cluster_matrix, TF_cluster_matrix_file, sep = "\t", quote = FALSE, row.names = TRUE)
 
 
 f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "blue"))
@@ -254,13 +255,19 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-output_tf_file = paste0(output_file_main,"cell_snp_tf.png")
-png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
+output_tf_file = paste0(output_file_main,"cell_snp_tf.svg")
+# png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
+width_in  <- (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) 
+height_in <- (nrow(tf_cluster_matrix) + 10) 
+
+svg(output_tf_file,
+    width = width_in,
+    height = height_in)
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
-dev.off()
+invisible(dev.off())
 
-print("Affected peaks and TFs extraction finished!")
+message("Affected peaks and TFs extraction finished!")
 
 #Loading the gene reference data from genecode files
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
@@ -278,6 +285,7 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
 }
 
 gene_annot_dir = args[["gencode_dir"]]
+gene_annot_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz"
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
 transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
 transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
@@ -340,8 +348,8 @@ if (length(rmp_promoter_overlap) != 0) {
     separate_rows(Cell_Type, sep = ',')
   
   #Output this as a spreadsheet
-  direct_overlap_dir = paste0(output_file_main, "direct_rmp_gene_overlaps.xlsx")
-  write_xlsx(direct_overlap_df, path = direct_overlap_dir)
+  direct_overlap_dir = paste0(output_file_main, "direct_rmp_gene_overlaps.txt")
+  write.table(direct_overlap_df, file = direct_overlap_dir ,row.names = FALSE, quote = FALSE, sep = "\t")
 } else {
   message('No genes found by direct overlap of RMPs with promoter peaks.')
 }
@@ -361,12 +369,13 @@ for (i in c(1:length(cell_type_list))){
   cell_temp = cell_type_list[i]
   cell_cicero_data = read.table(file = cicero_file_list[i],
                                 sep = "\t", header = TRUE)
+                                
   #Finding the peaks in the first column of the cell type data 
   #which overlaps the Effect SNPs and only keeping those peaks
   cell_peak1_grg = StringToGRanges(gsub("_","-",cell_cicero_data$Peak1))
   peak1_snp_overlap = findOverlaps(cell_peak1_grg, eff_snp_grg)
   cell_cicero_data = cell_cicero_data[unique(queryHits(peak1_snp_overlap)),]
-  
+
   #Now mapping the peak2 of the cell type filtered Cicero data to the
   #promoter regions of genes
   cell_peak2_grg = StringToGRanges(gsub("_","-",cell_cicero_data$Peak2))
@@ -383,7 +392,6 @@ for (i in c(1:length(cell_type_list))){
   if(nrow(peak_gene_frame_temp) == 0) { # check if no results for this cell type
     next
   }
-  
   peak_gene_frame_temp$Peak1 = cell_cicero_data$Peak1[queryHits(peak2_promoter_overlap)]
   peak_gene_frame_temp$Peak2 = cell_cicero_data$Peak2[queryHits(peak2_promoter_overlap)]
   peak_gene_frame_temp$coaccess = cell_cicero_data$coaccess[queryHits(peak2_promoter_overlap)]
@@ -392,7 +400,6 @@ for (i in c(1:length(cell_type_list))){
   peak_gene_frame_temp$Cell_Type = cell_temp
   
   coaccess_gene_cell_final[[cell_temp]] = peak_gene_frame_temp
-  
 }
 
 #The dataframe having the list of SNP-affected links matching 
@@ -406,82 +413,53 @@ if (is.null(coaccess_gene_cell_final)) {
   coaccess_gene_cell_final$Peak2 = gsub("_","-",coaccess_gene_cell_final$Peak2)
   
   #Saving the final table
-  cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.xlsx")
-  write_xlsx(coaccess_gene_cell_final, path = cic_peak_interact_dir)
+  cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
+  write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep= "\t", row.names = FALSE, quote = FALSE)
 }
 
 #Filtering the dataframe to only include gene-cell data
-if (!is.null(coaccess_gene_cell_final) & length(rmp_promoter_overlap) != 0) {
-  gene_cell_final1 = coaccess_gene_cell_final %>%
-    select(Cell_Type, Gene)
-  
-  gene_cell_final2 = direct_overlap_df %>%
-    select(Cell_Type, Gene)
-  
-  gene_cell_final <- rbind(gene_cell_final1, gene_cell_final2) %>% distinct()
-  
-  #Creating a cell by gene matrix 
-  gene_names = unique(gene_cell_final$Gene)
-  cell_names = unique(gene_cell_final$Cell_Type)
-  
-  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
-  row.names(gene_cell_matrix) = cell_names
-  colnames(gene_cell_matrix) = gene_names
-  
-  for (i in 1:nrow(gene_cell_final)) {
-    row <- gene_cell_final$Cell_Type[i]
-    col <- gene_cell_final$Gene[i]
-    gene_cell_matrix[row, col] <- 1
-  }
-  
-  #Saving the matrix
-  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
-  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
-} else if (!is.null(coaccess_gene_cell_final)) {
-  gene_cell_final = coaccess_gene_cell_final %>%
-    select(Cell_Type, Gene) %>%
-    distinct()
-  
-  #Creating a cell by gene matrix 
-  gene_names = unique(gene_cell_final$Gene)
-  cell_names = unique(gene_cell_final$Cell_Type)
-  
-  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
-  row.names(gene_cell_matrix) = cell_names
-  colnames(gene_cell_matrix) = gene_names
-  
-  for (i in 1:nrow(gene_cell_final)) {
-    row <- gene_cell_final$Cell_Type[i]
-    col <- gene_cell_final$Gene[i]
-    gene_cell_matrix[row, col] <- 1
-  }
-  
-  #Saving the matrix
-  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
-  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
-} else if (length(rmp_promoter_overlap) != 0) {
-  gene_cell_final = direct_overlap_df %>%
-    select(Cell_Type, Gene) %>%
-    distinct()
-  
-  #Creating a cell by gene matrix 
-  gene_names = unique(gene_cell_final$Gene)
-  cell_names = unique(gene_cell_final$Cell_Type)
-  
-  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
-  row.names(gene_cell_matrix) = cell_names
-  colnames(gene_cell_matrix) = gene_names
-  
-  for (i in 1:nrow(gene_cell_final)) {
-    row <- gene_cell_final$Cell_Type[i]
-    col <- gene_cell_final$Gene[i]
-    gene_cell_matrix[row, col] <- 1
-  }
-  
-  #Saving the matrix
-  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
-  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
+gene_cell_final1 = coaccess_gene_cell_final %>%
+  select(Cell_Type, Gene)
+
+gene_cell_final2 = direct_overlap_df %>%
+  select(Cell_Type, Gene)
+
+gene_cell_final <- rbind(gene_cell_final1, gene_cell_final2)
+
+#Creating a cell by gene matrix 
+gene_names = unique(gene_cell_final$Gene)
+cell_names = unique(gene_cell_final$Cell_Type)
+
+gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
+row.names(gene_cell_matrix) = cell_names
+colnames(gene_cell_matrix) = gene_names
+
+for (i in 1:nrow(gene_cell_final)) {
+  row <- gene_cell_final$Cell_Type[i]
+  col <- gene_cell_final$Gene[i]
+  gene_cell_matrix[row, col] <- 1
 }
+
+#Saving the final table and matrix and a heatmap
+cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
+write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep="\t", row.names = FALSE, quote= FALSE)
+
+cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
+write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
+
+
+f1 = c("0" = "white", "1" = "red")
+
+output_file = paste0(output_file_main, "cell_gene.png")
+invisible(suppressWarnings(file.remove(output_file)))
+png(output_file,width = 8400, height = 2800, res = 300)
+Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
+        column_title = "Gene-cell type plot",
+        row_names_gp = grid::gpar(fontsize = 16),
+        column_names_gp = grid::gpar(fontsize = 6),
+        rect_gp = gpar(col= "#84878a"))
+
+invisible(dev.off())
 
 if (length(rmp_promoter_overlap) != 0) {
   promoter_cell_gene = direct_overlap_df
@@ -497,7 +475,7 @@ if (length(rmp_promoter_overlap) != 0) {
   prom_matrix = as.matrix(prom_matrix)
   
   prom_matrix_file = paste0(output_file_main,"Gene_promoter_matrix.txt")
-  write.table(prom_matrix, prom_matrix_file, sep = "\t", row.names = TRUE)
+  write.table(prom_matrix, prom_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 }
 
 if (!is.null(coaccess_gene_cell_final)) {
@@ -514,8 +492,7 @@ if (!is.null(coaccess_gene_cell_final)) {
   enh_matrix = as.matrix(enh_matrix)
   
   enh_matrix_file = paste0(output_file_main,"Gene_enhancer_matrix.txt")
-  write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE)
+  write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 }
 
-
-print("Directly mapped and cicero genes identified!")
+message("Directly mapped genes and cicero genes identified!")

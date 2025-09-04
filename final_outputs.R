@@ -1,15 +1,14 @@
-library(tibble)
-library(stringr)
-library(tidyr)
-library(dplyr)
-library(readxl)
-library(GenomicRanges)
-library(ape)
-library(writexl)
-library(R.utils)
-library(ComplexHeatmap)
-library(circlize)
+suppressPackageStartupMessages(library(tibble))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(ape))
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(ComplexHeatmap))
+suppressPackageStartupMessages(library(circlize))
 
+message("Running final outputs")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
@@ -50,7 +49,7 @@ if (user_finemap == "Y") {
 }
 
 ## preparing tf data for effect_snps located on rmps (associating SNPs with TFs)
-risk_regions_ratio <- read_xlsx(paste0(output_dir, 'risk_regions_ratio.xlsx'))
+risk_regions_ratio <- read.table(paste0(output_dir, 'risk_regions_ratio.txt'),header=TRUE)
 
 risk_regions_ratio <- risk_regions_ratio %>%
   mutate(
@@ -157,7 +156,7 @@ for (i in 1:nrow(final_output)) {
 final_output <- final_output %>% separate_rows(rmp, sep = ", ")
 
 # loading in rmps and their PPAs (associated with the E-SNPs that overlap them)
-risk_regions_ppa <- read_xlsx(paste0(output_dir, "risk_regions_ppa.xlsx"))
+risk_regions_ppa <- read.table(paste0(output_dir, "risk_regions_ppa.txt"), header=TRUE)
 
 # adding in rmp information
 for (i in 1:nrow(final_output)) {
@@ -170,10 +169,10 @@ for (i in 1:nrow(final_output)) {
 }
 
 # adding promoter-linked rmps genes information, if any were found
-direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.xlsx")
+direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.txt")
 
 if (file.exists(direct_ovlp_res_dir)) {
-  rmp_promoter <- read_xlsx(direct_ovlp_res_dir)
+  rmp_promoter <- read.table(direct_ovlp_res_dir, header = TRUE)
   
   rmp_promoter <- rmp_promoter[,c("RMP", "Gene")] %>% distinct()
   
@@ -194,10 +193,10 @@ if (file.exists(direct_ovlp_res_dir)) {
 final_output <- final_output %>% separate_rows(cell_type, sep = ",")
 
 # reading in cicero information, if results were found
-cicero_dir <- paste0(output_dir, "cic_peak_interact_gene.xlsx")
+cicero_dir <- paste0(output_dir, "cic_peak_interact_gene.txt")
 
 if (file.exists(cicero_dir)) {
-  cicero <- read_xlsx(cicero_dir)
+  cicero <- read.table(cicero_dir, header = TRUE)
   
   # renaming certain columns
   colnames(cicero)[colnames(cicero) == "Peak1"] <- 'rmp'
@@ -336,7 +335,7 @@ if (file.exists(eqtl_results_dir)) {
   final_output$eqtl_gene <- NULL
 }
 
-write_xlsx(final_output, paste0(output_dir, "final_table.xlsx"))
+write.table(final_output, paste0(output_dir, "final_table.txt"), quote = FALSE, sep = "\t", row.names = F)
 
 # now creating the prioritized table
 final_table <- final_output
@@ -515,7 +514,7 @@ if (file.exists(tf_expr_results_dir)) {
     output_tf_file = paste0(output_dir,"cell_tf.png")
     png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
     heatmap_TFs
-    dev.off()
+    invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
     # converting the TF conf. matrix into a dataframe
@@ -644,7 +643,7 @@ if (file.exists(tf_expr_results_dir)) {
     output_tf_file = paste0(output_dir,"cell_tf.png")
     png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
     heatmap_TFs
-    dev.off()
+    invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
     # converting this matrix into a dataframe and naming column based on whether atac or rna conf was requested
@@ -679,30 +678,40 @@ if (file.exists(tf_expr_results_dir)) {
   }
 }
 
-write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
+write.table(final_table_new, file = paste0(output_dir, "complete_table.txt"), row.names = FALSE, quote = FALSE, sep = "\t")
 
 # now performing gene filtering, prioritization
 # first determining if filtering by tf score is desired
-tf_score_th <- if (nzchar(args[["tf_score_th"]])) {
-  as.integer(args[["tf_score_th"]])
-} else {
+
+tf_score_th  <- if (is.null(args[["tf_score_th"]])) {
   message("Using default tf_score_th value: ", defaults$tf_score_th)
   defaults$tf_score_th
-} 
-
-gene_sum_ppa_th <- if (nzchar(args[["gene_sum_ppa_th"]])) {
-  as.numeric(args[["gene_sum_ppa_th"]])
+} else if (!nzchar(args[["tf_score_th"]])) {
+  message("Using default tf_score_th value: ", defaults$tf_score_th)
+  defaults$tf_score_th
 } else {
+  as.integer(args[["tf_score_th"]])
+}
+
+gene_sum_ppa_th  <- if (is.null(args[["gene_sum_ppa_th"]])) {
   message("Using default gene_sum_ppa_th value: ", defaults$gene_sum_ppa_th)
   defaults$gene_sum_ppa_th
-} 
-
-gene_score_th <- if (nzchar(args[["gene_score_th"]])) {
-  as.integer(args[["gene_score_th"]])
+} else if (!nzchar(args[["gene_sum_ppa_th"]])) {
+  message("Using default gene_sum_ppa_th value: ", defaults$gene_sum_ppa_th)
+  defaults$gene_sum_ppa_th
 } else {
+  as.numeric(args[["gene_sum_ppa_th"]])
+}
+
+gene_score_th  <- if (is.null(args[["gene_score_th"]])) {
   message("Using default gene_score_th value: ", defaults$gene_score_th)
   defaults$gene_score_th
-} 
+} else if (!nzchar(args[["gene_score_th"]])) {
+  message("Using default gene_score_th value: ", defaults$gene_score_th)
+  defaults$gene_score_th
+} else {
+  as.numeric(args[["gene_score_th"]])
+}
 
 if (tf_score_th >= 0 & file.exists(tf_expr_results_dir)) {
   if (all(c('rna', 'atac') %in% type_tf_conf)) {
@@ -751,10 +760,10 @@ if (file.exists(hic_results_dir) & file.exists(cicero_dir)) {
 
 # creating a prioritized gene by cell type heat map, starting with creating a data frame for the plot
 gene_ct_df <- prioritized_table[,c('cell_type','gene','gene_score')] %>% distinct()
-gene_ct_df <- gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
+gene_ct_df <- suppressWarnings(gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
   group_by(cell_type, gene) %>%
   summarise(gene_score = max(gene_score)) %>% 
-  ungroup()
+  ungroup())
 
 # turning gene_ct_df into a matrix
 gene_cell_mtx <- gene_ct_df %>%
@@ -799,19 +808,17 @@ heatmap_genes <- Heatmap(
 output_gene_file = paste0(output_dir,"cell_gene.png")
 png(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10, units = 'cm', res = 300)
 heatmap_genes
-dev.off()
+invisible(dev.off())
 
 # printing a summary of findings for this dataset
 summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)), 
                   "Genes" = length(unique(prioritized_table$gene)), 
                   "Cell Types" = length(unique(prioritized_table$cell_type)), 
                   "TFs" = length(unique(unlist(strsplit(prioritized_table$tf, ", ")))))
-print("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
-print(summary_stat)
+message("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
+message(paste(summary_stat, collapse = "   "))
 
 # save prioritized table
-write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
+write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
 
-
-
-print('Final tables created!')
+message('Final tables created!')

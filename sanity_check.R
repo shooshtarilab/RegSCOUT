@@ -1,5 +1,6 @@
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(tools))
+
 args = commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Helper function that determines what input file format the user used
@@ -47,12 +48,13 @@ check_path(output_dir)
 
 if (tolower(args[["finemap"]]) == "y") {
   # check if plink_binary and fgwas_src param exists
-  if (!is.null(args[["plink2_dir"]])){ 
+  if (nzchar(args[["plink2_dir"]])){ 
     check_path(args[["plink2_dir"]])
   } else {
     check_binary("plink2") # version checking?
   }
-  if (!is.null(args[["fgwas_dir"]])){
+  if (nzchar(args[["fgwas_dir"]])){
+    print(args[["fgwas_dir"]])
     check_path(args[["fgwas_dir"]])
   } else {
     check_binary("fgwas")
@@ -68,7 +70,7 @@ if (tolower(args[["finemap"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in GWAS summary statistics: ", paste(missing_cols, collapse = ", "))
   }
-  message("GWAS summary statistics columns present.")
+  # message("GWAS summary statistics columns present.")
 
   # leadsnps, reminder that I do not like comparing snps between datasets using RSIDs
   lead_snp_dir = args[["lead_snps_dir"]]
@@ -80,14 +82,13 @@ if (tolower(args[["finemap"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in lead snp file: ", paste(missing_cols, collapse = ", "))
   }
-  message("Lead snp columns present.")
+  # message("Lead snp columns present.")
   
   # snp ref, reminder that the user should be able to provide their own B files which is different, so the snp_ref parameter and population parameter may not be necessary.
   # instead, they should specify the path to the B files, rather than by specifying the population
   # ex. (EAS, EUR)
   # .bed, .bim, .fam
   snp_ref_dir = args[["snp_ref_dir"]]
-  check_path(snp_ref_dir)
   prefix_name = args[["population"]]
   extension_list = c(".bed",".bim",".fam") # plink2 also have an alternative extension name for binary files, see pgen
   for (ext in extension_list){
@@ -104,7 +105,7 @@ if (tolower(args[["finemap"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
   }
-  message("Credible interval gwas columns present.")
+ # message("Credible interval gwas columns present.")
 }
 
 # genome_build
@@ -115,7 +116,6 @@ if (!(genome_build %in% req_builds)) {
   stop("Invalid genome build: '", genome_build, 
        "'. Allowed values are: ", paste(req_builds, collapse = ", "))
 }
-message("Using genome_build: ", genome_build)
 
 # genecode_dir
 gene_annot_dir = args[["gencode_dir"]]
@@ -131,7 +131,7 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in histone mark instructions file: ", paste(missing_cols, collapse = ", "))
   }
-  message("Histone mark instructions columns present.")
+  # message("Histone mark instructions columns present.")
 }
 
 if (tolower(args[["hic_analysis"]]) == "y") {
@@ -144,7 +144,7 @@ if (tolower(args[["hic_analysis"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
   }
-  message("HI-C instructions columns present.")
+  # message("HI-C instructions columns present.")
 }
 
 # need to check if cell type columns matches
@@ -158,7 +158,7 @@ if (tolower(args[["eqtl_analysis"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
   }
-  message("eQTL instructions columns present.")
+  # message("eQTL instructions columns present.")
 }
 
 tf_setting = args[["tf_expr_analysis"]]
@@ -179,13 +179,15 @@ if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in scrna instructions file: ", paste(missing_cols, collapse = ", "))
   }
-  message("scrna instructions columns present.")
+  # message("scrna instructions columns present.")
 }
 
 # Settings output
 settings_msg <- paste(
   "------------------------------------\n",
   "| RegSCOUT Settings                |\n",
+  "|                                  |\n",
+  "| Genome Build            : %-6s |\n",
   "|                                  |\n",
   "| Finemapping             : %-6s |\n",
   "| TF Expression Analysis  : %-6s |\n",
@@ -197,9 +199,44 @@ settings_msg <- paste(
 )
 
 cat(sprintf(settings_msg,
-  if (tolower(args[["finemap"]]) == "yes") toupper(args[["finemap"]]) else "N",
-  args[["tf_expr_analysis"]],
+  tolower(args[["genome_build"]]),
+  if (tolower(args[["finemap"]]) == "y") toupper(args[["finemap"]]) else "N",
+  tolower(args[["tf_expr_analysis"]]),
   toupper(args[["histone_mark_analysis"]]),
   toupper(args[["hic_analysis"]]),
   toupper(args[["eqtl_analysis"]])
 ))
+
+# notifying default values to user
+defaults <- list(
+  ld_th = 0.25, #fgwas 
+  ci_th = 0.95, # finemap
+  ci_ppa_th = 0.01 # finemap
+
+)
+
+# prom_th_up = if (is.null(args[["ld_th"]])) {
+
+# } else {
+#   message("Using default prom_th_up value: ", defaults$prom_th_up)
+#   defaults$prom_th_up
+# }
+
+
+# order 
+
+# ld th
+
+# finemap
+# population
+# sample num
+# locus region
+# ld th
+# ci th
+# ci ppa th
+
+# peak gen snp integration
+# prom th up
+# prom th down
+
+# tf 

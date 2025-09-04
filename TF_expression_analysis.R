@@ -1,9 +1,9 @@
-library(R.utils)
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(stringr)
+suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(stringr))
 
+message("Running TF Expression Analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
@@ -17,7 +17,7 @@ defaults <- list(
 )
 
 # read in TF, SNP, and rmp information
-tf_table <- read_xlsx(paste0(output_dir, "risk_regions_ratio.xlsx"))
+tf_table <- read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
 tf_table <- tf_table %>%
   mutate(
     tf = str_extract(TFSNP, "^.+(?=-[^-]+$)"),
@@ -74,9 +74,9 @@ confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, pro
   gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
   
   # Read peak data
-  peaks <- read_excel(peak_file_path)
+  peaks <- read.delim(peak_file_path, header = TRUE)
   peaks_ranges <- IRanges(start = as.integer(peaks$start), end = as.integer(peaks$end))
-  peaks_granges <- GRanges(seqnames = peaks$chr, ranges = peaks_ranges, cell = peaks$`cell sub-types`)
+  peaks_granges <- GRanges(seqnames = peaks$chr, ranges = peaks_ranges, cell = peaks$cell_sub_types)
   
   # Find overlaps
   TF_peak_overlap <- findOverlaps(gene_tss_grg, peaks_granges)
@@ -394,9 +394,9 @@ tf_expr_req <- args[["tf_expr_analysis"]]
 
 if (tf_expr_req == "atac") {
   # load the necessary libraries
-  library(ape)
-  library(GenomicRanges)
-  library(tibble)
+  suppressPackageStartupMessages(library(ape))
+  suppressPackageStartupMessages(library(GenomicRanges))
+  suppressPackageStartupMessages(library(tibble))
   
   # obtain list of TFs to test
   TFs <- tf_table_filt$tf
@@ -418,7 +418,7 @@ if (tf_expr_req == "atac") {
     defaults$prom_th_down
   }
   gene_annot_path = args[["gencode_dir"]]
-  peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
+  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
                                                peak_file_dir, gene_annot_path, tf_table_filt)
@@ -444,9 +444,9 @@ if (tf_expr_req == "atac") {
   }
 } else if (tf_expr_req == "rna") {
   # load the necessary libraries
-  library(Seurat)
-  library(tibble)
-  library(methods)
+  suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(tibble))
+  suppressPackageStartupMessages(library(methods))
   
   # obtain user instructions
   scrna_instruct_dir <- args[["scrna_instruct_dir"]]
@@ -456,7 +456,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read_xlsx(scrna_instruct_dir)
+  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -598,12 +598,12 @@ if (tf_expr_req == "atac") {
   }
 } else if (tf_expr_req == "both") {
   # load the necessary libraries
-  library(Seurat)
-  library(tibble)
-  library(methods)
-  library(ape)
-  library(GenomicRanges)
-  library(tibble)
+  suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(tibble))
+  suppressPackageStartupMessages(library(methods))
+  suppressPackageStartupMessages(library(ape))
+  suppressPackageStartupMessages(library(GenomicRanges))
+  suppressPackageStartupMessages(library(tibble))
   
   # first conducting RNA-seq analysis
   # obtain user instructions
@@ -614,7 +614,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read_xlsx(scrna_instruct_dir)
+  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -752,7 +752,7 @@ if (tf_expr_req == "atac") {
     defaults$prom_th_down
   }
   gene_annot_path = args[["gencode_dir"]]
-  peak_file_dir = paste0(output_dir, "cell_peak.xlsx")
+  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
@@ -834,7 +834,7 @@ if (tf_expr_req == "atac") {
     write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
                 sep = '\t')
     
-    print('TF expression analysis complete! No results found for scATAC-seq analysis. Results found for scRNA-seq analysis.')
+    message('TF expression analysis complete! No results found for scATAC-seq analysis. Results found for scRNA-seq analysis.')
   } else { # no results found
     message('TF expression analysis complete, no results were found over both the scRNA-seq and scATAC-seq analyses.')
   }
