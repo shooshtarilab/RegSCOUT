@@ -682,26 +682,36 @@ write.table(final_table_new, file = paste0(output_dir, "complete_table.txt"), ro
 
 # now performing gene filtering, prioritization
 # first determining if filtering by tf score is desired
-tf_score_th <- if (nzchar(args[["tf_score_th"]])) {
-  as.integer(args[["tf_score_th"]])
-} else {
+
+tf_score_th  <- if (is.null(args[["tf_score_th"]])) {
   message("Using default tf_score_th value: ", defaults$tf_score_th)
   defaults$tf_score_th
-} 
-
-gene_sum_ppa_th <- if (nzchar(args[["gene_sum_ppa_th"]])) {
-  as.numeric(args[["gene_sum_ppa_th"]])
+} else if (!nzchar(args[["tf_score_th"]])) {
+  message("Using default tf_score_th value: ", defaults$tf_score_th)
+  defaults$tf_score_th
 } else {
+  as.integer(args[["tf_score_th"]])
+}
+
+gene_sum_ppa_th  <- if (is.null(args[["gene_sum_ppa_th"]])) {
   message("Using default gene_sum_ppa_th value: ", defaults$gene_sum_ppa_th)
   defaults$gene_sum_ppa_th
-} 
-
-gene_score_th <- if (nzchar(args[["gene_score_th"]])) {
-  as.integer(args[["gene_score_th"]])
+} else if (!nzchar(args[["gene_sum_ppa_th"]])) {
+  message("Using default gene_sum_ppa_th value: ", defaults$gene_sum_ppa_th)
+  defaults$gene_sum_ppa_th
 } else {
+  as.numeric(args[["gene_sum_ppa_th"]])
+}
+
+gene_score_th  <- if (is.null(args[["gene_score_th"]])) {
   message("Using default gene_score_th value: ", defaults$gene_score_th)
   defaults$gene_score_th
-} 
+} else if (!nzchar(args[["gene_score_th"]])) {
+  message("Using default gene_score_th value: ", defaults$gene_score_th)
+  defaults$gene_score_th
+} else {
+  as.numeric(args[["gene_score_th"]])
+}
 
 if (tf_score_th >= 0 & file.exists(tf_expr_results_dir)) {
   if (all(c('rna', 'atac') %in% type_tf_conf)) {
@@ -806,7 +816,7 @@ summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)),
                   "Cell Types" = length(unique(prioritized_table$cell_type)), 
                   "TFs" = length(unique(unlist(strsplit(prioritized_table$tf, ", ")))))
 message("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
-message(summary_stat)
+message(paste(summary_stat, collapse = "   "))
 
 # save prioritized table
 write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")

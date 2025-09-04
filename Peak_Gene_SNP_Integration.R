@@ -451,7 +451,7 @@ write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, se
 f1 = c("0" = "white", "1" = "red")
 
 output_file = paste0(output_file_main, "cell_gene.png")
-invisible(file.remove(output_file))
+invisible(suppressWarnings(file.remove(output_file)))
 png(output_file,width = 8400, height = 2800, res = 300)
 Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
         column_title = "Gene-cell type plot",

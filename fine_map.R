@@ -30,7 +30,9 @@ fun <- paste0(
     " -fine ",
     " -print"
 )
-system(fun, ignore.stdout = TRUE) # silence fgwas print messages
+system(fun) # silence fgwas print messages
+
+#system(fun, ignore.stdout = TRUE) # silence fgwas print messages
 
 ci_file_bfs = paste0(ci_files,".bfs.gz")
 
