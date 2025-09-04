@@ -36,15 +36,18 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 | --fgwas_dir | Specifies the path to the fgwas executable | No default, must be set by user | 2 |
 | --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold. | 0.95 | 2 |
 | --ci_ppa_th | All CI SNPs must have a PPA greater than this threshold. | 0.01 | 2 |
+| --finemap | Set this parameter to *Y* if fine-mapping should be conducted by RegSCOUT using fgwas. If fine-mapping is not desired (i.e., the user already has fine-mapping results), this parameter should not be used. | Not conducted | 1, 2 |
 | --seurat_obj_dir | Specifies the path to the scATAC-seq Seurat object. | No default, must be set by user | 3 |
 | --cell_count_th | Cell types with less than this number of cells in the scATAC-seq dataset will be removed. | 3 | 3 |
-| --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak being open if it is accessible in 1/10 or 10% of cells. | 0.1 | 3 |
 | --coaccess_th | The co-accessibility value between two peaks must be greater than this threshold to be output in cicero results. | 0.05 | 3 |
 | --cic_genomic_window | Size of the regions on either side of an open chromatin region that cicero will look for peak to peak links in. | 2,000,000 | 3 |
 | --jaspar_mtx_dir | Specifies the path to file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used to obtain TF PFMs. | *none* | 4 |
-| --ci_gwas_dir | Only use this parameter if fine-mapping **was not** conducted by RegSCOUT. Specifies the path to fine-mapping results. | If fine-mapping was not conducted by RegSCOUt: no default, must be set by user | 4 |
+| --ci_gwas_dir | Only use this parameter if fine-mapping **was not** conducted by RegSCOUT. Specifies the path to fine-mapping results. | If fine-mapping was not conducted by RegSCOUT: no default, must be set by user | 4 |
+| --genome_build | The reference genome that RegSCOUT should conduct analyses in, either hg19 or hg38. | No default, must be set by user | 3, 4 |
+| --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak can be considered open if it is accessible in 1/10 or 10% of cells of a cell type. | 0.1 | 3, 4 |
 | --prom_th_up | Number of bps to add upstream a TSS to define the gene promoter. | 2,000 | 5 |
 | --prom_th_down | Number of bps to add downstream a TSS to define the gene promoter. | 2,000 | 5 |
+| --mode | The user must indicate whether they have a scATAC-seq Seurat object or if they have a table of open chromatin regions as well as cicero results already generated. If the user is providing a seurat object, this parameter should be set to *ATAC_obj*. If the user is providing a peak table and cicero results, this parameter should be set to *peak_table*. | No default, must be set by user | 3, 4, 5 |
 | --hic_analysis | Set this parameter to *Y* if gene regulatory analysis using Hi-C analysis is desired. If Hi-C analysis is not desired, do not use this parameter | Analysis not conducted | 6 |
 | --hic_instruct_dir | Specifies the path to user generated Hi-C analysis instructions. | No default, must be set by user | 6 |
 | --eqtl_analysis | Set this parameter to *Y* if gene regulatory analysis using eQTL analysis is desired. | Analysis not conducted | 7 |
@@ -54,9 +57,11 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 | --tf_expr_analysis | Only use this parameter if TF expression analysis using scATAC-seq, scRNA-seq, or both is desired. Set to *atac* if TF expression analysis is desired using scATAC-seq data that was provided as input earlier for --mode *peak_table* or *ATAC_obj*. Set to *rna* if analysis is desired using user-provided scRNA-seq data. Set to *both* if both scATAC-seq and scRNA-seq analyses are desired. | No conducted | 9 |
 | --scrna_instruct_dir | Specifies the path to user generated scRNA-seq analysis instructions spreadsheet. | No default, must be set by user | 9 |
 | --tf_rna_quantile_th | The quantile for percent expression of genes in a cell type, above which a TF will be considered expressed in that cell type. | 0.25 | 9 |
+| --gencode_dir | Specifies the path to GENCODE gene information. | No default, must be set by user | 5, 6, 9 |
 | --tf_score_th | Genes will only be prioritized if one of their associated TFs attains a score higher than this threshold. | -1 | 10 |
 | --gene_sum_ppa_th | Genes will only be prioritized if their sum ppa value is greater than this threshold. | 0.05 | 10 |
 | --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
+| --output_dir | The directory in which all RegSCOUT output files will be stored. | No default, must be set by user | 1 through 10 |
 
 ## Fine-mapping
 
