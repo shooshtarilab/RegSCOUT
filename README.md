@@ -32,11 +32,31 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 | --plink2_dir | Specifies the path to the Plink2 executable | No default, must be set by user | 1 |
 | --sample_num | Sample size (total number of cases and controls) of the GWAS. If a sample size column (N) with sample size for each SNP is provided in the GWAS summary statistics, this parameter should be set to *present*. Alternatively, an integer value can be provided in this parameter to specify the overall sample size of the GWAS, this should only be provided if a sample size for each SNP is not readily available. | *present* | 1 |
 | --locus_region | The # of bps to add on both sides of lead SNP positions to define locus regions. | 1,000,000 | 1 |
-| --ld_th | SNPs are not included in a locus if they obtain an |LD value|, with the lead SNP, less than or equal to this threshold. | 0.25 | 1 |
+| --ld_th | SNPs are not included in a locus if they obtain an abs(LD value) (absolute value), with the lead SNP, less than or equal to this threshold. | 0.25 | 1 |
 | --fgwas_dir | Specifies the path to the fgwas executable | No default, must be set by user | 2 |
 | --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold. | 0.95 | 2 |
 | --ci_ppa_th | All CI SNPs must have a PPA greater than this threshold. | 0.01 | 2 |
-| --jaspar_mtx_dir | Specifies the path to file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used. | *none* | 3 |
+| --seurat_obj_dir | Specifies the path to the scATAC-seq Seurat object. | No default, must be set by user | 3 |
+| --cell_count_th | Cell types with less than this number of cells in the scATAC-seq dataset will be removed. | 3 | 3 |
+| --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak being open if it is accessible in 1/10 or 10% of cells. | 0.1 | 3 |
+| --coaccess_th | The co-accessibility value between two peaks must be greater than this threshold to be output in cicero results. | 0.05 | 3 |
+| --cic_genomic_window | Size of the regions on either side of an open chromatin region that cicero will look for peak to peak links in. | 2,000,000 | 3 |
+| --jaspar_mtx_dir | Specifies the path to file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used to obtain TF PFMs. | *none* | 4 |
+| --ci_gwas_dir | Only use this parameter if fine-mapping **was not** conducted by RegSCOUT. Specifies the path to fine-mapping results. | If fine-mapping was not conducted by RegSCOUt: no default, must be set by user | 4 |
+| --prom_th_up | Number of bps to add upstream a TSS to define the gene promoter. | 2,000 | 5 |
+| --prom_th_down | Number of bps to add downstream a TSS to define the gene promoter. | 2,000 | 5 |
+| --hic_analysis | Set this parameter to *Y* if gene regulatory analysis using Hi-C analysis is desired. If Hi-C analysis is not desired, do not use this parameter | Analysis not conducted | 6 |
+| --hic_instruct_dir | Specifies the path to user generated Hi-C analysis instructions. | No default, must be set by user | 6 |
+| --eqtl_analysis | Set this parameter to *Y* if gene regulatory analysis using eQTL analysis is desired. | Analysis not conducted | 7 |
+| --eqtl_instruct_dir | Specifies the path to user generated eQTL analysis instructions. | No default, must be set by user | 7 |
+| --histone_mark_analysis | Set this parameter to *Y* if analysis of risk-mediating peaks using user-provided histone mark data is desired | Analysis not conducted | 8 |
+| --hist_mark_instruct_dir | Specifies the path to user generated histone mark analysis instructions. | No default, must be set by user | 8 |
+| --tf_expr_analysis | Only use this parameter if TF expression analysis using scATAC-seq, scRNA-seq, or both is desired. Set to *atac* if TF expression analysis is desired using scATAC-seq data that was provided as input earlier for --mode *peak_table* or *ATAC_obj*. Set to *rna* if analysis is desired using user-provided scRNA-seq data. Set to *both* if both scATAC-seq and scRNA-seq analyses are desired. | No conducted | 9 |
+| --scrna_instruct_dir | Specifies the path to user generated scRNA-seq analysis instructions spreadsheet. | No default, must be set by user | 9 |
+| --tf_rna_quantile_th | The quantile for percent expression of genes in a cell type, above which a TF will be considered expressed in that cell type. | 0.25 | 9 |
+| --tf_score_th | Genes will only be prioritized if one of their associated TFs attains a score higher than this threshold. | -1 | 10 |
+| --gene_sum_ppa_th | Genes will only be prioritized if their sum ppa value is greater than this threshold. | 0.05 | 10 |
+| --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
 
 ## Fine-mapping
 
