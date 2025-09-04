@@ -1,5 +1,5 @@
 suppressPackageStartupMessages(library(rtracklayer))
-suppressPackageStartupMessages(library(GenomicRange))
+suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(R.utils))

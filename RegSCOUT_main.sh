@@ -87,7 +87,7 @@ fi
 
 
 if [ "$mode" == "ATAC_obj" ]; then
-    echo "=== Running EffectSNP.R (ATAC_obj) ===" | tee -a "$master_log"
+    echo "=== Running EffectSNP.R ===" | tee -a "$master_log"
     Rscript EffectSNP.R \
         --output_dir "$output_dir" --jaspar_mtx_dir "$jaspar_mtx_dir" \
         --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build" \
@@ -106,20 +106,20 @@ if [ "$mode" == "ATAC_obj" ]; then
         --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th" \
         2>&1 | tee -a "$master_log"
 
-    echo "=== Running Peak_Gene_SNP_Integration.R (ATAC_obj) ===" | tee -a "$master_log"
+    echo "=== Running Peak_Gene_SNP_Integration.R ===" | tee -a "$master_log"
     Rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir" \
         2>&1 | tee -a "$master_log"
 
 elif [ "$mode" == "peak_table" ]; then
-    echo "=== Running EffectSNP.R (peak_table) ===" | tee -a "$master_log"
+    echo "=== Running EffectSNP.R ===" | tee -a "$master_log"
     Rscript EffectSNP.R \
         --output_dir "$output_dir" --jaspar_mtx_dir "$jaspar_mtx_dir" \
         --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build" \
         2>&1 | tee -a "$master_log"
 
-    echo "=== Running Peak_Gene_SNP_Integration.R (peak_table) ===" | tee -a "$master_log"
+    echo "=== Running Peak_Gene_SNP_Integration.R ===" | tee -a "$master_log"
     Rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir" \
