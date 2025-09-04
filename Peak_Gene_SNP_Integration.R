@@ -23,7 +23,6 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
-output_file_main = "/home/ubunkun/Lab/RA_project/RegSCOUT/EUR/"
 
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
