@@ -5,8 +5,6 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
 suppressPackageStartupMessages(library(liftOver))
 
-
-message("Running eQTL analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]

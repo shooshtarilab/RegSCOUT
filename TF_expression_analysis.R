@@ -3,7 +3,6 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
 
-message("Running TF Expression Analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
@@ -840,4 +839,4 @@ if (tf_expr_req == "atac") {
   }
 } 
 
-
+message("TF expression analysis complete!")

@@ -8,7 +8,6 @@ suppressPackageStartupMessages(library(Signac))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(tools))
 
-message("Running HiC Analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Function to read file based on extension

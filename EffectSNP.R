@@ -23,7 +23,7 @@ jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
 
 if (jaspar_mtx_dir == 'none') {
   # load required libraries for obtaining JASPAR matrix
-  library(JASPAR2024)
+  suppressPackageStartupMessages(library(JASPAR2024))
   
   jaspar_sql = JASPAR2024()
   
@@ -76,7 +76,7 @@ if (genome_build == "hg19"){
                               , mutation = FALSE)
   invisible(file.remove(snp_table_dir))
 }else if(genome_build == "hg38"){
-  library(BSgenome.Hsapiens.UCSC.hg38)
+  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
   
   eff_snp = ci_gwas_data
   
@@ -96,7 +96,7 @@ if (genome_build == "hg19"){
                               genome.lib ="BSgenome.Hsapiens.UCSC.hg38"
                               , half.window.size = 30, default.par = TRUE
                               , mutation = FALSE)
-  file.remove(snp_table_dir)
+  invisible(file.remove(snp_table_dir))
 }
 
 # Calculating Effect SNPs
@@ -149,11 +149,7 @@ for (i in c(1:length(results_pval_sig$snpid))){
   temp_pos = ci_gwas_data$pos[ci_effect_index]
   temp_chr = ci_gwas_data$chr[ci_effect_index]
   temp_locus = ci_gwas_data$chunk[ci_effect_index]
-  if (jaspar_mtx_dir == "none") { # accounting for difference in motif naming between downloaded file and that read in using the JASPAR2024 package
-    temp_TF = results_pval_sig$motif[i]
-  } else {
-    temp_TF = substring(results_pval_sig$motif[i], 10)
-  }
+  temp_TF <- gsub("^MA[0-9]+\\.[0-9]+\\.", "", results_pval_sig$motif[i])
   temp_pval = results_pval_sig$pval_diff[i]
   temp_pval_corr = results_pval_sig$results_pval_val_cor[i]
   temp_log_ratio = results_pval_sig$log_lik_ratio[i]
