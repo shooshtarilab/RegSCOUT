@@ -115,7 +115,6 @@ for (i in 1:10) {
 # Combine all data frames into one big data frame
 results_pval <- do.call(rbind, all_results)
 
-
 # save this dataframe as RDS
 saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
 

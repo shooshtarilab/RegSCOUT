@@ -368,7 +368,7 @@ final_table <- final_table %>% distinct()
 
 # calculating gene ppa values
 gene_sum_ppa_df <- final_table[,c('cell_type', 'gene', 'rmp', 'rmp_ppa')] %>% distinct()
-gene_sum_ppa_df <- suppressWarnings(gene_sum_ppa_df %>%
+gene_sum_ppa_df <- suppressMessages(gene_sum_ppa_df %>%
   group_by(cell_type, gene) %>%
   summarise(gene_sum_ppa = sum(rmp_ppa, na.rm = T), .groups = 'drop'))
 
@@ -759,7 +759,7 @@ if (file.exists(hic_results_dir) & file.exists(cicero_dir)) {
 
 # creating a prioritized gene by cell type heat map, starting with creating a data frame for the plot
 gene_ct_df <- prioritized_table[,c('cell_type','gene','gene_score')] %>% distinct()
-gene_ct_df <- suppressWarnings(gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
+gene_ct_df <- suppressMessages(gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
   group_by(cell_type, gene) %>%
   summarise(gene_score = max(gene_score)) %>% 
   ungroup())
