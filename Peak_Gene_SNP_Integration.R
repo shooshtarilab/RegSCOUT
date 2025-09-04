@@ -139,8 +139,8 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-output_peak_file = paste0(output_file_main,"cell_peak.png")
-png(output_peak_file, width = ncol(risk_regions) + ncol(peak_cluster_matrix) + 10, height = nrow(peak_cluster_matrix) + 10, units = 'cm', res = 300)
+output_peak_file = paste0(output_file_main,"cell_peak.svg")
+svg(output_peak_file, width = ncol(risk_regions) + 10, height = nrow(risk_regions) + 10)
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
@@ -254,13 +254,7 @@ heatmap_ppa <- Heatmap(
 
 # combine the two heatmaps and save it 
 output_tf_file = paste0(output_file_main,"cell_snp_tf.svg")
-# png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
-width_in  <- (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) 
-height_in <- (nrow(tf_cluster_matrix) + 10) 
-
-svg(output_tf_file,
-    width = width_in,
-    height = height_in)
+svg(output_tf_file, width = ncol(risk_tfs)+ 10, height = nrow(risk_tfs) + 10) 
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
@@ -283,7 +277,7 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
 }
 
 gene_annot_dir = args[["gencode_dir"]]
-gene_annot_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz"
+
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
 transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
 transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
@@ -448,9 +442,9 @@ write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, se
 
 f1 = c("0" = "white", "1" = "red")
 
-output_file = paste0(output_file_main, "cell_gene.png")
+output_file = paste0(output_file_main, "cell_gene.svg")
 invisible(suppressWarnings(file.remove(output_file)))
-png(output_file,width = 8400, height = 2800, res = 300)
+svg(output_file, width = length(gene_names) + 10, height = length(cell_names) + 10)
 Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
         column_title = "Gene-cell type plot",
         row_names_gp = grid::gpar(fontsize = 16),

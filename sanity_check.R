@@ -206,37 +206,3 @@ cat(sprintf(settings_msg,
   toupper(args[["hic_analysis"]]),
   toupper(args[["eqtl_analysis"]])
 ))
-
-# notifying default values to user
-defaults <- list(
-  ld_th = 0.25, #fgwas 
-  ci_th = 0.95, # finemap
-  ci_ppa_th = 0.01 # finemap
-
-)
-
-# prom_th_up = if (is.null(args[["ld_th"]])) {
-
-# } else {
-#   message("Using default prom_th_up value: ", defaults$prom_th_up)
-#   defaults$prom_th_up
-# }
-
-
-# order 
-
-# ld th
-
-# finemap
-# population
-# sample num
-# locus region
-# ld th
-# ci th
-# ci ppa th
-
-# peak gen snp integration
-# prom th up
-# prom th down
-
-# tf 
