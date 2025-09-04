@@ -1,5 +1,6 @@
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(tools))
+
 args = commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Helper function that determines what input file format the user used

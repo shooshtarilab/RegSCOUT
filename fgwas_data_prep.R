@@ -1,7 +1,7 @@
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(genetics.binaRies))
+suppressPackageStartupMessages(library(genetics.binaRies)) # plink v1.9
 
 message("Running fgwas_data_prep")
 ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_alleles=FALSE)

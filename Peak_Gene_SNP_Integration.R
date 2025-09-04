@@ -255,10 +255,10 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-output_tf_file = paste0(output_file_main,"cell_snp_tf.png")
+output_tf_file = paste0(output_file_main,"cell_snp_tf.svg")
 # png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
-width_in  <- (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54
-height_in <- (nrow(tf_cluster_matrix) + 10) / 2.54
+width_in  <- (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) 
+height_in <- (nrow(tf_cluster_matrix) + 10) 
 
 svg(output_tf_file,
     width = width_in,

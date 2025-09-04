@@ -760,10 +760,10 @@ if (file.exists(hic_results_dir) & file.exists(cicero_dir)) {
 
 # creating a prioritized gene by cell type heat map, starting with creating a data frame for the plot
 gene_ct_df <- prioritized_table[,c('cell_type','gene','gene_score')] %>% distinct()
-gene_ct_df <- gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
+gene_ct_df <- suppressWarnings(gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
   group_by(cell_type, gene) %>%
   summarise(gene_score = max(gene_score)) %>% 
-  ungroup()
+  ungroup())
 
 # turning gene_ct_df into a matrix
 gene_cell_mtx <- gene_ct_df %>%
