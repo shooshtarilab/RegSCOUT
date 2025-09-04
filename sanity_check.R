@@ -47,12 +47,13 @@ check_path(output_dir)
 
 if (tolower(args[["finemap"]]) == "y") {
   # check if plink_binary and fgwas_src param exists
-  if (!is.null(args[["plink2_dir"]])){ 
+  if (nzchar(args[["plink2_dir"]])){ 
     check_path(args[["plink2_dir"]])
   } else {
     check_binary("plink2") # version checking?
   }
-  if (!is.null(args[["fgwas_dir"]])){
+  if (nzchar(args[["fgwas_dir"]])){
+    print(args[["fgwas_dir"]])
     check_path(args[["fgwas_dir"]])
   } else {
     check_binary("fgwas")
@@ -198,7 +199,7 @@ settings_msg <- paste(
 
 cat(sprintf(settings_msg,
   tolower(args[["genome_build"]]),
-  if (tolower(args[["finemap"]]) == "yes") toupper(args[["finemap"]]) else "N",
+  if (tolower(args[["finemap"]]) == "y") toupper(args[["finemap"]]) else "N",
   args[["tf_expr_analysis"]],
   toupper(args[["histone_mark_analysis"]]),
   toupper(args[["hic_analysis"]]),

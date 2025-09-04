@@ -14,20 +14,19 @@
 ./RegSCOUT_main.sh \
   --mode peak_table \
   --finemap Y \
-  --SNP_ref /home/ubunkun/Lab/RA_project/RegSCOUT/EUR/ \
-  --sum_stats /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132223_buildGRCh37_p.tsv \
-  --lead_snps /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/lead_snps_EUR.txt \
-  --plink2_bin /home/ubunkun/anaconda3/envs/bio-R/bin/plink2 \
+  --snp_ref_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EUR/ \
+  --sum_stats_dir /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132223_buildGRCh37_p.tsv \
+  --lead_snps_dir /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/lead_snps_EUR.txt \
+  --plink2_dir /home/ubunkun/anaconda3/envs/bio-R/bin/plink2 \
   --sample_num 97173 \
   --locus_region 1000000 \
   --LD_thr 0.25 \
-  --Population EUR \
-  --fgwas_src /home/ubunkun/Lab/RA_project/oldpipe/2_GWAS_finemapping/fgwas-0.3.6/src/fgwas \
+  --population EUR \
   --CI_thr 0.95 \
   --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EUR/ \
-  --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
+  --jaspar_mtx_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
   --coaccess_th 0.05 \
-  --genome_built hg19 \
+  --genome_build hg19 \
   --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz \
   --peak_th 0.1 \
   --prom_th_up 2000 \
@@ -38,9 +37,10 @@
   --tf_expr_analysis atac \
   --scrna_instruct_dir "" \
   --tf_rna_quantile_th 0.25 \
-  --hic_eqtl_analysis Y \
-  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.xlsx \
-  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.xlsx \
+  --hic_analysis Y \
+  --eqtl_analysis Y \
+  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv \
+  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv \
   --gene_ppa_th 0.05 \
 
 
