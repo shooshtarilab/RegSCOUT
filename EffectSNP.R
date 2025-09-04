@@ -116,7 +116,7 @@ for (i in 1:10) {
 results_pval <- do.call(rbind, all_results)
 
 
-save this dataframe as RDS
+# save this dataframe as RDS
 saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
 
 # Correction for multiple testing
