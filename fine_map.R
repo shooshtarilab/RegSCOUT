@@ -1,5 +1,6 @@
 suppressPackageStartupMessages(library(R.utils))
 
+message("Running finemap")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #defining defaults for parameters
@@ -12,25 +13,31 @@ output_dir = args[["output_dir"]]
 
 fgwas_src = args[["fgwas_dir"]]
 
+if (!nzchar(fgwas_src)){
+    fgwas_src = Sys.which("fgwas")
+}
+
 fgwas_file = paste0(output_dir,"final_gwas_data.txt")
 ci_suff = "CI"
 ci_files = paste0(output_dir,ci_suff)
-print(fgwas_file)
+
 shell <- ifelse(Sys.info()['sysname'] == "Windows", "cmd", "sh")
+
 fun <- paste0(
     shQuote(fgwas_src, type=shell),
     " -i ", shQuote(fgwas_file, type=shell),
     " -o ", shQuote(ci_files, type=shell),
     " -fine ",
-    " -print "
+    " -print"
 )
-system(fun)
+system(fun, ignore.stdout = TRUE) # silence fgwas print messages
 
 ci_file_bfs = paste0(ci_files,".bfs.gz")
 
 fun <- paste0(
     shQuote("gzip", type=shell),
     " -d ",
+    " -f ", # force overwrite a problem?
     shQuote(ci_file_bfs, type=shell)
 )
 
@@ -47,13 +54,17 @@ ci_data[["a1"]] = fgwas_data$A1
 ci_data[["a2"]] = fgwas_data$A2
 
 # obtaining smallest number of SNPs whose PPAs sum up to ci_th
-print("Extracting CI SNPs")
-ci_th = if (nzchar(args[["ci_th"]])) {
-  as.numeric(args[["ci_th"]])
-} else {
+
+ci_th <- if (is.null(args[["ci_th"]])) {
   message("Using default ci_th value: ", defaults$ci_th)
   defaults$ci_th
-} 
+} else if (!nzchar(args[["ci_th"]])) {
+  message("Using default ci_th value: ", defaults$ci_th)
+  defaults$ci_th
+} else {
+  as.numeric(args[["ci_th"]])
+}
+
 
 ci_final_list = list()
 region_list = unique(ci_data$chunk)
@@ -82,11 +93,15 @@ chr_list = paste0("chr", c(1:22))
 ci_gwas_data = ci_gwas_data[ci_gwas_data$chr %in% chr_list,]
 
 # removing all SNPs with PPA <= CI PPA threshold
-ci_ppa_th = if (nzchar(args[["ci_ppa_th"]])) {
-  as.numeric(args[["ci_ppa_th"]])
-} else {
+
+ci_ppa_th = if (is.null(args[["ci_th"]])) {
+  message("Using default ci_ppa_th value: ", defaults$ci_th)
+  defaults$ci_th
+} else if (! nzchar(args[["ci_ppa_th"]])) {
   message("Using default ci_ppa_th value: ", defaults$ci_ppa_th)
   defaults$ci_ppa_th
+} else {
+  as.numeric(args[["ci_ppa_th"]])
 } 
 
 ci_gwas_data = ci_gwas_data[ci_gwas_data$PPA > ci_ppa_th,]
@@ -95,4 +110,9 @@ ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
             row.names = FALSE, quote = FALSE)
 
-print('Fine-mapping Complete!')
+files_to_delete <-file.path(output_dir, c("CI.bfs", "CI.llk", "CI.params", "CI.ridgeparams", "CI.segbfs.gz"))
+
+# delete the files
+invisible(file.remove(files_to_delete))
+
+message('Fine-mapping Complete!')

@@ -23,6 +23,7 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
+output_file_main = "/home/ubunkun/Lab/RA_project/RegSCOUT/EUR/"
 
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
@@ -255,7 +256,13 @@ heatmap_ppa <- Heatmap(
 
 # combine the two heatmaps and save it 
 output_tf_file = paste0(output_file_main,"cell_snp_tf.png")
-png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
+# png(output_tf_file, width = ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10, height = nrow(tf_cluster_matrix) + 10, units = 'cm', res = 300)
+width_in  <- (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54
+height_in <- (nrow(tf_cluster_matrix) + 10) / 2.54
+
+svg(output_tf_file,
+    width = width_in,
+    height = height_in)
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
