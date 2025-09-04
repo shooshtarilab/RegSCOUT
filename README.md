@@ -30,8 +30,13 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 | --sum_stats_dir | Specifies the path to the GWAS summary statistics | No default, must be set by user | 1 |
 | --lead_snps_dir | Specifies the path to GWAS lead SNP information | No default, must be set by user | 1 |
 | --plink2_dir | Specifies the path to the Plink2 executable | No default, must be set by user | 1 |
-| --sample_num | Sample size (total number of cases and controls) of the GWAS. If a sample size column (N) with sample size for each SNP is provided in the GWAS summary statistics, this parameter should be set to: present. Alternatively, an integer value can be provided in this parameter to specify the overall sample size of the GWAS, this should only be provided if a sample size for each SNP is not readily available. | present | 1 |
-| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold | 0.95 | 2 |
+| --sample_num | Sample size (total number of cases and controls) of the GWAS. If a sample size column (N) with sample size for each SNP is provided in the GWAS summary statistics, this parameter should be set to *present*. Alternatively, an integer value can be provided in this parameter to specify the overall sample size of the GWAS, this should only be provided if a sample size for each SNP is not readily available. | *present* | 1 |
+| --locus_region | The # of bps to add on both sides of lead SNP positions to define locus regions. | 1,000,000 | 1 |
+| --ld_th | SNPs are not included in a locus if they obtain an |LD value|, with the lead SNP, less than or equal to this threshold. | 0.25 | 1 |
+| --fgwas_dir | Specifies the path to the fgwas executable | No default, must be set by user | 2 |
+| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold. | 0.95 | 2 |
+| --ci_ppa_th | All CI SNPs must have a PPA greater than this threshold. | 0.01 | 2 |
+| --jaspar_mtx_dir | Specifies the path to file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used. | *none* | 3 |
 
 ## Fine-mapping
 
