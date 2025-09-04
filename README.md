@@ -23,12 +23,15 @@ A thorough description of each step of the RegSCOUT pipeline and of RegSCOUT out
 Above is a general overview of the RegSCOUT workflow. Each step will be explained below with a description of inputs and outputs. A table of all parameters included in RegSCOUT including which steps the parameter is relevant to, potential values, default value, and general purpose of the parameter can also be found below.
 
 ## Table of All Parameters
-| Parameter | Purpose | Default Value | Relevant Steps |
+| Parameter | Purpose and Potential Values | Default Value | Relevant Steps |
 | --------------------- | ----------------------------------------------------- | ---------------- | ---------------------- |
 | --snp_ref_dir | Specifies the directory containing the bfiles used for PLINK preprocessing of GWAS data and LD analysis. | No default, must be set by user. | 1 |
 | --population | Specifies the population/ancestry that the bfiles were created from (e.g., EUR, EAS). | No default, must be set by user. | 1 |
 | --sum_stats_dir | Specifies the path to the GWAS summary statistics | No default, must be set by user | 1 |
-| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold | 0.95 | Fine-mapping |
+| --lead_snps_dir | Specifies the path to GWAS lead SNP information | No default, must be set by user | 1 |
+| --plink2_dir | Specifies the path to the Plink2 executable | No default, must be set by user | 1 |
+| --sample_num | Sample size (total number of cases and controls) of the GWAS. If a sample size column (N) with sample size for each SNP is provided in the GWAS summary statistics, this parameter should be set to: present. Alternatively, an integer value can be provided in this parameter to specify the overall sample size of the GWAS, this should only be provided if a sample size for each SNP is not readily available. | present | 1 |
+| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold | 0.95 | 2 |
 
 ## Fine-mapping
 
