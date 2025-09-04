@@ -13,7 +13,6 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
 output_dir <- args[["output_dir"]]
-output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # defining default parameter values
 defaults <- list(
@@ -32,11 +31,10 @@ colnames(final_output) <- c("locus", "locus_region",	"lead_snp",	"lead_ppa",
 
 # read in ci_gwas_dir
 ci_gwas_dir = args[["ci_gwas_dir"]]
-ci_gwas_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt"
 
 # read in if fine-mapping was desired
 user_finemap <- args[["finemap"]]
-user_finemap = "N"
+
 ## assigning the locus number to each ci_snp, read in CI (credible interval) SNP file
 if (user_finemap == "Y") {
   fine_loci_head <- read.table(ci_gwas_dir, sep = '\t', header = T)
@@ -516,7 +514,7 @@ if (file.exists(tf_expr_results_dir)) {
     output_tf_file = paste0(output_dir,"cell_tf.png")
     png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
     heatmap_TFs
-    dev.off()
+    invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
     # converting the TF conf. matrix into a dataframe
@@ -645,7 +643,7 @@ if (file.exists(tf_expr_results_dir)) {
     output_tf_file = paste0(output_dir,"cell_tf.png")
     png(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10, units = 'cm', res = 300)
     heatmap_TFs
-    dev.off()
+    invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
     # converting this matrix into a dataframe and naming column based on whether atac or rna conf was requested
@@ -800,17 +798,17 @@ heatmap_genes <- Heatmap(
 output_gene_file = paste0(output_dir,"cell_gene.png")
 png(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10, units = 'cm', res = 300)
 heatmap_genes
-dev.off()
+invisible(dev.off())
 
 # printing a summary of findings for this dataset
 summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)), 
                   "Genes" = length(unique(prioritized_table$gene)), 
                   "Cell Types" = length(unique(prioritized_table$cell_type)), 
                   "TFs" = length(unique(unlist(strsplit(prioritized_table$tf, ", ")))))
-print("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
-print(summary_stat)
+message("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
+message(summary_stat)
 
 # save prioritized table
 write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
 
-print('Final tables created!')
+message('Final tables created!')

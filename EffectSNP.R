@@ -12,7 +12,6 @@ defaults <- list(
 
 # read output directory
 output_dir = args[["output_dir"]]
-output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # read in and prepare JASPAR matrix file
 jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
@@ -47,91 +46,76 @@ for (i in c(1:length(jaspar_pwm_list))){
   new_matrix = apply(temp_tf_matrix,2,function(x)(x/sum(x)))
   jaspar_pwm_atsnp[[temp_tf_name]] = t(new_matrix)
 }
-# contains every TF sequence and the likelihood of a base in each spot of the sequence
 
 # reading in GWAS data
 ci_gwas_dir = args[["ci_gwas_dir"]]
-ci_gwas_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt"
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
 
 # Preparing CI SNPs for motif analysis
 genome_build = args[["genome_build"]]
-genome_build = "hg19"
 
-# if (genome_build == "hg19"){
-#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
-#   eff_snp = ci_gwas_data
+if (genome_build == "hg19"){
+  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
+  eff_snp = ci_gwas_data
   
-#   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
-#   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
-#   snp_table$chr = eff_snp$chr
-#   snp_table$snp = eff_snp$pos
-#   snp_table$snpid = eff_snp$id
-#   snp_table$a1 = eff_snp$a1
-#   snp_table$a2 = eff_snp$a2
+  snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
+  colnames(snp_table) = c("chr","snp","snpid","a1","a2")
+  snp_table$chr = eff_snp$chr
+  snp_table$snp = eff_snp$pos
+  snp_table$snpid = eff_snp$id
+  snp_table$a1 = eff_snp$a1
+  snp_table$a2 = eff_snp$a2
   
-#   snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
-#   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
-#               row.names = FALSE, quote = FALSE)
+  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+  write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
+              row.names = FALSE, quote = FALSE)
   
-#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
-#                               , half.window.size = 30, default.par = TRUE
-#                               , mutation = FALSE)
-#   # str(reg1), transition contains values representing the probability of transitioning
-#   # from one base to another. useless for our use.
-#   # get genomic sequence around every finemapped SNP
-#   invisible(file.remove(snp_table_dir))
-# }else if(genome_build == "hg38"){
-#   library(BSgenome.Hsapiens.UCSC.hg38)
+  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+                              genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
+                              , half.window.size = 30, default.par = TRUE
+                              , mutation = FALSE)
+  invisible(file.remove(snp_table_dir))
+}else if(genome_build == "hg38"){
+  library(BSgenome.Hsapiens.UCSC.hg38)
   
-#   eff_snp = ci_gwas_data
+  eff_snp = ci_gwas_data
   
-#   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
-#   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
-#   snp_table$chr = eff_snp$chr
-#   snp_table$snp = eff_snp$pos
-#   snp_table$snpid = eff_snp$id
-#   snp_table$a1 = eff_snp$a1
-#   snp_table$a2 = eff_snp$a2
+  snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
+  colnames(snp_table) = c("chr","snp","snpid","a1","a2")
+  snp_table$chr = eff_snp$chr
+  snp_table$snp = eff_snp$pos
+  snp_table$snpid = eff_snp$id
+  snp_table$a1 = eff_snp$a1
+  snp_table$a2 = eff_snp$a2
   
-#   snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
-#   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
-#               row.names = FALSE, quote = FALSE)
+  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+  write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
+              row.names = FALSE, quote = FALSE)
   
-#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg38"
-#                               , half.window.size = 30, default.par = TRUE
-#                               , mutation = FALSE)
-#   file.remove(snp_table_dir)
-# }
+  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+                              genome.lib ="BSgenome.Hsapiens.UCSC.hg38"
+                              , half.window.size = 30, default.par = TRUE
+                              , mutation = FALSE)
+  file.remove(snp_table_dir)
+}
 
-# # Calculating Effect SNPs
-# results = ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2)
-# # computes binding affinity scores for both A1/2 alleles at each SNP window.
-# # searches TF motifs on both forward and reverse strand
-# # finds the subsequence for each allele (forward or reverse) that has the highest binding affinity scores.
+# Calculating Effect SNPs
+results = ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2)
 
+# Initialize an empty list to store the results
+all_results <- list()
 
-# # Initialize an empty list to store the results
-# all_results <- list()
+# Loop ComputePValues() function 10 times and obtain all results
+for (i in 1:10) {
+  results_pval_i <- invisible(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T))
+  all_results[[i]] <- results_pval_i
+}
 
-# # Loop ComputePValues() function 10 times and obtain all results
-# for (i in 1:10) {
-#   results_pval_i <- invisible(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T))
-#   all_results[[i]] <- results_pval_i
-# }
+# Combine all data frames into one big data frame
+results_pval <- do.call(rbind, all_results)
 
-# # uses importance sampling to estimate the probability of observing those binding affinity scores by change
-# # outputs p values for each allele's affinity score (is this score unusually high or low compared to random sequences?)
-
-# # Combine all data frames into one big data frame
-# results_pval <- do.call(rbind, all_results)
-
-# # save this dataframe as RDS
-# saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
-
-results_pval = readRDS(file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+# save this dataframe as RDS
+saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff
@@ -195,8 +179,6 @@ Ci_effect_SNPs <- final_effect_snp_frame %>%
   )
 
 Ci_effect_SNPs$log_like_ratio <- -(Ci_effect_SNPs$log_like_ratio) 
-# this allows a positive LLR to mean the SNP increases the binding affinity of a TF 
-# and negative to mean it decreases it
 
 final_ci_effect_dir = paste0(output_dir,"Ci_effect_SNPs.txt")
 write.table(file = final_ci_effect_dir, Ci_effect_SNPs, col.names = TRUE, row.names = FALSE,

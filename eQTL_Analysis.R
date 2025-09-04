@@ -10,13 +10,12 @@ message("Running eQTL analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]
-output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
+
 genome_build = args[["genome_build"]]
 
 # read in SNP, rmp information
-snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt") # rmp region, cell type adn TFSNP
+snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt")
 snp_rmp_df = read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
-# modify this dataframe
 snp_rmp_df$log_lik_ratio <- NULL
 colnames(snp_rmp_df)[colnames(snp_rmp_df) == "region"] <- "rmp"
 
