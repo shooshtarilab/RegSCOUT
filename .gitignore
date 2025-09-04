@@ -8,3 +8,8 @@ EUR/
 EUR_copy_results/
 test.sh
 test2.sh
+run_EAS.sh
+run_EUR.sh
+run_MULTI.sh
+README.md
+instructions_spreadsheets/
