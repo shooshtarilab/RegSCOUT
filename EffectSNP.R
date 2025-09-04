@@ -106,8 +106,8 @@ results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, nc
 all_results <- list()
 
 # Loop ComputePValues() function 10 times and obtain all results
-for (i in 1:3) {
-  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 10, testing.mc=T)))
+for (i in 1:10) {
+  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T)))
   all_results[[i]] <- results_pval_i
   message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
 } 
