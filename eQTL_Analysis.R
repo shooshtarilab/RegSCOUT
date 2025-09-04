@@ -10,6 +10,7 @@ message("Running eQTL analysis")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
 output_dir = args[["output_dir"]]
+output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 genome_build = args[["genome_build"]]
 
 # read in SNP, rmp information

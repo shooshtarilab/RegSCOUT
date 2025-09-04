@@ -87,7 +87,6 @@ if (tolower(args[["finemap"]]) == "y") {
   # ex. (EAS, EUR)
   # .bed, .bim, .fam
   snp_ref_dir = args[["snp_ref_dir"]]
-  check_path(snp_ref_dir)
   prefix_name = args[["population"]]
   extension_list = c(".bed",".bim",".fam") # plink2 also have an alternative extension name for binary files, see pgen
   for (ext in extension_list){
@@ -115,7 +114,6 @@ if (!(genome_build %in% req_builds)) {
   stop("Invalid genome build: '", genome_build, 
        "'. Allowed values are: ", paste(req_builds, collapse = ", "))
 }
-message("Using genome_build: ", genome_build)
 
 # genecode_dir
 gene_annot_dir = args[["gencode_dir"]]
@@ -187,6 +185,8 @@ settings_msg <- paste(
   "------------------------------------\n",
   "| RegSCOUT Settings                |\n",
   "|                                  |\n",
+  "| Genome Build            : %-6s |\n",
+  "|                                  |\n",
   "| Finemapping             : %-6s |\n",
   "| TF Expression Analysis  : %-6s |\n",
   "| Histone Marker Analysis : %-6s |\n",
@@ -197,6 +197,7 @@ settings_msg <- paste(
 )
 
 cat(sprintf(settings_msg,
+  tolower(args[["genome_build"]]),
   if (tolower(args[["finemap"]]) == "yes") toupper(args[["finemap"]]) else "N",
   args[["tf_expr_analysis"]],
   toupper(args[["histone_mark_analysis"]]),

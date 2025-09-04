@@ -3,17 +3,16 @@ suppressPackageStartupMessages(library(TFBSTools))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
 
-message("Running EffectSNP.R")
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx_dir = "none",
-  genome_build = "hg38"
+  jaspar_mtx_dir = "none"
 )
 
 # read output directory
 output_dir = args[["output_dir"]]
+output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # read in and prepare JASPAR matrix file
 jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
@@ -24,9 +23,8 @@ jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
 }
 
 if (jaspar_mtx_dir == 'none') {
-  jaspar_mtx = defaults$jaspar_mtx
   # load required libraries for obtaining JASPAR matrix
-  suppressPackageStartupMessages(library(JASPAR2024))
+  library(JASPAR2024)
   
   jaspar_sql = JASPAR2024()
   
@@ -35,7 +33,6 @@ if (jaspar_mtx_dir == 'none') {
     opts = list(species = 9606, all_versions = FALSE)
   )
 } else {
-  jaspar_mtx = "yes"
   jaspar_pwm <- readJASPARMatrix(jaspar_mtx_dir, matrixClass = c("PFM", "PWM", "PWMProb"))
 }
 
@@ -50,18 +47,16 @@ for (i in c(1:length(jaspar_pwm_list))){
   new_matrix = apply(temp_tf_matrix,2,function(x)(x/sum(x)))
   jaspar_pwm_atsnp[[temp_tf_name]] = t(new_matrix)
 }
+# contains every TF sequence and the likelihood of a base in each spot of the sequence
 
 # reading in GWAS data
 ci_gwas_dir = args[["ci_gwas_dir"]]
+ci_gwas_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt"
 ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
 
 # Preparing CI SNPs for motif analysis
-genome_build = if (nzchar(args[["genome_build"]])) {
-  args[["genome_build"]]
-} else {
-  message("Using default genome_build value: ", defaults$genome_build)
-  defaults$genome_build
-}
+genome_build = args[["genome_build"]]
+genome_build = "hg19"
 
 # if (genome_build == "hg19"){
 #   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
@@ -83,9 +78,12 @@ genome_build = if (nzchar(args[["genome_build"]])) {
 #                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
 #                               , half.window.size = 30, default.par = TRUE
 #                               , mutation = FALSE)
-#   file.remove(snp_table_dir)
+#   # str(reg1), transition contains values representing the probability of transitioning
+#   # from one base to another. useless for our use.
+#   # get genomic sequence around every finemapped SNP
+#   invisible(file.remove(snp_table_dir))
 # }else if(genome_build == "hg38"){
-#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
+#   library(BSgenome.Hsapiens.UCSC.hg38)
   
 #   eff_snp = ci_gwas_data
   
@@ -110,15 +108,22 @@ genome_build = if (nzchar(args[["genome_build"]])) {
 
 # # Calculating Effect SNPs
 # results = ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2)
+# # computes binding affinity scores for both A1/2 alleles at each SNP window.
+# # searches TF motifs on both forward and reverse strand
+# # finds the subsequence for each allele (forward or reverse) that has the highest binding affinity scores.
+
 
 # # Initialize an empty list to store the results
 # all_results <- list()
 
 # # Loop ComputePValues() function 10 times and obtain all results
 # for (i in 1:10) {
-#   results_pval_i <- ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T)
+#   results_pval_i <- invisible(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T))
 #   all_results[[i]] <- results_pval_i
 # }
+
+# # uses importance sampling to estimate the probability of observing those binding affinity scores by change
+# # outputs p values for each allele's affinity score (is this score unusually high or low compared to random sequences?)
 
 # # Combine all data frames into one big data frame
 # results_pval <- do.call(rbind, all_results)
@@ -126,7 +131,7 @@ genome_build = if (nzchar(args[["genome_build"]])) {
 # # save this dataframe as RDS
 # saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
 
-results_pval = readRDS("/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/atSNP_10runs_results.RDS")
+results_pval = readRDS(file = paste0(output_dir,'atSNP_10runs_results.RDS'))
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff
@@ -198,4 +203,4 @@ write.table(file = final_ci_effect_dir, Ci_effect_SNPs, col.names = TRUE, row.na
             quote = FALSE, sep = "\t")
 
 
-message("Effect-SNP identification complete!")
+print("Effect-SNP identification complete!")

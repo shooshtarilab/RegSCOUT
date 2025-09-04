@@ -13,6 +13,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # read output directory
 output_dir <- args[["output_dir"]]
+output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 # defining default parameter values
 defaults <- list(
@@ -31,10 +32,11 @@ colnames(final_output) <- c("locus", "locus_region",	"lead_snp",	"lead_ppa",
 
 # read in ci_gwas_dir
 ci_gwas_dir = args[["ci_gwas_dir"]]
+ci_gwas_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt"
 
 # read in if fine-mapping was desired
 user_finemap <- args[["finemap"]]
-
+user_finemap = "N"
 ## assigning the locus number to each ci_snp, read in CI (credible interval) SNP file
 if (user_finemap == "Y") {
   fine_loci_head <- read.table(ci_gwas_dir, sep = '\t', header = T)
@@ -156,7 +158,7 @@ for (i in 1:nrow(final_output)) {
 final_output <- final_output %>% separate_rows(rmp, sep = ", ")
 
 # loading in rmps and their PPAs (associated with the E-SNPs that overlap them)
-risk_regions_ppa <- read.table(paste0(output_dir, "risk_regions_ppa.txt"),header=FALSE)
+risk_regions_ppa <- read.table(paste0(output_dir, "risk_regions_ppa.txt"), header=TRUE)
 
 # adding in rmp information
 for (i in 1:nrow(final_output)) {
@@ -335,7 +337,7 @@ if (file.exists(eqtl_results_dir)) {
   final_output$eqtl_gene <- NULL
 }
 
-write.table(final_output, paste0(output_dir, "final_table.txt"), quote = FALSE, sep = "\t")
+write.table(final_output, paste0(output_dir, "final_table.txt"), quote = FALSE, sep = "\t", row.names = F)
 
 # now creating the prioritized table
 final_table <- final_output

@@ -23,11 +23,12 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
+output_file_main = "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
 cell_peak = read.delim(cell_peak_file, header = TRUE)
-peaks_cell_types = unique(unlist(str_split(cell_peak$`cell sub-types`, ",")))
+peaks_cell_types = unique(unlist(str_split(cell_peak$cell_sub_types, ",")))
 
 #Getting the file of effect SNPs and loading them
 eff_snp_file = paste0(output_file_main,"Ci_effect_SNPs.txt")
@@ -278,6 +279,7 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
 }
 
 gene_annot_dir = args[["gencode_dir"]]
+gene_annot_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz"
 gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
 transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
 transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
@@ -361,11 +363,13 @@ for (i in c(1:length(cell_type_list))){
   cell_temp = cell_type_list[i]
   cell_cicero_data = read.table(file = cicero_file_list[i],
                                 sep = "\t", header = TRUE)
+                                
   #Finding the peaks in the first column of the cell type data 
   #which overlaps the Effect SNPs and only keeping those peaks
   cell_peak1_grg = StringToGRanges(gsub("_","-",cell_cicero_data$Peak1))
   peak1_snp_overlap = findOverlaps(cell_peak1_grg, eff_snp_grg)
   cell_cicero_data = cell_cicero_data[unique(queryHits(peak1_snp_overlap)),]
+
   #Now mapping the peak2 of the cell type filtered Cicero data to the
   #promoter regions of genes
   cell_peak2_grg = StringToGRanges(gsub("_","-",cell_cicero_data$Peak2))
@@ -465,7 +469,7 @@ if (length(rmp_promoter_overlap) != 0) {
   prom_matrix = as.matrix(prom_matrix)
   
   prom_matrix_file = paste0(output_file_main,"Gene_promoter_matrix.txt")
-  write.table(prom_matrix, prom_matrix_file, sep = "\t", row.names = TRUE)
+  write.table(prom_matrix, prom_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 }
 
 if (!is.null(coaccess_gene_cell_final)) {
@@ -482,7 +486,7 @@ if (!is.null(coaccess_gene_cell_final)) {
   enh_matrix = as.matrix(enh_matrix)
   
   enh_matrix_file = paste0(output_file_main,"Gene_enhancer_matrix.txt")
-  write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE)
+  write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 }
 
 message("Directly mapped genes and cicero genes identified!")

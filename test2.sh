@@ -1,9 +1,9 @@
 mode="peak_table"
-output_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/EAS/"
+output_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 ci_gwas_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/multi_finemap.txt"
 genome_build="HG19"
 gencode_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v48.annotation.gff3.gz"
-finemap="Y"
+finemap="N"
 plink2_dir="/home/ubunkun/anaconda3/envs/bio-R/bin/plink2"
 fgwas_dir="/home/ubunkun/anaconda3/envs/bio-R/bin/fgwas"
 sum_stats_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132224_buildGRCh37_p.tsv"
@@ -27,6 +27,9 @@ scrna_instruct_dir="/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadshe
 #     --histone_mark_analysis "$histone_mark_analysis" --seurat_obj_dir "$seurat_obj_dir"
 
 
+Rscript final_outputs.R --output_dir "$output_dir" --finemap "$finemap" \
+--ci_gwas_dir "$ci_gwas_dir" --tf_score_th "$tf_score_th" --gene_score_th \
+"$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th"
 
  
 
