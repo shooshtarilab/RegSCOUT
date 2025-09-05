@@ -73,7 +73,7 @@ ts=$(date +"%Y%m%d_%H%M%S")
 master_log="$output_dir/RegSCOUT_pipeline.log"
 
 pipeline_start_time=$(date +%s)
-echo "=== Pipeline started at $(date) ===" | tee -a "$master_log"
+echo "=== Pipeline started at $(date) ===" > "$master_log"
 
 Rscript sanity_check.R \
     --output_dir "$output_dir" --mode "$mode" --genome_build "$genome_build" \
@@ -171,5 +171,5 @@ total_seconds=$((total_elapsed % 60))
 
 echo "========================================" | tee -a "$master_log"
 echo "=== Pipeline finished at $(date) ===" | tee -a "$master_log"
-printf "=== Total pipeline time: %02d:%02d:%02d (hh:mm:ss) ===\n" $total_hours $total_minutes $total_seconds | tee -a "$master_log"
+printf "=== Total pipeline time: %02d:%02d:%02d ===\n" $total_hours $total_minutes $total_seconds | tee -a "$master_log"
 echo "========================================" | tee -a "$master_log"

@@ -432,17 +432,6 @@ write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep="\t", ro
 cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
 write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
 
-f1 = c("0" = "white", "1" = "red")
-
-output_file = paste0(output_file_main, "cell_gene.svg")
-svg(output_file, width =  (length(gene_names) + 10) / 2.54, height = (length(cell_names)+ 10) / 2.54)
-print(Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
-        column_title = "Gene-cell type plot",
-        row_names_gp = grid::gpar(fontsize = 16),
-        column_names_gp = grid::gpar(fontsize = 6),
-        rect_gp = gpar(col= "#84878a")))
-invisible(dev.off())
-
 if (length(rmp_promoter_overlap) != 0) {
   promoter_cell_gene = direct_overlap_df
   promoter_cell_gene[["Peak_gene"]] = paste0(promoter_cell_gene$RMP,"; ",

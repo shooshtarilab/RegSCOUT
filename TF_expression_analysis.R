@@ -31,7 +31,6 @@ tf_table_filt <- tf_table %>%
 # defining function that identifies peaks on TF promoters
 confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, gencode_file_path, prio_tf_table) {
   gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
-
   gene_tss_grg = gene_tss_grg[gene_tss_grg$gene_name %in% tf_list, ]
 
   # Read peak data

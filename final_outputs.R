@@ -807,7 +807,7 @@ heatmap_genes <- Heatmap(
   height = unit(1 * nrow(gene_cell_mtx), "cm")
 ) 
 
-output_gene_file = paste0(output_dir,"cell_gene_2.svg")
+output_gene_file = paste0(output_dir,"cell_gene.svg")
 svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(gene_cell_mtx) + 10)/2.54)
 print(heatmap_genes)
 invisible(dev.off())
