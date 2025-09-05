@@ -514,7 +514,7 @@ if (file.exists(tf_expr_results_dir)) {
     ) 
     
     output_tf_file = paste0(output_dir,"cell_tf.svg")
-    svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
+    svg(output_tf_file, width = (ncol(tf_heatmap_mtx) + 10)/2.54, height = (nrow(tf_heatmap_mtx) + 10)/2.54)
     print(heatmap_TFs)
     invisible(dev.off())
     
@@ -643,7 +643,7 @@ if (file.exists(tf_expr_results_dir)) {
     ) 
     
     output_tf_file = paste0(output_dir,"cell_tf.svg")
-    svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
+    svg(output_tf_file, width = (ncol(tf_heatmap_mtx) + 10)/2.54, height = (nrow(tf_heatmap_mtx) + 10)/2.54)
     print(heatmap_TFs)
     invisible(dev.off())
     
@@ -808,8 +808,8 @@ heatmap_genes <- Heatmap(
 ) 
 
 output_gene_file = paste0(output_dir,"cell_gene_2.svg")
-svg(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10)
-heatmap_genes
+svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(gene_cell_mtx) + 10)/2.54)
+print(heatmap_genes)
 invisible(dev.off())
 
 # printing a summary of findings for this dataset
