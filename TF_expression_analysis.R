@@ -127,7 +127,6 @@ gene_percent_expr <- function(seurat_obj, matrix_location) {
   
   i = 1
   for (cell in cell_types) {
-    print(cell)
     cell_labels_filt = WhichCells(object = seurat_obj, idents = cell)
     expr_data = FetchData(seurat_obj, row.names(seurat_obj), cells = cell_labels_filt, layer = matrix_location)
     
@@ -758,7 +757,7 @@ if (tf_expr_req == "atac") {
     write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
                 sep = '\t')
     
-    print('TF expression analysis complete!')
+    message('TF expression analysis complete!')
   } else if (is.data.frame(tf_expr_results)) { # just atac-seq results available
     # convert this dataframe into matrix
     tf_expr_results$value = "atac"

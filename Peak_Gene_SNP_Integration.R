@@ -23,7 +23,7 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
-output_file_main= "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
+
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
 cell_peak = read.delim(cell_peak_file, header = TRUE)
@@ -264,7 +264,7 @@ invisible(dev.off())
 
 message("Affected peaks and TFs extraction finished!")
 
-Loading the gene reference data from genecode files
+# Loading the gene reference data from genecode files
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
   as.integer(args[["prom_th_up"]])
 } else {
@@ -434,24 +434,15 @@ write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep="\t", ro
 cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
 write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
 
-
 f1 = c("0" = "white", "1" = "red")
 
 output_file = paste0(output_file_main, "cell_gene.svg")
-print(length(gene_names))
-print(length(cell_names))
-invisible(suppressWarnings(file.remove(output_file)))
-# svg(output_file, width = length(gene_names) + 10, height = length(cell_names) + 10)
-
-svg(output_file,
-    width =  (length(gene_names) + 10) / 2.54,
-    height = (length(cell_names)+ 10) / 2.54)
-Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
+svg(output_file, width =  (length(gene_names) + 10) / 2.54, height = (length(cell_names)+ 10) / 2.54)
+print(Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
         column_title = "Gene-cell type plot",
         row_names_gp = grid::gpar(fontsize = 16),
         column_names_gp = grid::gpar(fontsize = 6),
-        rect_gp = gpar(col= "#84878a"))
-
+        rect_gp = gpar(col= "#84878a")))
 invisible(dev.off())
 
 if (length(rmp_promoter_overlap) != 0) {

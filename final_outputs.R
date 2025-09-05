@@ -21,7 +21,7 @@ defaults <- list(
 )
 
 # Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
-invisible(file.remove(paste0(output_dir, "gene_tss_granges.rds"))) 
+invisible(suppressWarnings(file.remove(paste0(output_dir, "gene_tss_granges.rds"))))
 
 # starting to create the final dataframe
 final_output <- data.frame(matrix(ncol = 17, nrow = 1))
@@ -515,7 +515,7 @@ if (file.exists(tf_expr_results_dir)) {
     
     output_tf_file = paste0(output_dir,"cell_tf.svg")
     svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
-    heatmap_TFs
+    print(heatmap_TFs)
     invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
@@ -644,7 +644,7 @@ if (file.exists(tf_expr_results_dir)) {
     
     output_tf_file = paste0(output_dir,"cell_tf.svg")
     svg(output_tf_file, width = ncol(tf_heatmap_mtx) + 10, height = nrow(tf_heatmap_mtx) + 10)
-    heatmap_TFs
+    print(heatmap_TFs)
     invisible(dev.off())
     
     ## bringing TF expression results into final_table_new
@@ -807,7 +807,7 @@ heatmap_genes <- Heatmap(
   height = unit(1 * nrow(gene_cell_mtx), "cm")
 ) 
 
-output_gene_file = paste0(output_dir,"cell_gene.svg")
+output_gene_file = paste0(output_dir,"cell_gene_2.svg")
 svg(output_gene_file, width = ncol(gene_cell_mtx) + 10, height = nrow(gene_cell_mtx) + 10)
 heatmap_genes
 invisible(dev.off())

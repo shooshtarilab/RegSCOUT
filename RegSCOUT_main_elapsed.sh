@@ -5,7 +5,7 @@ set -o pipefail
 # Function to run R script and track time
 run_rscript() {
     local script_name="$1"
-    shift  # Remove first argument, rest are script arguments
+    shift
     
     echo "=== Running $script_name ===" | tee -a "$master_log"
     echo "Start time: $(date)" | tee -a "$master_log"
@@ -75,7 +75,7 @@ master_log="$output_dir/pipeline_${ts}.log"
 pipeline_start_time=$(date +%s)
 echo "=== Pipeline started at $(date) ===" | tee -a "$master_log"
 
-run_rscript sanity_check.R \
+Rscript sanity_check.R \
     --output_dir "$output_dir" --mode "$mode" --genome_build "$genome_build" \
     --finemap "$finemap" --gencode_dir "$gencode_dir" \
     --snp_ref_dir "$snp_ref_dir" --population "$population" \
