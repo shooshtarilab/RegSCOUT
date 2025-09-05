@@ -10,6 +10,7 @@ suppressPackageStartupMessages(library(Signac))
 suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(tibble))
 suppressPackageStartupMessages(library(circlize))
+suppressPackageStartupMessages(library(rtracklayer))
 
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
@@ -22,7 +23,7 @@ defaults <- list(
 
 #Getting the working directory
 output_file_main = args[["output_dir"]]
-
+output_file_main= "/home/ubunkun/Lab/RA_project/RegSCOUT/MULTI/"
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
 cell_peak = read.delim(cell_peak_file, header = TRUE)
@@ -140,14 +141,12 @@ heatmap_ppa <- Heatmap(
 
 # combine the two heatmaps and save it 
 output_peak_file = paste0(output_file_main,"cell_peak.svg")
-svg(output_peak_file, width = ncol(risk_regions) + 10, height = nrow(risk_regions) + 10)
+svg(output_peak_file, width = ((ncol(peak_cluster_matrix) + ncol(risk_regions)) + 10) / 2.54, height = (nrow(peak_cluster_matrix) + 10)/ 2.54)
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
 
 #Changing the cell by peak matrix so that each line has only one cell type
-cell_peak = cell_peak %>% 
-  separate_rows(cell_sub_types, sep=",")
 
 #Getting the peaks and Effect SNPs as GRanges and overlapping them to find
 #SNP-affected peaks and mapping TFs to those peaks 
@@ -165,10 +164,9 @@ cell_peak_filt = as.data.frame(matrix(0,nrow = length(peak_snp_overlap),
 colnames(cell_peak_filt) = c(colnames(cell_peak),"SNP","TF","log_lik_ratio")
 
 cell_peak_filt[,colnames(cell_peak)] = cell_peak[queryHits(peak_snp_overlap),]
-
 cell_peak_filt$SNP = eff_snp$SNP[subjectHits(peak_snp_overlap)]
 cell_peak_filt$TF = eff_snp$TF[subjectHits(peak_snp_overlap)]
-cell_peak_filt$log_lik_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)])
+cell_peak_filt$log_lik_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]) # why abs
 
 cell_tf_snp = as.data.frame(matrix(0, nrow = nrow(cell_peak_filt),
                                    ncol = 4))
@@ -180,6 +178,8 @@ cell_tf_snp$region = paste(cell_peak_filt$chr,
 cell_tf_snp$cell = cell_peak_filt$cell_sub_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
 cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
+
+cell_tf_snp = cell_tf_snp %>% separate_rows(cell, sep = ",")
 
 peak_ratio_frame_dir = paste0(output_file_main,"risk_regions_ratio.txt")
 write.table(as.data.frame(cell_tf_snp), file = peak_ratio_frame_dir,
@@ -254,14 +254,17 @@ heatmap_ppa <- Heatmap(
 
 # combine the two heatmaps and save it 
 output_tf_file = paste0(output_file_main,"cell_snp_tf.svg")
-svg(output_tf_file, width = ncol(risk_tfs)+ 10, height = nrow(risk_tfs) + 10) 
+svg(output_tf_file,
+    width = (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54,
+    height = (nrow(tf_cluster_matrix) + 10) / 2.54)
+
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
 
 message("Affected peaks and TFs extraction finished!")
 
-#Loading the gene reference data from genecode files
+Loading the gene reference data from genecode files
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
   as.integer(args[["prom_th_up"]])
 } else {
@@ -277,44 +280,36 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
 }
 
 gene_annot_dir = args[["gencode_dir"]]
+gencode_transcripts  <- import(gene_annot_dir, format = "gff3", feature.type = "transcript")
+gene_transcript_data <- gencode_transcripts[gencode_transcripts$transcript_type == "protein_coding"]
+gene_id_lists <- mcols(gene_transcript_data)$gene_name 
 
-gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
-transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
-transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
+pos_transcripts <- gene_transcript_data[strand(gene_transcript_data) == "+"]
+neg_transcripts <- gene_transcript_data[strand(gene_transcript_data) == "-"]
 
-transcript_coding_index = transcript_type_list == "protein_coding"
-gene_annot = gene_annot[transcript_coding_index,]
-gene_transcript_data = gene_annot[gene_annot$type == "transcript",]
-gene_id_list = gene_transcript_data$attributes
-gene_id_list = str_split(gene_id_list, "gene_name=", simplify = TRUE)
-gene_id_list = str_split(gene_id_list[,2], ";", simplify = TRUE)[,1]
+prom_pos <- GRanges(
+  seqnames = seqnames(pos_transcripts),
+  ranges = IRanges(
+    start = start(pos_transcripts) - prom_th_up,
+    end   = start(pos_transcripts) + prom_th_down
+  ),
+  strand = strand(pos_transcripts),
+  gene_name = mcols(pos_transcripts)$gene_name
+)
 
-gene_transcript_data[["gene_name"]] = gene_id_list
-pos_strand_index = gene_transcript_data$strand == "+"
-neg_strand_index = gene_transcript_data$strand == "-"
+prom_neg <- GRanges(
+  seqnames = seqnames(neg_transcripts),
+  ranges = IRanges(
+    start = end(neg_transcripts) - prom_th_down,
+    end   = end(neg_transcripts) + prom_th_up
+  ),
+  strand = strand(neg_transcripts),
+  gene_name = mcols(neg_transcripts)$gene_name
+)
 
-gene_transcript_data[["TSS"]] = rep(0, nrow(gene_transcript_data))
-gene_transcript_data$TSS[pos_strand_index] = gene_transcript_data$start[pos_strand_index]
-gene_transcript_data$TSS[neg_strand_index] = gene_transcript_data$end[neg_strand_index]
-gene_transcript_data[["length"]] = gene_transcript_data$end - gene_transcript_data$start
-
-gene_data_temp_pos = gene_transcript_data[gene_transcript_data$strand == "+",]
-
-gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th_up,
-                                           end = gene_data_temp_pos$TSS + prom_th_down),
-                           seqnames = gene_data_temp_pos$seqid)
-
-gene_tss_grg_pos$gene_name = gene_data_temp_pos$gene_name
-
-gene_data_temp_neg = gene_transcript_data[gene_transcript_data$strand == "-",]
-
-gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th_down,
-                                           end = gene_data_temp_neg$TSS + prom_th_up),
-                           seqnames = gene_data_temp_neg$seqid)
-
-gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
-
-gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
+gene_tss_grg <- c(prom_pos, prom_neg)
+# the result of this is used in TF expression analysis, but if we use RDS then we assume the user will use the same gencode version/file
+saveRDS(gene_tss_grg, paste0(output_file_main,"gene_tss_granges.rds"))
 
 #Directly overlapping genes' promoters with risk-mediating peaks
 peak_ppa_frame_filt = peak_ppa_frame
@@ -443,8 +438,14 @@ write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, se
 f1 = c("0" = "white", "1" = "red")
 
 output_file = paste0(output_file_main, "cell_gene.svg")
+print(length(gene_names))
+print(length(cell_names))
 invisible(suppressWarnings(file.remove(output_file)))
-svg(output_file, width = length(gene_names) + 10, height = length(cell_names) + 10)
+# svg(output_file, width = length(gene_names) + 10, height = length(cell_names) + 10)
+
+svg(output_file,
+    width =  (length(gene_names) + 10) / 2.54,
+    height = (length(cell_names)+ 10) / 2.54)
 Heatmap(gene_cell_matrix, name = "Gene presence", col = f1, 
         column_title = "Gene-cell type plot",
         row_names_gp = grid::gpar(fontsize = 16),

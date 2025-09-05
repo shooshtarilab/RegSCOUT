@@ -20,6 +20,9 @@ defaults <- list(
   tf_score_th = -1
 )
 
+# Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
+invisible(file.remove(paste0(output_dir, "gene_tss_granges.rds"))) 
+
 # starting to create the final dataframe
 final_output <- data.frame(matrix(ncol = 17, nrow = 1))
 

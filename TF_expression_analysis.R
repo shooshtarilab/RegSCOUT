@@ -30,48 +30,10 @@ tf_table_filt <- tf_table %>%
 
 # defining function that identifies peaks on TF promoters
 confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, gencode_file_path, prio_tf_table) {
-  # reading in gene annotation from gencode and processing it to obtain promoter regions for each gene
-  gene_annot = read.gff(gencode_file_path, na.strings = c(".", "?"), GFF3 = TRUE)
-  transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
-  transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
-  
-  transcript_coding_index = transcript_type_list == "protein_coding"
-  gene_annot = gene_annot[transcript_coding_index,]
-  gene_transcript_data = gene_annot[gene_annot$type == "transcript",]
-  gene_id_list = gene_transcript_data$attributes
-  gene_id_list = str_split(gene_id_list, "gene_name=", simplify = TRUE)
-  gene_id_list = str_split(gene_id_list[,2], ";", simplify = TRUE)[,1]
-  gene_transcript_data[["gene_name"]] = gene_id_list
-  
-  # filter by TF_list
-  gene_transcript_data = gene_transcript_data[gene_transcript_data$gene_name %in% tf_list, ]
-  
-  pos_strand_index = gene_transcript_data$strand == "+"
-  neg_strand_index = gene_transcript_data$strand == "-"
-  
-  gene_transcript_data[["TSS"]] = rep(0, nrow(gene_transcript_data))
-  gene_transcript_data$TSS[pos_strand_index] = gene_transcript_data$start[pos_strand_index]
-  gene_transcript_data$TSS[neg_strand_index] = gene_transcript_data$end[neg_strand_index]
-  gene_transcript_data[["length"]] = gene_transcript_data$end - gene_transcript_data$start
-  
-  gene_data_temp_pos = gene_transcript_data[gene_transcript_data$strand == "+",]
-  
-  gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th_up,
-                                             end = gene_data_temp_pos$TSS + prom_th_down),
-                             seqnames = gene_data_temp_pos$seqid)
-  
-  gene_tss_grg_pos$gene_name = gene_data_temp_pos$gene_name
-  
-  gene_data_temp_neg = gene_transcript_data[gene_transcript_data$strand == "-",]
-  
-  gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th_down,
-                                             end = gene_data_temp_neg$TSS + prom_th_up),
-                             seqnames = gene_data_temp_neg$seqid)
-  
-  gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
-  
-  gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
-  
+  gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
+
+  gene_tss_grg = gene_tss_grg[gene_tss_grg$gene_name %in% tf_list, ]
+
   # Read peak data
   peaks <- read.delim(peak_file_path, header = TRUE)
   peaks_ranges <- IRanges(start = as.integer(peaks$start), end = as.integer(peaks$end))

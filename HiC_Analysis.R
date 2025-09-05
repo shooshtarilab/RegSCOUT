@@ -57,44 +57,7 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
   defaults$prom_th_down
 }
 
-gene_annot_dir <- args[["gencode_dir"]]
-gene_annot = read.gff(gene_annot_dir, na.strings = c(".", "?"), GFF3 = TRUE)
-transcript_type_list = str_split(gene_annot$attributes, "transcript_type=", simplify = TRUE) 
-transcript_type_list = str_split(transcript_type_list[,2], ";", simplify = TRUE)[,1]
-
-transcript_coding_index = transcript_type_list == "protein_coding"
-gene_annot = gene_annot[transcript_coding_index,]
-gene_transcript_data = gene_annot[gene_annot$type == "transcript",]
-gene_id_list = gene_transcript_data$attributes
-gene_id_list = str_split(gene_id_list, "gene_name=", simplify = TRUE)
-gene_id_list = str_split(gene_id_list[,2], ";", simplify = TRUE)[,1]
-
-gene_transcript_data[["gene_name"]] = gene_id_list
-pos_strand_index = gene_transcript_data$strand == "+"
-neg_strand_index = gene_transcript_data$strand == "-"
-
-gene_transcript_data[["TSS"]] = rep(0, nrow(gene_transcript_data))
-gene_transcript_data$TSS[pos_strand_index] = gene_transcript_data$start[pos_strand_index]
-gene_transcript_data$TSS[neg_strand_index] = gene_transcript_data$end[neg_strand_index]
-gene_transcript_data[["length"]] = gene_transcript_data$end - gene_transcript_data$start
-
-gene_data_temp_pos = gene_transcript_data[gene_transcript_data$strand == "+",]
-
-gene_tss_grg_pos = GRanges(ranges= IRanges(start = gene_data_temp_pos$TSS - prom_th_up,
-                                           end = gene_data_temp_pos$TSS + prom_th_down),
-                           seqnames = gene_data_temp_pos$seqid)
-
-gene_tss_grg_pos$gene_name = gene_data_temp_pos$gene_name
-
-gene_data_temp_neg = gene_transcript_data[gene_transcript_data$strand == "-",]
-
-gene_tss_grg_neg = GRanges(ranges= IRanges(start = gene_data_temp_neg$TSS - prom_th_down,
-                                           end = gene_data_temp_neg$TSS + prom_th_up),
-                           seqnames = gene_data_temp_neg$seqid)
-
-gene_tss_grg_neg$gene_name = gene_data_temp_neg$gene_name
-
-gene_tss_grg = c(gene_tss_grg_pos, gene_tss_grg_neg)
+gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
 
 # load in RMP information
 rmp_df <- read.table(paste0(output_dir, 'risk_regions_ppa.txt'), header = TRUE)
