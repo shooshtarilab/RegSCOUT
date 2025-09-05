@@ -11,12 +11,6 @@ RegSCOUT was created using R version 4.4.0 and uses these libraries: Seurat, Sig
 ## Note about genome builds:
 When using RegSCOUT please ensure that all files provided to this pipeline are in the same genome build. E.g., PLINK bfiles (.bed, .bim, .fam), GWAS summary statistics, GWAS lead SNPs, GWAS locus region information, fine-mapped GWAS data, scATAC-seq datasets, Hi-C datasets, eQTL datasets, histone mark results datasets, and GENCODE gene information. 
 
-## Table of Contents
-A thorough description of each step of the RegSCOUT pipeline and of RegSCOUT output can be found below. 
-1. [Pipeline Overview](https://github.com/shooshtarilab/RegSCOUT?tab=readme-ov-file#pipeline-overview)
-2. 
-3. 
-
 ## Pipeline Overview
 ![Pipeline Overview](https://github.com/shooshtarilab/RegSCOUT/blob/main/images/Workflow_schematic.png)
 
@@ -63,7 +57,7 @@ Above is a general overview of the RegSCOUT workflow. Each step will be explaine
 | --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
 | --output_dir | The directory in which all RegSCOUT output files will be stored. | No default, must be set by user | 1 through 10 |
 
-## Fine-mapping
+## Fine-mapping (Steps 1 and 2)
 
 ## Main Parameters:
 ### --mode: 
