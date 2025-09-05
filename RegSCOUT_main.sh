@@ -133,7 +133,7 @@ fi
 if [ "$tf_expr_analysis" == "atac" ] || [ "$tf_expr_analysis" == "rna" ] || [ "$tf_expr_analysis" == "both" ]; then
     run_rscript TF_expression_analysis.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
-        --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir" \
+        --prom_th_down "$prom_th_down" \
         --tf_rna_quantile_th "$tf_rna_quantile_th" --scrna_instruct_dir "$scrna_instruct_dir" \
         --tf_expr_analysis "$tf_expr_analysis"
 fi
@@ -146,7 +146,7 @@ fi
 if [ "$hic_analysis" == "Y" ]; then
     run_rscript HiC_Analysis.R \
         --output_dir "$output_dir" --hic_instruct_dir "$hic_instruct_dir" \
-        --prom_th_up "$prom_th_up" --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir"
+        --prom_th_up "$prom_th_up" --prom_th_down "$prom_th_down"
 fi 
 
 if [ "$eqtl_analysis" == "Y" ]; then

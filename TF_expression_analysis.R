@@ -29,7 +29,7 @@ tf_table_filt <- tf_table %>%
   distinct()
 
 # defining function that identifies peaks on TF promoters
-confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, gencode_file_path, prio_tf_table) {
+confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, prio_tf_table) {
   gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
   gene_tss_grg = gene_tss_grg[gene_tss_grg$gene_name %in% tf_list, ]
 
@@ -376,11 +376,11 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  gene_annot_path = args[["gencode_dir"]]
+  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
-                                               peak_file_dir, gene_annot_path, tf_table_filt)
+                                               peak_file_dir, tf_table_filt)
   
   # accounting for if there are no results found
   if (is.data.frame(tf_expr_results)) {
@@ -710,12 +710,12 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  gene_annot_path = args[["gencode_dir"]]
+  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
-                                               peak_file_dir, gene_annot_path, tf_table_filt)
+                                               peak_file_dir, tf_table_filt)
   
   # bringing both analyses together
   if (is.data.frame(tf_expr_results) & length(tf_expr_results_list) > 0) { # both rna-seq and atac-seq results are available
