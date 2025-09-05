@@ -3,6 +3,7 @@ suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
+suppressPackageStartupMessages(library(liftOver))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 # read output directory
@@ -121,6 +122,11 @@ for (i in 1:num_eqtl) {
     # defining genomic ranges for SNPs
     snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
                                ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
+
+    if (genome_build == "hg19"){ # remove this later
+      hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
+      snp_granges = unlist(liftOver(snp_granges,hg19to38))
+    }
     
     eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
     
