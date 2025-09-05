@@ -113,4 +113,3 @@ output_file_main = args[["output_dir"]]
 output_file = paste0(output_file_main, "cell_peak.xlsx")
 write.xlsx(final_peak_cell_df, file = output_file, col.names = TRUE,
            row.names = FALSE)
-print('Finished extracting cell type-specific open chromatin regions!')

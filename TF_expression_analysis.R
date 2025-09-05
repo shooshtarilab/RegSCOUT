@@ -799,5 +799,3 @@ if (tf_expr_req == "atac") {
     message('TF expression analysis complete, no results were found over both the scRNA-seq and scATAC-seq analyses.')
   }
 } 
-
-message("TF expression analysis complete!")

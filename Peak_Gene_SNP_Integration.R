@@ -262,8 +262,6 @@ combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
 
-message("Affected peaks and TFs extraction finished!")
-
 # Loading the gene reference data from genecode files
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
   as.integer(args[["prom_th_up"]])
@@ -478,5 +476,3 @@ if (!is.null(coaccess_gene_cell_final)) {
   enh_matrix_file = paste0(output_file_main,"Gene_enhancer_matrix.txt")
   write.table(enh_matrix, enh_matrix_file, sep = "\t", row.names = TRUE, quote = FALSE)
 }
-
-message("Directly mapped genes and cicero genes identified!")

@@ -20,7 +20,7 @@ run_rscript() {
     seconds=$((elapsed % 60))
     
     echo "End time: $(date)" | tee -a "$master_log"
-    printf "Elapsed time: %02d:%02d:%02d (hh:mm:ss)\n" $hours $minutes $seconds | tee -a "$master_log"
+    printf "Elapsed time: %02d:%02d:%02d\n" $hours $minutes $seconds | tee -a "$master_log"
     echo "----------------------------------------" | tee -a "$master_log"
 }
 
@@ -70,7 +70,7 @@ done
 
 # Create a logs directory inside output_dir 
 ts=$(date +"%Y%m%d_%H%M%S")
-master_log="$output_dir/pipeline_${ts}.log"
+master_log="$output_dir/RegSCOUT_pipeline.log"
 
 pipeline_start_time=$(date +%s)
 echo "=== Pipeline started at $(date) ===" | tee -a "$master_log"

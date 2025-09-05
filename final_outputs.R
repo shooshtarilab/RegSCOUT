@@ -822,5 +822,3 @@ message(paste(summary_stat, collapse = "   "))
 
 # save prioritized table
 write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
-
-message('Final tables created!')

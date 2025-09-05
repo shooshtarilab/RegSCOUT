@@ -24,6 +24,7 @@ read_file <- function(file_path) {
   }
   return(df)
 }
+
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -925,8 +926,6 @@ if (length(hic_results_list) == 0) {
   # save this dataframe
   write.table(all_results, file = paste0(output_dir, "all_hic_results.txt"), row.names = F, quote = F,
               sep = '\t')
-  
-  message('Hi-C analysis complete!')
 }
 
 
