@@ -45,6 +45,7 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 | --cic_genomic_window | Size of the regions on either side of an open chromatin region that cicero will look for peak to peak links in. | 2,000,000 | 3 |
 | --jaspar_mtx_dir | Specifies the path to a user provided file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used to obtain TF PFMs. | *none* | 4 |
 | --ci_gwas_dir | Only use this parameter if fine-mapping <ins>was not</ins> conducted by RegSCOUT. Specifies the path to fine-mapping results. | If fine-mapping was not conducted by RegSCOUT: no default, must be set by user | 4 |
+| --ncores | Number of cores to use when computing TF-SNP pair p-values using atSNP. Generally a greater number of cores means faster computing time. | 2 | 4 |
 | --genome_build | The reference genome that RegSCOUT should conduct analyses in, either hg19 or hg38. | No default, must be set by user | 3, 4 |
 | --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak can be considered open if it is accessible in 1/10 or 10% of cells of a cell type. | 0.1 | 3, 4 |
 | --prom_th_up | Number of bps to add upstream a TSS to define the gene promoter. | 2,000 | 5 |
@@ -65,7 +66,15 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 | --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
 | --output_dir | The directory in which all RegSCOUT output files will be stored. | No default, must be set by user | 1 through 10 |
 
-## Fine-mapping (Steps 1 and 2)
+***All directories specified in parameters should end with "/".**
+
+****Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.).**
+
+*****When providing numerical values to parameters, do not incorporate commas or spaces for thousands, e.g., use 100000 not 100,000.**
+
+
+
+
 
 ## Main Parameters:
 ### --mode: 
@@ -77,42 +86,25 @@ This parameter should be used only when the user wants fine-mapping to be conduc
 ### --output_dir: 
 This parameter should be used for setting the working directory (the directory address should end with "/"). **This parameter should always be set when using RegSCOUT regardless of the value of --finemap or --mode**. All the output and intermediate files of the pipeline are generated in this directory. If running the pipeline with --mode peak_table, the peak-by-cell and peak-peak interaction tables of the pipeline should be provided in this directory.
 
-*All directories specified in parameters should end with "/"*
+## Fine-mapping Requested by User (--finemap Y; Steps 1 and 2)
+See required parameters in table of all parameters.
 
-*Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.)*
+### <ins>Required Files</ins>
 
-## If fine-mapping must be conducted (--finemap Y)
+### GWAS Summary Statistics
+The path to the summary statistics file should be specified using --sum_stats. This file must be tab separated and contain at least these 4 following columns (note that RegSCOUT is case sensitive): SNP (containing SNP rsIDs), CHR (chromosome of the SNP), POS (position of SNP on chromosome), and P (p-value of association of SNP to disease). The following columns are not necessary but will be used by RegSCOUT if present: A1 (reference allele of SNP), A2 (alternative allele of SNP), MAF (minor allele frequency of SNP), and N (sample size). 
 
-### <ins>Required parameters</ins>
+If a sample size column is present in the summary statistics, the --sample_num parameter should be set to *present*; however, if it is not and the user is not able to find sample size for each SNP, the overall sample size of the GWAS study should be provided using the --sample_num parameter (e.g., --sample_num 190000). 
 
-### --output_dir: 
-See description above.
+If one of A1, A2, or MAF are missing from the GWAS summary statistics file, each of these columns will be filled in using Plink2 and its required bfiles. More information regarding this can be found in the Plink bfiles section. 
 
-### --SNP_ref:
-This parameter specifies the <ins>directory</ins> containing LD reference files from the 1000 Genomes project (bed, bim, fam files). These files could be downloaded from https://mrcieu.github.io/gwasglue/ (see Reference datasets subheading).
+### GWAS Lead SNPs
+The path to this file should be specified using --lead_snp. This file must be tab separated (.txt or .tsv) if containing more than one column; however, only one column in this file is necessary for the pipeline to run: SNP (containing lead SNP rsIDs). Any additional columns provided will be included in the new_lead_snps.txt output file described in the "Output Files" section. 
 
-### --Population:
-This is a three letter identifier for the LD reference population (e.g., EUR, AFR, EAS, AMR, SAS).
+### Plink bfiles
 
-### --sum_stats:
-The <ins>path</ins> to a GWAS summary statistics file. This file must be tab separated and contain at least these 4 following columns: SNP (containing SNP rsIDs), CHR (chromosome of the SNP), POS (position of SNP on chromosome), and P (p-value of association of SNP to disease). The following columns are not necessary but will be used by RegSCOUT if present: A1 (reference allele of SNP), A2 (alternative allele of SNP), MAF (minor allele frequency of SNP), and N (sample size). 
 
-### --lead_snps: 
-The <ins>path</ins> to a file containing the lead SNPs found in a GWAS study. This file must be tab separated if containing more than one column; however, only one column in this file is necessary for the pipeline to run: SNP (containing lead SNP rsIDs).
-
-### --plink2_bin: 
-This parameter is only required in the case that at least one of the A1, A2, or MAF columns is not present in the summary statistics provided to RegSCOUT. If this is the case, please provide to this parameter the <ins>path</ins> to the Plink2 executable downloaded from: https://www.cog-genomics.org/plink/2.0/. 
-
-### --sample_num: 
-This parameter can take an integer for the sample size of the GWAS (--sample_num 200000). However, if the N column (sample size) is present in the GWAS summary statistics, this column can be used instead of specifying an integer by setting this parameter as present (i.e., --sample_num present). 
-
-### --fgwas_src:
-The <ins>path</ins> to the fgwas executable after installation (e.g., --fgwas_src /home/fgwas/src/fgwas). 
-
-### --CI_thr:
-To SNPs have had their posterior probabilities of association (PPAs) assigned by fgwas, RegSCOUT finds the smallest set of SNPs in each locus whose cumulative PPAs add up to a certain threshold. This threshold is specified by this parameter by providing an integer. For example, if the smallest set of SNPs in each locus whose cumulative PPAs add up to 95% is desired then CI_thr can be set to 95 (i.e., --CI_thr 95).
-
-### <ins>Output files</ins>
+### <ins>Output Files</ins>
 
 ### Plink2.afreq
 A file output by Plink2 which provides SNP information including reference and alternative alleles and minor allele frequency. Will not be output if A1, A2, and MAF files are present in GWAS summary statistics. 
