@@ -743,7 +743,7 @@ if (tf_score_th > 0 & file.exists(tf_expr_results_dir)) {
 }
 
 if (nrow(prioritized_table) == 0) {
-  stop("Final tables created, no prioritized genes found with gene_score > ", gene_score_th, ", gene_sum_ppa_th > ", gene_sum_ppa_th, ", and tf_score_th > ", tf_score_th, ".")
+  stop("Final tables created, no prioritized genes found with gene_score >= ", gene_score_th, ", gene_sum_ppa_th >= ", gene_sum_ppa_th, ", and tf_score_th >= ", tf_score_th, ".")
 }
 
 if (file.exists(hic_results_dir) & file.exists(cicero_dir)) { 
