@@ -5,6 +5,21 @@ suppressPackageStartupMessages(library(stringr))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
+
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -415,7 +430,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
+  user_instruct <- read_file(scrna_instruct_dir)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -573,7 +588,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
+  user_instruct <- read_file(scrna_instruct_dir)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)

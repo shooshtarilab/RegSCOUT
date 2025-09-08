@@ -9,6 +9,21 @@ suppressPackageStartupMessages(library(purrr))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
+
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -16,7 +31,7 @@ output_dir = args[["output_dir"]]
 hist_mark_instruct_dir <- args[["hist_mark_instruct_dir"]]
 
 # loading in user instructions
-user_instruct <- read.table(hist_mark_instruct_dir, header = TRUE)
+user_instruct <- read_file(hist_mark_instruct_dir)
 
 # reading in risk-mediating peak regions
 peak_cluster_matrix = read.table(paste0(output_dir, "peak_cluster_matrix.txt"), header = TRUE, sep = "\t")

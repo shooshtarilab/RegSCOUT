@@ -5,6 +5,22 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
+
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
+
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -36,7 +52,7 @@ eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
 if (!file.exists(eqtl_instruct_dir)) {
   stop("eQTL analysis requested but eQTL instructions spreadsheet not found, please ensure path is correct/provided. Or if eQTL analysis is not desired please do not use --hic_eqtl_analysis parameter.")
 } 
-user_instruct <- read.table(eqtl_instruct_dir, header = TRUE)
+user_instruct <- read_file(eqtl_instruct_dir)
 
 # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
 rmp_cell_types <- unique(snp_rmp_df$cell)
