@@ -159,7 +159,6 @@ if (tolower(args[["hic_analysis"]]) == "y") {
 # need to check if cell type columns matches
 if (tolower(args[["eqtl_analysis"]]) == "y") {
   eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
-  eqtl_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv"
   check_path(eqtl_instruct_dir)
   eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
   colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
