@@ -27,7 +27,7 @@ output_file_main = args[["output_dir"]]
 #Getting the cell by peak table
 cell_peak_file = paste0(output_file_main,"cell_peak.tsv")
 cell_peak = read.delim(cell_peak_file, header = TRUE)
-peaks_cell_types = unique(unlist(str_split(cell_peak$cell_sub_types, ",")))
+peaks_cell_types = unique(unlist(str_split(cell_peak$cell_types, ",")))
 
 #Getting the file of effect SNPs and loading them
 eff_snp_file = paste0(output_file_main,"Ci_effect_SNPs.txt")
@@ -54,7 +54,7 @@ peak_ppa_frame = as.data.frame(matrix(0,nrow = length(peak_eff_overlaps),
 colnames(peak_ppa_frame) = c("region","PPA","cell")
 
 peak_ppa_frame$region = peak_list[queryHits(peak_eff_overlaps)]
-peak_ppa_frame$cell = cell_peak$cell_sub_types[queryHits(peak_eff_overlaps)]
+peak_ppa_frame$cell = cell_peak$cell_types[queryHits(peak_eff_overlaps)]
 peak_ppa_frame$PPA = eff_snp_filt$ppa[subjectHits(peak_eff_overlaps)]
 
 peak_ppa_frame = peak_ppa_frame %>%
