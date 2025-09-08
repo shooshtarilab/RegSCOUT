@@ -124,8 +124,9 @@ check_path(gene_annot_dir)
 if (tolower(args[["histone_mark_analysis"]]) == "y") {
   hist_mark_instruct_dir = args[["hist_mark_instruct_dir"]]
   check_path(hist_mark_instruct_dir)
-  hist_mark_instruct = read.table(hist_mark_instruct_dir, nrows = -1)
+  hist_mark_instruct = read.table(hist_mark_instruct_dir, header = T, nrows = -1)
   colnames(hist_mark_instruct) = tolower(colnames(hist_mark_instruct))
+  print(colnames(hist_mark_instruct))
   req_list = c("chromhmm_dir","atac_cell_types","chromhmm_cell_types")
   missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
   if (length(missing_cols) > 0) {
