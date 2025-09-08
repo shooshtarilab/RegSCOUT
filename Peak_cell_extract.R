@@ -97,12 +97,12 @@ peak_sep_frame = str_split(loci_cluster_df$Peak, pattern = "-",simplify = TRUE)
 
 final_peak_cell_df = as.data.frame(matrix(0, nrow = nrow(loci_cluster_df),
                                           ncol = 4))
-colnames(final_peak_cell_df) = c("chr","start","end","cell sub-types")
+colnames(final_peak_cell_df) = c("chr","start","end","cell_types")
 
 final_peak_cell_df$chr = peak_sep_frame[,1]
 final_peak_cell_df$start = peak_sep_frame[,2]
 final_peak_cell_df$end = peak_sep_frame[,3]
-final_peak_cell_df$`cell sub-types` = loci_cluster_df$Cell_Type
+final_peak_cell_df$cell_types = loci_cluster_df$Cell_Type
 
 #Getting the output directory
 output_file_main = args[["output_dir"]]
