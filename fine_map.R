@@ -114,6 +114,4 @@ write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
 files_to_delete <-file.path(output_dir, c("CI.bfs", "CI.llk", "CI.params", "CI.ridgeparams", "CI.segbfs.gz"))
 
 # delete the files
-invisible(file.remove(files_to_delete))
-
-message('Fine-mapping Complete!')
+invisible(suppressWarnings(file.remove(files_to_delete)))

@@ -138,7 +138,6 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
   new_gwas_data[,"A2"] = substr(unique_snp_freq$V4,1,1)
   new_gwas_data["MAF"] = unique_snp_freq$V6
 }
-message("SNP information loaded!")
 
 #Matching lead SNPs to the GWAS SNPs
 new_loci_head = loci_head[loci_head$SNP %in% new_gwas_data$SNP,]
@@ -222,9 +221,7 @@ for (i in c(1:length(new_loci_head$SNP))){
 files_to_delete <-file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
 
 # delete the files
-invisible(file.remove(files_to_delete))
-
-message("SNPs assigned to loci!")
+invisible(suppressWarnings(file.remove(files_to_delete)))
 
 #Filtering the SNPs outside of the loci
 filt_gwas_data = new_gwas_data[new_gwas_data$SEGNUM != 'None',]
@@ -283,6 +280,3 @@ for (j in c(1:i)){
 final_gwas_data <- final_gwas_data[!is.infinite(final_gwas_data$Z),]
 write.table(final_gwas_data, file = final_gwas_dir, sep = "\t", col.names = TRUE,
             row.names = FALSE, quote = FALSE)
-
-message("SNPs are ready for fine mapping!")
-

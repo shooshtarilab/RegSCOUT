@@ -5,14 +5,14 @@ args = commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Helper function that determines what input file format the user used
 # Function to read file based on extension
-read_file <- function(file_path) {
+read_file <- function(file_path, nrows = 0) {
   ext <- file_ext(file_path)
   if (ext == "csv") {
-    df = read.csv(file_path, header = TRUE,nrows=0)
+    df = read.csv(file_path, header = TRUE,nrows=nrows)
   } else if (ext == "tsv") {
-    df = read.delim(file_path, header = TRUE,nrows=0)
+    df = read.delim(file_path, header = TRUE,nrows=nrows)
   } else {
-    df = read.table(file_path, header = TRUE,nrows=0)
+    df = read.table(file_path, header = TRUE,nrows=nrows)
   }
   return(df)
 }
@@ -117,7 +117,7 @@ if (!(genome_build %in% req_builds)) {
        "'. Allowed values are: ", paste(req_builds, collapse = ", "))
 }
 
-# genecode_dir
+# gencode_dir
 gene_annot_dir = args[["gencode_dir"]]
 check_path(gene_annot_dir)
 
@@ -151,12 +151,17 @@ if (tolower(args[["hic_analysis"]]) == "y") {
 if (tolower(args[["eqtl_analysis"]]) == "y") {
   eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
   check_path(eqtl_instruct_dir)
-  eqtl_instruct = read_file(eqtl_instruct_dir)
+  eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
   colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
   req_list = c("eqtl_dir","atac_cell_types")
   missing_cols = setdiff(req_list, colnames(eqtl_instruct))
   if (length(missing_cols) > 0) {
     stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
+  }
+
+  # check if contents of eqtl instruct directories exist
+  for (i in eqtl_instruct){
+
   }
   # message("eQTL instructions columns present.")
 }

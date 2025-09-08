@@ -3,9 +3,25 @@ suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
-suppressPackageStartupMessages(library(liftOver))
+suppressPackageStartupMessages(library(tools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
+
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
+
 # read output directory
 output_dir = args[["output_dir"]]
 
@@ -37,7 +53,7 @@ eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
 if (!file.exists(eqtl_instruct_dir)) {
   stop("eQTL analysis requested but eQTL instructions spreadsheet not found, please ensure path is correct/provided. Or if eQTL analysis is not desired please do not use --hic_eqtl_analysis parameter.")
 } 
-user_instruct <- read.table(eqtl_instruct_dir, header = TRUE)
+user_instruct <- read_file(eqtl_instruct_dir)
 
 # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
 rmp_cell_types <- unique(snp_rmp_df$cell)
@@ -122,11 +138,6 @@ for (i in 1:num_eqtl) {
     # defining genomic ranges for SNPs
     snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
                                ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
-
-    if (genome_build == "hg19"){ # remove this later
-      hg19to38 = import.chain(paste0(output_dir, "hg19ToHg38.over.chain"))
-      snp_granges = unlist(liftOver(snp_granges,hg19to38))
-    }
     
     eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
     

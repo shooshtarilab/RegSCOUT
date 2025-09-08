@@ -2,8 +2,24 @@ suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(tools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
+
+# Function to read file based on extension
+read_file <- function(file_path) {
+  ext <- file_ext(file_path)
+  
+  # Decide based on extension
+  if (ext == "csv") {
+    df = read.csv(file_path, header = TRUE)
+  } else if (ext == "tsv") {
+    df = read.delim(file_path, header = TRUE)
+  } else {
+    df = read.table(file_path, header = TRUE)
+  }
+  return(df)
+}
 
 # read output directory
 output_dir = args[["output_dir"]]
@@ -29,7 +45,7 @@ tf_table_filt <- tf_table %>%
   distinct()
 
 # defining function that identifies peaks on TF promoters
-confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, gencode_file_path, prio_tf_table) {
+confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, prio_tf_table) {
   gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
   gene_tss_grg = gene_tss_grg[gene_tss_grg$gene_name %in% tf_list, ]
 
@@ -376,11 +392,11 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  gene_annot_path = args[["gencode_dir"]]
+  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
-                                               peak_file_dir, gene_annot_path, tf_table_filt)
+                                               peak_file_dir, tf_table_filt)
   
   # accounting for if there are no results found
   if (is.data.frame(tf_expr_results)) {
@@ -415,7 +431,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
+  user_instruct <- read_file(scrna_instruct_dir)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -573,7 +589,7 @@ if (tf_expr_req == "atac") {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
   } 
   
-  user_instruct <- read.table(scrna_instruct_dir, header = TRUE)
+  user_instruct <- read_file(scrna_instruct_dir)
   
   # getting list of atac cell types requested and rmp cell types, seeing if rmps were not found in some atac cell types, removing them
   rmp_cell_types <- unique(tf_table_filt$cell)
@@ -710,12 +726,12 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  gene_annot_path = args[["gencode_dir"]]
+  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
-                                               peak_file_dir, gene_annot_path, tf_table_filt)
+                                               peak_file_dir, tf_table_filt)
   
   # bringing both analyses together
   if (is.data.frame(tf_expr_results) & length(tf_expr_results_list) > 0) { # both rna-seq and atac-seq results are available

@@ -7,7 +7,8 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx_dir = "none"
+  jaspar_mtx_dir = "none",
+  ncores = 2
 )
 
 # read output directory
@@ -99,15 +100,17 @@ if (genome_build == "hg19"){
   invisible(file.remove(snp_table_dir))
 }
 
+ncores = if (nzchar(args[["ncores"]])) {as.numeric(args[["ncores"]])} else {defaults$ncores}
+
 # Calculating Effect SNPs
-results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2))
+results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
 
 # Initialize an empty list to store the results
 all_results <- list()
 
 # Loop ComputePValues() function 10 times and obtain all results
 for (i in 1:10) {
-  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T)))
+  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T)))
   all_results[[i]] <- results_pval_i
   message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
 } 

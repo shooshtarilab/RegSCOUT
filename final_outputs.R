@@ -16,8 +16,8 @@ output_dir <- args[["output_dir"]]
 # defining default parameter values
 defaults <- list(
   gene_sum_ppa_th = 0.05,
-  gene_score_th = 1,
-  tf_score_th = -1
+  gene_score_th = 2,
+  tf_score_th = 0
 )
 
 # Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
@@ -715,35 +715,35 @@ gene_score_th  <- if (is.null(args[["gene_score_th"]])) {
   as.numeric(args[["gene_score_th"]])
 }
 
-if (tf_score_th >= 0 & file.exists(tf_expr_results_dir)) {
+if (tf_score_th > 0 & file.exists(tf_expr_results_dir)) {
   if (all(c('rna', 'atac') %in% type_tf_conf)) {
     prioritized_table <- final_table_new %>%
-      filter(gene_score > gene_score_th) %>%
-      filter(tf_score > tf_score_th) %>%
-      filter(gene_sum_ppa > gene_sum_ppa_th) %>%
+      filter(gene_score >= gene_score_th) %>%
+      filter(tf_score >= tf_score_th) %>%
+      filter(gene_sum_ppa >= gene_sum_ppa_th) %>%
       distinct()
   } else if ('atac' %in% type_tf_conf) {
     prioritized_table <- final_table_new %>%
-      filter(gene_score > gene_score_th) %>%
-      filter(tf_peak > tf_score_th) %>%
-      filter(gene_sum_ppa > gene_sum_ppa_th) %>%
+      filter(gene_score >= gene_score_th) %>%
+      filter(tf_peak >= tf_score_th) %>%
+      filter(gene_sum_ppa >= gene_sum_ppa_th) %>%
       distinct()
   } else if ('rna' %in% type_tf_conf) {
     prioritized_table <- final_table_new %>%
-      filter(gene_score > gene_score_th) %>%
-      filter(tf_rna > tf_score_th) %>%
-      filter(gene_sum_ppa > gene_sum_ppa_th) %>%
+      filter(gene_score >= gene_score_th) %>%
+      filter(tf_rna >= tf_score_th) %>%
+      filter(gene_sum_ppa >= gene_sum_ppa_th) %>%
       distinct()
   }
 } else {
   prioritized_table <- final_table_new %>%
-    filter(gene_score > gene_score_th) %>%
-    filter(gene_sum_ppa > gene_sum_ppa_th) %>%
+    filter(gene_score >= gene_score_th) %>%
+    filter(gene_sum_ppa >= gene_sum_ppa_th) %>%
     distinct()
 }
 
 if (nrow(prioritized_table) == 0) {
-  stop("Final tables created, no prioritized genes found with gene_score > ", gene_score_th, ", gene_sum_ppa_th > ", gene_sum_ppa_th, ", and tf_score_th > ", tf_score_th, ".")
+  stop("Final tables created, no prioritized genes found with gene_score >= ", gene_score_th, ", gene_sum_ppa_th >= ", gene_sum_ppa_th, ", and tf_score_th >= ", tf_score_th, ".")
 }
 
 if (file.exists(hic_results_dir) & file.exists(cicero_dir)) { 
