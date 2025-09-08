@@ -151,7 +151,7 @@ if [ "$hic_analysis" == "Y" ]; then
 fi 
 
 if [ "$eqtl_analysis" == "Y" ]; then
-    run_rscript eQTL_Analysis_liftover.R \
+    run_rscript eQTL_Analysis.R \
         --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
         --genome_build "$genome_build"
 fi 
