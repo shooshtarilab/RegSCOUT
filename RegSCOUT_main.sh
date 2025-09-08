@@ -64,6 +64,7 @@ while [[ "$#" -gt 0 ]]; do
     --tf_score_th) tf_score_th="$2"; shift;;
     --gene_sum_ppa_th) gene_sum_ppa_th="$2"; shift;;
     --gene_score_th) gene_score_th="$2"; shift;;
+    --ncores) ncores="$2"; shift;;
   esac
   shift
 done
@@ -85,7 +86,7 @@ Rscript sanity_check.R \
     --eqtl_analysis "$eqtl_analysis" --hic_instruct_dir "$hic_instruct_dir" \
     --eqtl_instruct_dir "$eqtl_instruct_dir" --tf_expr_analysis "$tf_expr_analysis" \
     --scrna_instruct_dir "$scrna_instruct_dir" --hist_mark_instruct_dir "$hist_mark_instruct_dir" \
-    --histone_mark_analysis "$histone_mark_analysis" --seurat_obj_dir "$seurat_obj_dir"
+    --histone_mark_analysis "$histone_mark_analysis" --seurat_obj_dir "$seurat_obj_dir" --ncores "$ncores"
 
 if [ "$finemap" == "Y" ]; then
     run_rscript fgwas_data_prep.R \
@@ -105,7 +106,7 @@ fi
 if [ "$mode" == "ATAC_obj" ]; then
     run_rscript EffectSNP.R \
         --output_dir "$output_dir" --jaspar_mtx_dir "$jaspar_mtx_dir" \
-        --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build"
+        --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build" --ncores "$ncores"
 
     run_rscript Peak_cell_extract.R \
         --seurat_obj_dir "$seurat_obj_dir" --output_dir "$output_dir" \
@@ -123,7 +124,7 @@ if [ "$mode" == "ATAC_obj" ]; then
 elif [ "$mode" == "peak_table" ]; then
     run_rscript EffectSNP.R \
         --output_dir "$output_dir" --jaspar_mtx_dir "$jaspar_mtx_dir" \
-        --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build"
+        --ci_gwas_dir "$ci_gwas_dir" --genome_build "$genome_build" --ncores "$ncores"
 
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
@@ -150,7 +151,7 @@ if [ "$hic_analysis" == "Y" ]; then
 fi 
 
 if [ "$eqtl_analysis" == "Y" ]; then
-    run_rscript eQTL_Analysis.R \
+    run_rscript eQTL_Analysis_liftover.R \
         --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
         --genome_build "$genome_build"
 fi 

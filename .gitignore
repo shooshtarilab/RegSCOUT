@@ -6,6 +6,7 @@ MULTI/
 harmonisation/
 EUR/
 EUR_copy_results/
+EAS_copy/
 test.sh
 test2.sh
 run_EAS.sh

@@ -2,6 +2,7 @@ suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(tools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
