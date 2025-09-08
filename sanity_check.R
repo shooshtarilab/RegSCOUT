@@ -117,7 +117,7 @@ if (!(genome_build %in% req_builds)) {
        "'. Allowed values are: ", paste(req_builds, collapse = ", "))
 }
 
-# genecode_dir
+# gencode_dir
 gene_annot_dir = args[["gencode_dir"]]
 check_path(gene_annot_dir)
 
