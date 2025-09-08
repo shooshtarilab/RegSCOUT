@@ -72,7 +72,6 @@ for (cell in cell_types){
   } else {
     cell_counts[which(cell_counts>0)] = 1
   }
-  cell_counts[which(cell_counts>0)] = 1
   cell_counts_perc = rowSums(cell_counts)/ncol(cell_counts)
   cell_peaks = names(cell_counts_perc)[cell_counts_perc > peak_th]
   
