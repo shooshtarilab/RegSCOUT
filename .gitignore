@@ -7,10 +7,10 @@ harmonisation/
 EUR/
 EUR_copy_results/
 EAS_copy/
-test.sh
-test2.sh
 run_EUR.sh
 run_MULTI.sh
 README.md
 instructions_spreadsheets/
 .Rproj.user
+for_testing/
+for_testing.zip
