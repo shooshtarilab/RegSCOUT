@@ -134,7 +134,15 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
   # check if contents of histone marker instruct directories exist
   for (i in hist_mark_instruct$chromhmm_dir){
     check_path(i, verbose = 0)
+    hist_mark = read_file(i)
+    colnames(hist_mark) = tolower(colnames(hist_mark))
+    req_list = c("chr","start","end","state")
+    missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
+    if (length(missing_cols) > 0) {
+      stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
+    }
   }
+  # check content's columns
   
   # message("Histone mark instructions columns present.")
 }
