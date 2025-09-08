@@ -1,5 +1,4 @@
 suppressPackageStartupMessages(library(ape))
-suppressPackageStartupMessages(library(liftOver))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
