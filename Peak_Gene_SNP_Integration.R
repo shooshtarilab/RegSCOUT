@@ -175,7 +175,7 @@ cell_tf_snp$region = paste(cell_peak_filt$chr,
                            cell_peak_filt$start,
                            cell_peak_filt$end,
                            sep = "-")
-cell_tf_snp$cell = cell_peak_filt$cell_sub_types
+cell_tf_snp$cell = cell_peak_filt$cell_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
 cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
 
