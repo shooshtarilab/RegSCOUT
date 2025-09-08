@@ -144,7 +144,7 @@ if (tolower(args[["hic_analysis"]]) == "y") {
   check_path(hic_instruct_dir)
   hic_instruct = read_file(hic_instruct_dir, nrows = -1)
   colnames(hic_instruct) = tolower(colnames(hic_instruct))
-  req_list = c("hic_dir","genes_present","bulk","atac_cell_types","hic_cell_types")
+  req_list = c("hic_dir","genes_present","cell_sorted","atac_cell_types","hic_cell_types")
   missing_cols = setdiff(req_list, colnames(hic_instruct))
   if (length(missing_cols) > 0) {
     stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))

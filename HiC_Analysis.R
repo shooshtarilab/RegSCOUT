@@ -860,7 +860,7 @@ for (i in 1:num_hic) {
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
   genes_present <- as.logical(trimws(current_row$genes_present))
-  bulk <- as.logical(trimws(current_row$bulk))
+  cell_sorted <- as.logical(trimws(current_row$cell_sorted))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
   
   if (is.na(current_row$hic_cell_types)) {
@@ -871,7 +871,7 @@ for (i in 1:num_hic) {
   
   # run the appropriate function depending on whether genes are present in Hi-C data
   if (genes_present) {
-    if (bulk | is.na(hic_cell_types[1])) { # analysis of bulk is identical to if single cell had just one cell type
+    if (cell_sorted | is.na(hic_cell_types[1])) { # analysis of bulk is identical to if single cell had just one cell type
       hic_results <- bulk_gene_present_analysis(hic_dataset, rmp_df, atac_cell_types)
       if (is.data.frame(hic_results)) {
         write.table(hic_results, file = paste0(output_dir, "hic_analysis", i, "_results.txt"), row.names = F, quote = F,
@@ -892,7 +892,7 @@ for (i in 1:num_hic) {
       }
     }
   } else {
-    if (bulk | is.na(hic_cell_types[1])) {
+    if (cell_sorted | is.na(hic_cell_types[1])) {
       hic_results <- bulk_nogene_analysis(hic_dataset, rmp_df, atac_cell_types, gene_tss_grg)
       if (is.data.frame(hic_results)) {
         write.table(hic_results, file = paste0(output_dir, "hic_analysis", i, "_results.txt"), row.names = F, quote = F,
