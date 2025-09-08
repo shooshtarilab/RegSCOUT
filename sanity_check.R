@@ -137,7 +137,7 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
     hist_mark = read_file(i)
     colnames(hist_mark) = tolower(colnames(hist_mark))
     req_list = c("chr","start","end","state")
-    missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
+    missing_cols = setdiff(req_list, colnames(hist_mark))
     if (length(missing_cols) > 0) {
       stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
     }
