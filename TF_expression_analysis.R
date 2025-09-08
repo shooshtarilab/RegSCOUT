@@ -52,7 +52,7 @@ confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, pro
   # Read peak data
   peaks <- read.delim(peak_file_path, header = TRUE)
   peaks_ranges <- IRanges(start = as.integer(peaks$start), end = as.integer(peaks$end))
-  peaks_granges <- GRanges(seqnames = peaks$chr, ranges = peaks_ranges, cell = peaks$cell_sub_types)
+  peaks_granges <- GRanges(seqnames = peaks$chr, ranges = peaks_ranges, cell = peaks$cell_types)
   
   # Find overlaps
   TF_peak_overlap <- findOverlaps(gene_tss_grg, peaks_granges)
