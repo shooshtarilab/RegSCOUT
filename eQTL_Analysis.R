@@ -3,6 +3,7 @@ suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(Rsamtools))
+suppressPackageStartupMessages(library(tools))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 

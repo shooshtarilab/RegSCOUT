@@ -7,7 +7,8 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx_dir = "none"
+  jaspar_mtx_dir = "none",
+  ncores = 2
 )
 
 # read output directory
@@ -54,71 +55,73 @@ ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
 # Preparing CI SNPs for motif analysis
 genome_build = args[["genome_build"]]
 
-if (genome_build == "hg19"){
-  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
-  eff_snp = ci_gwas_data
+# if (genome_build == "hg19"){
+#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
+#   eff_snp = ci_gwas_data
   
-  snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
-  colnames(snp_table) = c("chr","snp","snpid","a1","a2")
-  snp_table$chr = eff_snp$chr
-  snp_table$snp = eff_snp$pos
-  snp_table$snpid = eff_snp$id
-  snp_table$a1 = eff_snp$a1
-  snp_table$a2 = eff_snp$a2
+#   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
+#   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
+#   snp_table$chr = eff_snp$chr
+#   snp_table$snp = eff_snp$pos
+#   snp_table$snpid = eff_snp$id
+#   snp_table$a1 = eff_snp$a1
+#   snp_table$a2 = eff_snp$a2
   
-  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
-  write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
-              row.names = FALSE, quote = FALSE)
+#   snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+#   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
+#               row.names = FALSE, quote = FALSE)
   
-  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-                              genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
-                              , half.window.size = 30, default.par = TRUE
-                              , mutation = FALSE)
-  invisible(file.remove(snp_table_dir))
-}else if(genome_build == "hg38"){
-  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
+#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg19"
+#                               , half.window.size = 30, default.par = TRUE
+#                               , mutation = FALSE)
+#   invisible(file.remove(snp_table_dir))
+# }else if(genome_build == "hg38"){
+#   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
   
-  eff_snp = ci_gwas_data
+#   eff_snp = ci_gwas_data
   
-  snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
-  colnames(snp_table) = c("chr","snp","snpid","a1","a2")
-  snp_table$chr = eff_snp$chr
-  snp_table$snp = eff_snp$pos
-  snp_table$snpid = eff_snp$id
-  snp_table$a1 = eff_snp$a1
-  snp_table$a2 = eff_snp$a2
+#   snp_table = as.data.frame(matrix(0, nrow = nrow(eff_snp), ncol = 5))
+#   colnames(snp_table) = c("chr","snp","snpid","a1","a2")
+#   snp_table$chr = eff_snp$chr
+#   snp_table$snp = eff_snp$pos
+#   snp_table$snpid = eff_snp$id
+#   snp_table$a1 = eff_snp$a1
+#   snp_table$a2 = eff_snp$a2
   
-  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
-  write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
-              row.names = FALSE, quote = FALSE)
+#   snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+#   write.table(snp_table, file = snp_table_dir, col.names = TRUE, 
+#               row.names = FALSE, quote = FALSE)
   
-  reg1_snp_data = LoadSNPData(filename = snp_table_dir,
-                              genome.lib ="BSgenome.Hsapiens.UCSC.hg38"
-                              , half.window.size = 30, default.par = TRUE
-                              , mutation = FALSE)
-  invisible(file.remove(snp_table_dir))
-}
+#   reg1_snp_data = LoadSNPData(filename = snp_table_dir,
+#                               genome.lib ="BSgenome.Hsapiens.UCSC.hg38"
+#                               , half.window.size = 30, default.par = TRUE
+#                               , mutation = FALSE)
+#   invisible(file.remove(snp_table_dir))
+# }
 
-# Calculating Effect SNPs
-results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = 2))
+# ncores = if (nzchar(args[["ncores"]])) {as.numeric(args[["ncores"]])} else {defaults$ncores}
 
-# Initialize an empty list to store the results
-all_results <- list()
+# # Calculating Effect SNPs
+# results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
 
-# Loop ComputePValues() function 10 times and obtain all results
-for (i in 1:10) {
-  results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = 2, testing.mc=T)))
-  all_results[[i]] <- results_pval_i
-  message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
-} 
+# # Initialize an empty list to store the results
+# all_results <- list()
 
-# Combine all data frames into one big data frame
-results_pval <- do.call(rbind, all_results)
+# # Loop ComputePValues() function 10 times and obtain all results
+# for (i in 1:10) {
+#   results_pval_i <- suppressMessages((ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T)))
+#   all_results[[i]] <- results_pval_i
+#   message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
+# } 
 
-# save this dataframe as RDS
-saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+# # Combine all data frames into one big data frame
+# results_pval <- do.call(rbind, all_results)
 
-# results_pval = readRDS(paste0(output_dir,'atSNP_10runs_results.RDS'))
+# # save this dataframe as RDS
+# saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+
+results_pval = readRDS(paste0(output_dir,'atSNP_10runs_results.RDS'))
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff
 results_pval_val_cor = p.adjust(results_pval_val, method = "fdr")
