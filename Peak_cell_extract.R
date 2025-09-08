@@ -4,7 +4,6 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(circlize))
 suppressPackageStartupMessages(library(ComplexHeatmap))
-suppressPackageStartupMessages(library(xlsx))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(Repitools))
@@ -110,6 +109,5 @@ final_peak_cell_df$`cell sub-types` = loci_cluster_df$Cell_Type
 output_file_main = args[["output_dir"]]
 
 #Saving the final table in the output directory
-output_file = paste0(output_file_main, "cell_peak.xlsx")
-write.xlsx(final_peak_cell_df, file = output_file, col.names = TRUE,
-           row.names = FALSE)
+output_file = paste0(output_file_main, "cell_peak.tsv")
+write.table(final_peak_cell_df, file = output_file, quote = F, row.names = F, sep = '\t')
