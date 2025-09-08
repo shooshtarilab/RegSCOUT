@@ -74,7 +74,6 @@ snp_ref = args[["snp_ref_dir"]]
 
 #Getting the directory of Plink2 software
 plink2_bin = args[["plink2_dir"]]
-plink2_bin = ""
 if (!nzchar(plink2_bin)){
     plink2_bin = Sys.which("plink2")
 }
@@ -218,7 +217,7 @@ for (i in c(1:length(new_loci_head$SNP))){
   # print(paste0("step ",i," completed"))
 }
 
-files_to_delete <-file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
+files_to_delete <- file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
 
 # delete the files
 invisible(suppressWarnings(file.remove(files_to_delete)))
