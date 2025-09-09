@@ -467,8 +467,15 @@ if (tf_expr_req == "atac") {
       scrna_dir <- current_row$scrna_dir
       
       # read in scRNA-seq dataset and associated info
-      seurat_name <- load(scrna_dir)
-      scrna_dataset <- get(seurat_name)
+      if (tolower(file_ext(scrna_dir)) == "rds"){
+        scrna_dataset <- readRDS(scrna_dir)
+
+      } else if (tolower(file_ext(scrna_dir)) == "rdata"){
+        scrna_dataset <- load(scrna_dir)
+        scrna_dataset <- get(scrna_dataset)
+      }
+      
+      scrna_dataset <- subset(scrna_dataset, idents = rna_cell_types)
       atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
       matrix_loc <- current_row$matrix_loc
       
@@ -513,13 +520,18 @@ if (tf_expr_req == "atac") {
       scrna_dir <- current_row$scrna_dir
       
       # read in scRNA-seq dataset and associated info
-      seurat_name <- load(scrna_dir)
-      scrna_dataset <- get(seurat_name)
       atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
       rna_cell_types <- unlist(strsplit(current_row$rna_cell_types, split = ","))
       matrix_loc <- current_row$matrix_loc
       
       # filter the scRNA-seq dataset for just those cell types requested by user
+      if (tolower(file_ext(scrna_dir)) == "rds"){
+        scrna_dataset <- readRDS(scrna_dir)
+
+      } else if (tolower(file_ext(scrna_dir)) == "rdata"){
+        scrna_dataset <- load(scrna_dir)
+        scrna_dataset <- get(seurat_name)
+      }
       scrna_dataset <- subset(scrna_dataset, idents = rna_cell_types)
       
       # filter tf by cell type table and get list of TFs
@@ -624,8 +636,14 @@ if (tf_expr_req == "atac") {
       scrna_dir <- current_row$scrna_dir
       
       # read in scRNA-seq dataset and associated info
-      seurat_name <- load(scrna_dir)
-      scrna_dataset <- get(seurat_name)
+      if (tolower(file_ext(scrna_dir)) == "rds"){
+        scrna_dataset <- readRDS(scrna_dir)
+
+      } else if (tolower(file_ext(scrna_dir)) == "rdata"){
+        scrna_dataset <- load(scrna_dir)
+        scrna_dataset <- get(seurat_name)
+      }
+
       atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
       matrix_loc <- current_row$matrix_loc
       
@@ -670,15 +688,19 @@ if (tf_expr_req == "atac") {
       scrna_dir <- current_row$scrna_dir
       
       # read in scRNA-seq dataset and associated info
-      seurat_name <- load(scrna_dir)
-      scrna_dataset <- get(seurat_name)
       atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
       rna_cell_types <- unlist(strsplit(current_row$rna_cell_types, split = ","))
       matrix_loc <- current_row$matrix_loc
       
       # filter the scRNA-seq dataset for just those cell types requested by user
+      if (tolower(file_ext(scrna_dir)) == "rds"){
+        scrna_dataset <- readRDS(scrna_dir)
+
+      } else if (tolower(file_ext(scrna_dir)) == "rdata"){
+        scrna_dataset <- load(scrna_dir)
+        scrna_dataset <- get(seurat_name)
+      }
       scrna_dataset <- subset(scrna_dataset, idents = rna_cell_types)
-      
       # filter tf by cell type table and get list of TFs
       tf_table_ct <- tf_table_filt[tf_table_filt$cell %in% atac_cell_types,]
       TFs <- tf_table_ct$tf
