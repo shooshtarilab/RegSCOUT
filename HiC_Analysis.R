@@ -43,6 +43,7 @@ if (!file.exists(hic_instruct_dir)) {
 
 # loading in user instructions
 user_instruct <- read_file(hic_instruct_dir)
+colnames(user_instruct) = tolower(colnames(user_instruct))
 
 # load in gencode gene annotation and processing it
 prom_th_up = if (nzchar(args[["prom_th_up"]])) {
@@ -83,18 +84,18 @@ rmp_df <- rmp_df %>%
 ## defining functions for each type of Hi-C analysis (with/without gene information and single cell/bulk)
 bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
   # filter hic dataset for certain columns, we assume all interactions in this Hi-C dataset are significant
-  columns_to_keep <- c('Chr1', 'Start1', 'End1', 'Chr2', 'Start2', 'End2')
+  columns_to_keep <- c('chr1', 'start1', 'end1', 'chr2', 'start2', 'end2')
   hic_data <- hic_data[,columns_to_keep]
   
   # create two sets of granges, one for each set of genomic regions
   hic_granges1 <- GRanges(
-    seqnames = hic_data$Chr1,
-    ranges = IRanges(start = hic_data$Start1, end = hic_data$End1),
+    seqnames = hic_data$chr1,
+    ranges = IRanges(start = hic_data$start1, end = hic_data$end1),
   )
   
   hic_granges2 <- GRanges(
-    seqnames = hic_data$Chr2,
-    ranges = IRanges(start = hic_data$Start2, end = hic_data$End2),
+    seqnames = hic_data$chr2,
+    ranges = IRanges(start = hic_data$start2, end = hic_data$end2),
   )
   
   # overlap these granges with promoter granges as defined using gencode earlier
@@ -107,12 +108,12 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
   } else if (length(hic_gene_overlap1) == 0) {
     # working with just the hic_gene_overlap2 results
     gene_overlap_df2 <- data.frame(
-      Chr1 = hic_data$Chr1[queryHits(hic_gene_overlap2)],
-      Start1 = hic_data$Start1[queryHits(hic_gene_overlap2)],
-      End1 = hic_data$End1[queryHits(hic_gene_overlap2)],
-      promChr = hic_data$Chr2[queryHits(hic_gene_overlap2)],
-      promStart = hic_data$Start2[queryHits(hic_gene_overlap2)],
-      promEnd = hic_data$End2[queryHits(hic_gene_overlap2)],
+      Chr1 = hic_data$chr1[queryHits(hic_gene_overlap2)],
+      Start1 = hic_data$start1[queryHits(hic_gene_overlap2)],
+      End1 = hic_data$end1[queryHits(hic_gene_overlap2)],
+      promChr = hic_data$chr2[queryHits(hic_gene_overlap2)],
+      promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
+      promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
@@ -158,12 +159,12 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
   } else if (length(hic_gene_overlap2) == 0) {
     # create dataframes of results of this overlap
     gene_overlap_df1 <- data.frame(
-      promChr = hic_data$Chr1[queryHits(hic_gene_overlap1)],
-      promStart = hic_data$Start1[queryHits(hic_gene_overlap1)],
-      promEnd = hic_data$End1[queryHits(hic_gene_overlap1)],
-      Chr2 = hic_data$Chr2[queryHits(hic_gene_overlap1)],
-      Start2 = hic_data$Start2[queryHits(hic_gene_overlap1)],
-      End2 = hic_data$End2[queryHits(hic_gene_overlap1)],
+      promChr = hic_data$chr1[queryHits(hic_gene_overlap1)],
+      promStart = hic_data$start1[queryHits(hic_gene_overlap1)],
+      promEnd = hic_data$end1[queryHits(hic_gene_overlap1)],
+      Chr2 = hic_data$chr2[queryHits(hic_gene_overlap1)],
+      Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
+      End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
@@ -209,23 +210,23 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
   } else {
     # create dataframes of results of this overlap
     gene_overlap_df1 <- data.frame(
-      promChr = hic_data$Chr1[queryHits(hic_gene_overlap1)],
-      promStart = hic_data$Start1[queryHits(hic_gene_overlap1)],
-      promEnd = hic_data$End1[queryHits(hic_gene_overlap1)],
-      Chr2 = hic_data$Chr2[queryHits(hic_gene_overlap1)],
-      Start2 = hic_data$Start2[queryHits(hic_gene_overlap1)],
-      End2 = hic_data$End2[queryHits(hic_gene_overlap1)],
+      promChr = hic_data$chr1[queryHits(hic_gene_overlap1)],
+      promStart = hic_data$start1[queryHits(hic_gene_overlap1)],
+      promEnd = hic_data$end1[queryHits(hic_gene_overlap1)],
+      Chr2 = hic_data$chr2[queryHits(hic_gene_overlap1)],
+      Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
+      End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
     gene_overlap_df2 <- data.frame(
-      Chr1 = hic_data$Chr1[queryHits(hic_gene_overlap2)],
-      Start1 = hic_data$Start1[queryHits(hic_gene_overlap2)],
-      End1 = hic_data$End1[queryHits(hic_gene_overlap2)],
-      promChr = hic_data$Chr2[queryHits(hic_gene_overlap2)],
-      promStart = hic_data$Start2[queryHits(hic_gene_overlap2)],
-      promEnd = hic_data$End2[queryHits(hic_gene_overlap2)],
+      Chr1 = hic_data$chr1[queryHits(hic_gene_overlap2)],
+      Start1 = hic_data$start1[queryHits(hic_gene_overlap2)],
+      End1 = hic_data$end1[queryHits(hic_gene_overlap2)],
+      promChr = hic_data$chr2[queryHits(hic_gene_overlap2)],
+      promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
+      promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
@@ -352,13 +353,13 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   
   # create two sets of granges, one for each set of genomic regions
   hic_granges1 <- GRanges(
-    seqnames = hic_data$Chr1,
-    ranges = IRanges(start = hic_data$Start1, end = hic_data$End1),
+    seqnames = hic_data$chr1,
+    ranges = IRanges(start = hic_data$start1, end = hic_data$end1),
   )
   
   hic_granges2 <- GRanges(
-    seqnames = hic_data$Chr2,
-    ranges = IRanges(start = hic_data$Start2, end = hic_data$End2),
+    seqnames = hic_data$chr2,
+    ranges = IRanges(start = hic_data$start2, end = hic_data$end2),
   )
   
   # overlap these granges with promoter granges as defined using gencode earlier
@@ -370,12 +371,12 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   } else if (length(hic_gene_overlap1) == 0) {
     # create dataframe of results of this overlap
     gene_overlap_df2 <- data.frame(
-      Chr1 = hic_data$Chr1[queryHits(hic_gene_overlap2)],
-      Start1 = hic_data$Start1[queryHits(hic_gene_overlap2)],
-      End1 = hic_data$End1[queryHits(hic_gene_overlap2)],
-      promChr = hic_data$Chr2[queryHits(hic_gene_overlap2)],
-      promStart = hic_data$Start2[queryHits(hic_gene_overlap2)],
-      promEnd = hic_data$End2[queryHits(hic_gene_overlap2)],
+      Chr1 = hic_data$chr1[queryHits(hic_gene_overlap2)],
+      Start1 = hic_data$start1[queryHits(hic_gene_overlap2)],
+      End1 = hic_data$end1[queryHits(hic_gene_overlap2)],
+      promChr = hic_data$chr2[queryHits(hic_gene_overlap2)],
+      promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
+      promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
@@ -429,12 +430,12 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   } else if (length(hic_gene_overlap2) == 0) {
     # create dataframe of results of this overlap
     gene_overlap_df1 <- data.frame(
-      promChr = hic_data$Chr1[queryHits(hic_gene_overlap1)],
-      promStart = hic_data$Start1[queryHits(hic_gene_overlap1)],
-      promEnd = hic_data$End1[queryHits(hic_gene_overlap1)],
-      Chr2 = hic_data$Chr2[queryHits(hic_gene_overlap1)],
-      Start2 = hic_data$Start2[queryHits(hic_gene_overlap1)],
-      End2 = hic_data$End2[queryHits(hic_gene_overlap1)],
+      promChr = hic_data$chr1[queryHits(hic_gene_overlap1)],
+      promStart = hic_data$start1[queryHits(hic_gene_overlap1)],
+      promEnd = hic_data$end1[queryHits(hic_gene_overlap1)],
+      Chr2 = hic_data$chr2[queryHits(hic_gene_overlap1)],
+      Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
+      End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
@@ -489,23 +490,23 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   } else {
     # create dataframes of results of this overlap
     gene_overlap_df1 <- data.frame(
-      promChr = hic_data$Chr1[queryHits(hic_gene_overlap1)],
-      promStart = hic_data$Start1[queryHits(hic_gene_overlap1)],
-      promEnd = hic_data$End1[queryHits(hic_gene_overlap1)],
-      Chr2 = hic_data$Chr2[queryHits(hic_gene_overlap1)],
-      Start2 = hic_data$Start2[queryHits(hic_gene_overlap1)],
-      End2 = hic_data$End2[queryHits(hic_gene_overlap1)],
+      promChr = hic_data$chr1[queryHits(hic_gene_overlap1)],
+      promStart = hic_data$start1[queryHits(hic_gene_overlap1)],
+      promEnd = hic_data$end1[queryHits(hic_gene_overlap1)],
+      Chr2 = hic_data$chr2[queryHits(hic_gene_overlap1)],
+      Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
+      End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
     gene_overlap_df2 <- data.frame(
-      Chr1 = hic_data$Chr1[queryHits(hic_gene_overlap2)],
-      Start1 = hic_data$Start1[queryHits(hic_gene_overlap2)],
-      End1 = hic_data$End1[queryHits(hic_gene_overlap2)],
-      promChr = hic_data$Chr2[queryHits(hic_gene_overlap2)],
-      promStart = hic_data$Start2[queryHits(hic_gene_overlap2)],
-      promEnd = hic_data$End2[queryHits(hic_gene_overlap2)],
+      Chr1 = hic_data$chr1[queryHits(hic_gene_overlap2)],
+      Start1 = hic_data$start1[queryHits(hic_gene_overlap2)],
+      End1 = hic_data$end1[queryHits(hic_gene_overlap2)],
+      promChr = hic_data$chr2[queryHits(hic_gene_overlap2)],
+      promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
+      promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
@@ -858,6 +859,7 @@ for (i in 1:num_hic) {
   hic_dir <- current_row$hic_dir
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
+  colnames(hic_dataset) = tolower(hic_dataset)
   genes_present <- as.logical(trimws(current_row$genes_present))
   cell_sorted <- as.logical(trimws(current_row$cell_sorted))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
