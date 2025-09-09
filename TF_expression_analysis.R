@@ -393,7 +393,6 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
@@ -530,7 +529,7 @@ if (tf_expr_req == "atac") {
 
       } else if (tolower(file_ext(scrna_dir)) == "rdata"){
         scrna_dataset <- load(scrna_dir)
-        scrna_dataset <- get(seurat_name)
+        scrna_dataset <- get(scrna_dataset)
       }
       scrna_dataset <- subset(scrna_dataset, idents = rna_cell_types)
       
@@ -641,7 +640,7 @@ if (tf_expr_req == "atac") {
 
       } else if (tolower(file_ext(scrna_dir)) == "rdata"){
         scrna_dataset <- load(scrna_dir)
-        scrna_dataset <- get(seurat_name)
+        scrna_dataset <- get(scrna_dataset)
       }
 
       atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
@@ -698,7 +697,7 @@ if (tf_expr_req == "atac") {
 
       } else if (tolower(file_ext(scrna_dir)) == "rdata"){
         scrna_dataset <- load(scrna_dir)
-        scrna_dataset <- get(seurat_name)
+        scrna_dataset <- get(scrna_dataset)
       }
       scrna_dataset <- subset(scrna_dataset, idents = rna_cell_types)
       # filter tf by cell type table and get list of TFs
@@ -749,7 +748,6 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  # gene_annot_path = args[["gencode_dir"]]
   peak_file_dir = paste0(output_dir, "cell_peak.tsv")
   
   # predict TF expression using ATAC-seq
@@ -795,7 +793,6 @@ if (tf_expr_req == "atac") {
     write.table(all_results_mtx, file = paste0(output_dir, "all_TF_expr_results.txt"), row.names = T, quote = F,
                 sep = '\t')
     
-    message('TF expression analysis complete!')
   } else if (is.data.frame(tf_expr_results)) { # just atac-seq results available
     # convert this dataframe into matrix
     tf_expr_results$value = "atac"
