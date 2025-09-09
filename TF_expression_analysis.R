@@ -256,8 +256,9 @@ tf_expression_analysis <- function(seurat_obj, TF_list, quant_vector, matrix_loc
     }
     
     # remove rows where all NA in results dataframe (only occurs if TF not found), and all TFs that were not expressed in any cell type
-    filt_results_df <- results_df[!rowSums(is.na(results_df)) == ncol(results_df),]
-    filt_results_df <- filt_results_df[rowSums(filt_results_df) > 0,] 
+    filt_results_df <- results_df[!rowSums(is.na(results_df)) == ncol(results_df), , drop = FALSE]
+    filt_results_df <- filt_results_df[rowSums(filt_results_df) > 0, , drop = FALSE]
+
     
     if (nrow(filt_results_df) == 0) {
       return('none')
