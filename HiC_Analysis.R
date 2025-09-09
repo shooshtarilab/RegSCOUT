@@ -720,25 +720,25 @@ bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
     
     # adding additional information from Hi-C dataset
     hic_overlap_df <- hic_data[subjectHits(overlaps),]
-    hic_overlap_df <- hic_overlap_df[,!(colnames(hic_overlap_df) %in% c('oeChr', 'oeStart', 'oeEnd'))]
+    hic_overlap_df <- hic_overlap_df[,!(colnames(hic_overlap_df) %in% c('oechr', 'oestart', 'oeend'))]
     overlap_df <- cbind(overlap_df, hic_overlap_df)
     
     # cleaning up dataframe
     overlap_df_filt <- overlap_df %>%
       mutate(
         rmpRegion = paste(rmpChr, rmpStart, rmpEnd, sep = "-"),
-        promRegion = paste(baitChr, baitStart, baitEnd, sep = "-"),
+        promRegion = paste(baitchr, baitstart, baitend, sep = "-"),
         oeRegion = paste(oeChr, oeStart, oeEnd, sep = "-")
       ) %>%
       select(-rmpChr, -rmpStart, -rmpEnd, -oeChr, -oeStart, -oeEnd,
-             -hic_idx, -rmp_idx, -baitChr, -baitStart, -baitEnd) %>%
+             -hic_idx, -rmp_idx, -baitchr, -baitstart, -baitend) %>%
       arrange(cell)
     
     # removing NAs in baitNames
-    overlap_df_filt <- overlap_df_filt[!is.na(overlap_df_filt$baitName),] %>% distinct()
+    overlap_df_filt <- overlap_df_filt[!is.na(overlap_df_filt$baitname),] %>% distinct()
     
     # finalizing dataframe
-    colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitName'] <- "gene"
+    colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitname'] <- "gene"
     
     overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
     
@@ -792,7 +792,7 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
     
     # adding additional information from Hi-C dataset
     hic_overlap_df <- hic_data[subjectHits(overlaps),]
-    hic_overlap_df <- hic_overlap_df[,!(colnames(hic_overlap_df) %in% c('oeChr', 'oeStart', 'oeEnd'))]
+    hic_overlap_df <- hic_overlap_df[,!(colnames(hic_overlap_df) %in% c('oechr', 'oestart', 'oeend'))]
     overlap_df <- cbind(overlap_df, hic_overlap_df)
     
     # filtering out instances for each cell type where Hi-C does not confirm an interaction
@@ -824,18 +824,18 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
       overlap_df_filt <- overlap_df_filt %>%
         mutate(
           rmpRegion = paste(rmpChr, rmpStart, rmpEnd, sep = "-"),
-          promRegion = paste(baitChr, baitStart, baitEnd, sep = "-"),
+          promRegion = paste(baitchr, baitstart, baitend, sep = "-"),
           oeRegion = paste(oeChr, oeStart, oeEnd, sep = "-")
         ) %>%
         select(-rmpChr, -rmpStart, -rmpEnd, -oeChr, -oeStart, -oeEnd,
-               -hic_idx, -rmp_idx, -baitChr, -baitStart, -baitEnd) %>%
+               -hic_idx, -rmp_idx, -baitchr, -baitstart, -baitend) %>%
         arrange(cell)
       
       # removing NAs in baitNames
-      overlap_df_filt <- overlap_df_filt[!is.na(overlap_df_filt$baitName),]
+      overlap_df_filt <- overlap_df_filt[!is.na(overlap_df_filt$baitname),]
       
       # rename baitName and cell column and make it so there is one gene per row
-      colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitName'] <- "gene"
+      colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitname'] <- "gene"
       
       overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
       
@@ -860,7 +860,6 @@ for (i in 1:num_hic) {
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
   colnames(hic_dataset) = tolower(colnames(hic_dataset))
-  print(colnames(hic_dataset))
   genes_present <- as.logical(trimws(current_row$genes_present))
   cell_sorted <- as.logical(trimws(current_row$cell_sorted))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
@@ -870,7 +869,7 @@ for (i in 1:num_hic) {
   } else {
     hic_cell_types <- unlist(strsplit(current_row$hic_cell_types, split = ","))
   }
-  
+  hic_cell_types = tolower(hic_cell_types)
   # run the appropriate function depending on whether genes are present in Hi-C data
   if (genes_present) {
     if (cell_sorted | is.na(hic_cell_types[1])) { # analysis of bulk is identical to if single cell had just one cell type
