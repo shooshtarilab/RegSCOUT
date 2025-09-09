@@ -681,13 +681,13 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
 # when the hic dataset encompasses just one cell type or if it is bulk Hi-C data with gene info
 bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
   # filter hic dataset for certain columns
-  columns_to_keep <- c('baitChr', 'baitStart', 'baitEnd', 'baitName', 'oeChr', 'oeStart', 'oeEnd')
+  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend')
   hic_data <- hic_data[,columns_to_keep]
   
   # create granges for other end (oe) interacting with bait
   hic_granges <- GRanges(
-    seqnames = hic_data$oeChr,
-    ranges = IRanges(start = hic_data$oeStart, end = hic_data$oeEnd),
+    seqnames = hic_data$oechr,
+    ranges = IRanges(start = hic_data$oestart, end = hic_data$oeend),
   )
   
   # filter rmp_df based on atac_cell_types
@@ -752,13 +752,13 @@ bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
 
 sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif_th) { # when the hic dataset encompasses multiple cell types
   # filter hic dataset for certain columns
-  columns_to_keep <- c('baitChr', 'baitStart', 'baitEnd', 'baitName', 'oeChr', 'oeStart', 'oeEnd', unique(hic_ct))
+  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend', unique(hic_ct))
   hic_data <- hic_data[,columns_to_keep]
   
   # create granges for other end (oe) interacting with bait
   hic_granges <- GRanges(
-    seqnames = hic_data$oeChr,
-    ranges = IRanges(start = hic_data$oeStart, end = hic_data$oeEnd),
+    seqnames = hic_data$oechr,
+    ranges = IRanges(start = hic_data$oestart, end = hic_data$oeend),
   )
   
   # filter rmp_df based on atac_cell_types
@@ -859,7 +859,8 @@ for (i in 1:num_hic) {
   hic_dir <- current_row$hic_dir
   # read in hic dataset and associated information
   hic_dataset <- read.table(file = hic_dir, sep = '\t', header = TRUE)
-  colnames(hic_dataset) = tolower(hic_dataset)
+  colnames(hic_dataset) = tolower(colnames(hic_dataset))
+  print(colnames(hic_dataset))
   genes_present <- as.logical(trimws(current_row$genes_present))
   cell_sorted <- as.logical(trimws(current_row$cell_sorted))
   atac_cell_types <- unlist(strsplit(current_row$atac_cell_types, split = ","))
