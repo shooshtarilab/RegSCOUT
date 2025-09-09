@@ -348,7 +348,7 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
 
 sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_granges, signif_th) {
   # filter hic dataset for certain columns, we assume all interactions in this Hi-C dataset are significant
-  columns_to_keep <- c('Chr1', 'Start1', 'End1', 'Chr2', 'Start2', 'End2', unique(hic_ct))
+  columns_to_keep <- c('chr1', 'start1', 'end1', 'chr2', 'start2', 'end2', unique(hic_ct))
   hic_data <- hic_data[,columns_to_keep]
   
   # create two sets of granges, one for each set of genomic regions
