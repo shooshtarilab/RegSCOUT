@@ -38,7 +38,7 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 | --fgwas_dir | Specifies the path to the fgwas executable. | No default, must be set by user | 2 |
 | --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold. | 0.95 | 2 |
 | --ci_ppa_th | Each CI SNP must have a PPA greater than this threshold. | 0.01 | 2 |
-| --finemap | Set this parameter to *Y* if fine-mapping should be conducted by RegSCOUT using fgwas. If fine-mapping is not desired (i.e., the user already has fine-mapping results), this parameter should not be used. | Not conducted | 1, 2 |
+| --finemap | Set this parameter to *Y* if fine-mapping should be conducted by RegSCOUT using [fgwas](https://github.com/joepickrell/fgwas). If fine-mapping is not desired (i.e., the user already has fine-mapping results), this parameter should not be used. | Not conducted | 1, 2 |
 | --seurat_obj_dir | Specifies the path to the scATAC-seq Seurat object. | No default, must be set by user | 3 |
 | --cell_count_th | Cell types with less than this number of cells in the scATAC-seq dataset will be removed. | 3 | 3 |
 | --coaccess_th | The co-accessibility value between two peaks must be greater than this threshold to be output in cicero results. | 0.05 | 3 |
@@ -50,6 +50,7 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 | --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak can be considered open if it is accessible in 1/10 or 10% of cells of a cell type. | 0.1 | 3, 4 |
 | --prom_th_up | Number of bps to add upstream a TSS to define the gene promoter. | 2,000 | 5 |
 | --prom_th_down | Number of bps to add downstream a TSS to define the gene promoter. | 2,000 | 5 |
+| --gencode_dir | Specifies the path to GENCODE gene information. | No default, must be set by user | 5 |
 | --mode | The user must indicate whether they have a scATAC-seq Seurat object or if they have a table of open chromatin regions as well as cicero results already generated. If the user is providing a seurat object, this parameter should be set to *ATAC_obj*. If the user is providing a peak table and cicero results, this parameter should be set to *peak_table*. | No default, must be set by user | 3, 4, 5 |
 | --hic_analysis | Set this parameter to *Y* if gene regulatory analysis using Hi-C analysis is desired. If Hi-C analysis is not desired, do not use this parameter | Analysis not conducted | 6 |
 | --hic_instruct_dir | Specifies the path to user generated Hi-C analysis instructions. | No default, must be set by user | 6 |
@@ -60,17 +61,16 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 | --tf_expr_analysis | Only use this parameter if TF expression analysis using scATAC-seq, scRNA-seq, or both is desired. Set to *atac* if TF expression analysis is desired using scATAC-seq data that was provided as input earlier for --mode *peak_table* or *ATAC_obj*. Set to *rna* if analysis is desired using user-provided scRNA-seq data. Set to *both* if both scATAC-seq and scRNA-seq analyses are desired. | No conducted | 9 |
 | --scrna_instruct_dir | Specifies the path to user generated scRNA-seq analysis instructions spreadsheet. | No default, must be set by user | 9 |
 | --tf_rna_quantile_th | The quantile for percent expression of genes in a cell type, above which a TF will be considered expressed in that cell type. | 0.25 | 9 |
-| --gencode_dir | Specifies the path to GENCODE gene information. | No default, must be set by user | 5, 6, 9 |
 | --tf_score_th | Genes will only be prioritized if one of their associated TFs attains a score higher than this threshold. | -1 | 10 |
 | --gene_sum_ppa_th | Genes will only be prioritized if their sum ppa value is greater than this threshold. | 0.05 | 10 |
 | --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
 | --output_dir | The directory in which all RegSCOUT output files will be stored. | No default, must be set by user | 1 through 10 |
 
-***All directories specified in parameters should end with "/".**
+*All directories specified in parameters should end with "/".
 
-****Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.).**
+**Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.).
 
-*****When providing numerical values to parameters, do not incorporate commas or spaces for thousands, e.g., use 100000 not 100,000.**
+***When providing numerical values to parameters, do not incorporate commas or spaces for thousands, e.g., use 100000 not 100,000.
 
 
 
@@ -79,9 +79,6 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 ## Main Parameters:
 ### --mode: 
 This parameter should be used to choose the mode of operation of the pipeline based on input type. If a scATAC-seq Seurat object is provided, this option should be set to ATAC_obj (i.e., --mode ATAC_obj). If a peak and cell type table and peak-peak interaction table are used this mode should be set to peak_table (i.e., --mode peak_table).
-
-### --finemap:
-This parameter should be used only when the user wants fine-mapping to be conducted within the RegSCOUT workflow using [fgwas](https://github.com/joepickrell/fgwas). If this is the case --finemap should be set to Y (i.e., --finemap Y). If this is not the case, this parameter should not be used. 
 
 ### --output_dir: 
 This parameter should be used for setting the working directory (the directory address should end with "/"). **This parameter should always be set when using RegSCOUT regardless of the value of --finemap or --mode**. All the output and intermediate files of the pipeline are generated in this directory. If running the pipeline with --mode peak_table, the peak-by-cell and peak-peak interaction tables of the pipeline should be provided in this directory.
@@ -92,39 +89,52 @@ See required parameters in table of all parameters.
 ### <ins>Required Files</ins>
 
 ### GWAS Summary Statistics
-The path to the summary statistics file should be specified using --sum_stats. This file must be tab separated and contain at least these 4 following columns (note that RegSCOUT is case sensitive): SNP (containing SNP rsIDs), CHR (chromosome of the SNP), POS (position of SNP on chromosome), and P (p-value of association of SNP to disease). The following columns are not necessary but will be used by RegSCOUT if present: A1 (reference allele of SNP), A2 (alternative allele of SNP), MAF (minor allele frequency of SNP), and N (sample size). 
+The path to the summary statistics file should be specified using --sum_stats_dir. This file must be tab separated and contain at least these 4 following columns (note that RegSCOUT is case sensitive): SNP (containing SNP rsIDs), CHR (chromosome of the SNP), POS (position of SNP on chromosome), and P (p-value of association of SNP to disease). The following columns are not necessary but will be used by RegSCOUT if present: A1 (reference allele of SNP), A2 (alternative allele of SNP), MAF (minor allele frequency of SNP), and N (sample size). 
 
 If a sample size column is present in the summary statistics, the --sample_num parameter should be set to *present*; however, if it is not and the user is not able to find sample size for each SNP, the overall sample size of the GWAS study should be provided using the --sample_num parameter (e.g., --sample_num 190000). 
 
 If one of A1, A2, or MAF are missing from the GWAS summary statistics file, each of these columns will be filled in using Plink2 and its required bfiles. More information regarding this can be found in the Plink bfiles section. 
 
 ### GWAS Lead SNPs
-The path to this file should be specified using --lead_snp. This file must be tab separated (.txt or .tsv) if containing more than one column; however, only one column in this file is necessary for the pipeline to run: SNP (containing lead SNP rsIDs). Any additional columns provided will be included in the new_lead_snps.txt output file described in the "Output Files" section. 
+The path to this file should be specified using --lead_snp_dir. This file must be tab separated (.txt or .tsv) if containing more than one column; however, only one column in this file is necessary for the pipeline to run: SNP (containing lead SNP rsIDs). Any additional columns provided will be included in the new_lead_snps.txt output file described in the "Output Files" section. 
 
 ### Plink bfiles
-
+The path to these files are specified by the combination of the --snp_ref_dir and --population parameters. The file suffixes are not required in the file path, thus an example file path used by RegSCOUT is '/user/bin/EUR'. These are the .bim, .bed, .fam files required to run Plink2 to fill in reference/alternative allele as well as minor allele frequency information. These files will also be used to calculate LD values and group SNPs into loci. These files in hg19 can be downloaded from here: https://mrcieu.github.io/gwasglue/. Users can also provide bfiles that they have generated, in hg38, or for the specific group they want to study.
 
 ### <ins>Output Files</ins>
 
 ### Plink2.afreq
-A file output by Plink2 which provides SNP information including reference and alternative alleles and minor allele frequency. Will not be output if A1, A2, and MAF files are present in GWAS summary statistics. 
+A file output by Plink2 which provides SNP information including reference and alternative alleles and minor allele frequency. Will not be output if all of A1, A2, and MAF columns are present in GWAS summary statistics.
 
 ### new_lead_snps.txt
-If the A1, A2, or MAF column in missing in the GWAS summary statistics, this file will contain only those lead SNPs that were found in Plink2, which subsequent analysis will be performed on. If the three columns were present this new_lead_snps.txt file should not be different from the lead SNP file provided initially to RegSCOUT.
+If the A1, A2, or MAF column in missing in the GWAS summary statistics, this file will contain only those lead SNPs that were found in Plink2, which subsequent analyses will be performed on. If the three columns were present this new_lead_snps.txt file should not be different from the lead SNP file provided initially to RegSCOUT.
 
 ### loci_info.txt
-File containing information on each locus region created by RegSCOUT. The columns of this file are SEGNUM (the locus number), lead_snp (the lead SNP of the locus), locus_chr (the chromosome the locus is found on), locus_start (start position of the locus), and locus_end (end position of the locus).
+File containing information on each locus region created by RegSCOUT. The columns of this file are chunk (the locus number), lead_snp (the lead SNP of the locus), locus_chr (the chromosome the locus is found on), locus_start (start position of the locus), and locus_end (end position of the locus). 
 
 ### final_gwas_data.txt
 A tab-separated file organized by increasing locus number. This file is provided to fgwas for fine-mapping. There are 9 columns: SNPID (the rsID of a SNP), CHR (the chromosome the SNP is found on), POS (the position of the SNP on the chromosome), Z (the associated Z-score of the SNP), F (the SNP's minor allele frequency), N (sample size), SEGNUMBER (locus number), A1 (reference allele of SNP), A2 (alternative allele of SNP). 
 
-### files starting with CI (e.g., CI.bfs.gz)
-These are output files produced by fgwas as it assigns PPAs to SNPs. CI.bfs.gz contains SNPs and their associated PPA values. 
-
 ### gwas_CI.txt
 A tab-separated file which contains the results of fine-mapping and filtering for CI_thr. SNPs on sex chromosomes and with PPA values <= 0.01 have also been filtered out. These are the credible interval SNPs.
 
-## If mode is set to ATAC_obj (--mode ATAC_obj)
+## If mode is set to peak_table (--mode peak_table; Steps 4 and 5)
+If the user has specified this option for RegSCOUT, this means that RegSCOUT will not be identifying cell type-specific open chromatin regions based on a certain threshold (e.g., a region must be open in 10% of cells of a cell type). RegSCOUT will also not be running cicero analysis to link open chromatin regions to each other as that must have already been done by the user. The user will provide both a peak-cell type table and cell type-specific co-accessibility tables (output of cicero) to RegSCOUT <ins>in the directory specified by the --output_dir parameter</ins>. 
+
+### <ins>Required Files</ins>
+
+### Cell Peak Table
+
+
+Example peak and cell type table:
+| chr | start | end | cell sub-types | 
+| ---- | ----- | --- | -------------- | 
+| chr1 | 123 | 1000 | plasma_cells,memory_b_cells | 
+| chr11 | 2000 | 2600 | naive_CD8_T_cells,naive_CD4_T_cells | 
+| chr18 | 1 | 678 | classical_monocytes,intermediate_monocytes,nonclassical_monocytes | 
+
+## If mode is set to ATAC_obj (--mode ATAC_obj; Steps 3, 4, and 5)
+
 
 ### <ins>Required parameters</ins>
 
@@ -215,13 +225,6 @@ Parameters required for --mode peak_table are nearly the same as those required 
 
 ### <ins>The peak and cell type table, and peak-peak interaction tables</ins>
 This peak and cell type table should be named cell_peak.xlsx and should have three columns named "chr", "start", "end" (chromosome, start and end of the open chromatin regions), and a column named “cell sub-types” which represents the cell types in which a peak is considered open. Multiple cells should be comma-separated in this column. There should be one peak-peak interaction table for each cell type to be studied. The names of their associated files should be [cell type name].filtered_coaccessible_sites4s.txt. These tables should be tab-separated and should have three columns named "Peak1", "Peak2", and "coaccess" (coaccessibility value between peak1 and peak2 calculated by cicero). The Peak1 and Peak2 columns should contain underscore-separated locations of open chromatin regions (e.g., chr1_1000_1600). Examples of a peak and cell type table and of a peak-peak interaction table are shown below. 
-
-Example peak and cell type table:
-| chr | start | end | cell sub-types | 
-| ---- | ----- | --- | -------------- | 
-| chr1 | 123 | 1000 | plasma_cells,memory_b_cells | 
-| chr11 | 2000 | 2600 | naive_CD8_T_cells,naive_CD4_T_cells | 
-| chr18 | 1 | 678 | classical_monocytes,intermediate_monocytes,nonclassical_monocytes | 
 
 Example peak-peak interaction table:
 | Peak1 | Peak2 | coaccess | 
