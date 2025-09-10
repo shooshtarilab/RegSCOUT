@@ -50,7 +50,7 @@ for (i in c(1:length(jaspar_pwm_list))){
 
 # reading in GWAS data
 ci_gwas_dir = args[["ci_gwas_dir"]]
-ci_gwas_data = read.table(file=ci_gwas_dir, sep="", header=TRUE)
+ci_gwas_data = read.table(file=ci_gwas_dir, sep="\t", header=TRUE)
 
 # Preparing CI SNPs for motif analysis
 genome_build = args[["genome_build"]]
