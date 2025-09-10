@@ -219,7 +219,7 @@ heatmap_TFs <- Heatmap(
 
 
 # guideline bar based on sum log like ratio
-risk_tfs = cell_tf_snp[,c("TFSNP", "log_lik_ratio")]
+risk_tfs = cell_tf_snp[,c("TFSNP", "log_like_ratio")]
 risk_tfs = unique(risk_tfs)
 rownames(risk_tfs) = NULL
 risk_tfs <- risk_tfs %>%
