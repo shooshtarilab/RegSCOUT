@@ -335,7 +335,7 @@ if (length(rmp_promoter_overlap) != 0) {
   
   #Output this as a spreadsheet
   direct_overlap_dir = paste0(output_file_main, "direct_rmp_gene_overlaps.txt")
-  write.table(direct_overlap_df, file = direct_overlap_dir ,row.names = FALSE, quote = FALSE, sep = "\t")
+  write.table(direct_overlap_df, file = direct_overlap_dir, row.names = FALSE, quote = FALSE, sep = "\t")
 } else {
   message('No genes found by direct overlap of RMPs with promoter peaks.')
 }
