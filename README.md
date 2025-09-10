@@ -151,7 +151,7 @@ Example cell type-specific co-accessibility table:
 | chr3_3000_4000 | chr3_5000_5500 | 0.27 |
 
 ### GENCODE Gene Annotation File
-The <ins>path</ins> to the [GENCODE gene annotation](https://www.gencodegenes.org). This gene annotation should be a gff3 file.
+The path to this file should be specified using the --gencode_dir parameter. The <ins>path</ins> to the GENCODE gene annotation file downloaded from the [GENCODE website](https://www.gencodegenes.org). Users should download the appropriate .gff3 file in the genome build that all other files are in, that the user is hoping to have RegSCOUT analyze. The .gff3 file should be a comprehensive gene annotation file. RegSCOUT will filter this gene annotation file for specifically the protein coding gene transcripts present and use those transcripts for subsequent analyses, i.e., defining promoter regions.
 
 ### <ins>Output Files</ins>
 
@@ -198,6 +198,11 @@ A binary matrix that shows cell types as columns and RMP-gene pairs as rows. Thi
 The *ATAC_obj* option should be used when the user has a scATAC-seq dataset that they would like RegSCOUT to use to identify risk-mediating open chromatin regions and run cicero analysis. More information on how this scATAC-seq dataset should be formatted can be found below. In this case, RegSCOUT will identify open chromatin regions in the scATAC-seq dataset based on a threshold defined using the --peak_th parameter. RegSCOUT will also run cicero analysis according to the user's specifications using the --cic_genomic_window and --coaccess_th parameters. 
 
 ### <ins>Required Files</ins>
+The required files when using --mode ATAC_obj are different from those required for --mode peak_table with the exception of the GENCODE gene annotation file, which is still required and the path to this file should still be set with the --gencode_dir parameter. 
+
+### scATAC-seq Seurat Object
+
+
 
 ### --output_dir: 
 See description above.
