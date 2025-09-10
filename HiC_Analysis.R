@@ -872,7 +872,7 @@ for (i in 1:num_hic) {
   hic_cell_types = tolower(hic_cell_types)
   # run the appropriate function depending on whether genes are present in Hi-C data
   if (genes_present) {
-    if (cell_sorted | is.na(hic_cell_types[1])) { # analysis of bulk is identical to if single cell had just one cell type
+    if (!cell_sorted | is.na(hic_cell_types[1])) { # analysis of bulk is identical to if single cell had just one cell type
       hic_results <- bulk_gene_present_analysis(hic_dataset, rmp_df, atac_cell_types)
       if (is.data.frame(hic_results)) {
         write.table(hic_results, file = paste0(output_dir, "hic_analysis", i, "_results.txt"), row.names = F, quote = F,
@@ -893,7 +893,7 @@ for (i in 1:num_hic) {
       }
     }
   } else {
-    if (cell_sorted | is.na(hic_cell_types[1])) {
+    if (!cell_sorted | is.na(hic_cell_types[1])) {
       hic_results <- bulk_nogene_analysis(hic_dataset, rmp_df, atac_cell_types, gene_tss_grg)
       if (is.data.frame(hic_results)) {
         write.table(hic_results, file = paste0(output_dir, "hic_analysis", i, "_results.txt"), row.names = F, quote = F,
