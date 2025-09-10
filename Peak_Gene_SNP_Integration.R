@@ -202,7 +202,7 @@ f1 = colorRamp2(seq(0, 1, length = 2), c("#EEEEEE", "blue"))
 
 heatmap_TFs <- Heatmap(
   tf_cluster_matrix, name = "Percentage accessibility", col = f1, 
-  column_title = "Cell Type", row_title = "SNP-TF Pair",
+  column_title = "Cell Type", row_title = "TF-SNP Pair",
   column_title_gp = grid::gpar(fontsize = 14),
   row_title_gp = grid::gpar(fontsize = 14),
   row_names_gp = grid::gpar(fontsize = 11),
