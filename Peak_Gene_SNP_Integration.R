@@ -306,7 +306,8 @@ prom_neg <- GRanges(
 )
 
 gene_tss_grg <- c(prom_pos, prom_neg)
-# the result of this is used in TF expression analysis, but if we use RDS then we assume the user will use the same gencode version/file
+
+#Save this granges object as an RDS
 saveRDS(gene_tss_grg, paste0(output_file_main,"gene_tss_granges.rds"))
 
 #Directly overlapping genes' promoters with risk-mediating peaks
