@@ -637,7 +637,6 @@ if (tf_expr_req == "atac") {
       # read in scRNA-seq dataset and associated info
       if (tolower(file_ext(scrna_dir)) == "rds"){
         scrna_dataset <- readRDS(scrna_dir)
-
       } else if (tolower(file_ext(scrna_dir)) == "rdata"){
         scrna_dataset <- load(scrna_dir)
         scrna_dataset <- get(scrna_dataset)
@@ -694,7 +693,6 @@ if (tf_expr_req == "atac") {
       # filter the scRNA-seq dataset for just those cell types requested by user
       if (tolower(file_ext(scrna_dir)) == "rds"){
         scrna_dataset <- readRDS(scrna_dir)
-
       } else if (tolower(file_ext(scrna_dir)) == "rdata"){
         scrna_dataset <- load(scrna_dir)
         scrna_dataset <- get(scrna_dataset)
