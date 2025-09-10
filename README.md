@@ -72,6 +72,7 @@ A table of all parameters included in RegSCOUT including which steps the paramet
 
 ***When providing numerical values to parameters, do not incorporate commas or spaces for thousands, e.g., use 100000 not 100,000.
 
+****All chromosome numbers provided in files to RegSCOUT must be of the following naming convention 'chr' + 'number' (no space between). For example: chr8.
 
 
 
@@ -118,25 +119,85 @@ A tab-separated file organized by increasing locus number. This file is provided
 ### gwas_CI.txt
 A tab-separated file which contains the results of fine-mapping and filtering for CI_thr. SNPs on sex chromosomes and with PPA values <= 0.01 have also been filtered out. These are the credible interval SNPs.
 
-## If mode is set to peak_table (--mode peak_table; Steps 4 and 5)
-If the user has specified this option for RegSCOUT, this means that RegSCOUT will not be identifying cell type-specific open chromatin regions based on a certain threshold (e.g., a region must be open in 10% of cells of a cell type). RegSCOUT will also not be running cicero analysis to link open chromatin regions to each other as that must have already been done by the user. The user will provide both a peak-cell type table and cell type-specific co-accessibility tables (output of cicero) to RegSCOUT <ins>in the directory specified by the --output_dir parameter</ins>. 
+## Fine-mapping Already Conducted (--finemap not used)
 
 ### <ins>Required Files</ins>
 
-### Cell Peak Table
+### Fine-mapping Results File
+The path to this file must be specified by the --ci_gwas_dir parameter. If fine-mapping has already been conducted by the user, a file that contains the results of fine-mapping is required to be provided by the user. This file must contain credible interval SNPs where for each locus, the smallest number of SNPs whose cumulative PPAs add up to a certain threshold is provided (e.g., 0.99 or 0.95, this threshold is up to the user). This identification of credible interval SNPs will not be conducted by RegSCOUT if the --finemap parameter is not used. The file does not have a specific naming convention that it must follow, but must be a tab separated file (.txt or .tsv). This file must have at least 7 columns labelled: 'id' (SNP rsID), 'pos' (SNP bp position), 'chr' (SNP chromosome), 'chunk' (SNP locus number), 'PPA' (SNP associated PPA), 'a1' (SNP reference allele), and 'a2' (SNP alternative allele). Other columns that are optional but if present will be included in the final tables generated are: 'lead_snp' (the lead SNP of the SNP's locus), 'locus_chr' (locus chromosome number e.g., chr8 - chromosome numbers must follow this naming convention), 'locus_start' (start position of the locus), and 'locus_end' (end position of the locus).
 
+## Mode set to peak_table (--mode peak_table; Steps 4 and 5)
+The *peak_table* option should only be used if the user has already identified cell type-specific open chromatin regions and has already run cicero on their data to establish peak to peak links. If the user has specified this option for RegSCOUT, this means that RegSCOUT will not be identifying cell type-specific open chromatin regions based on a certain threshold (e.g., a region must be open in 10% of cells of a cell type). RegSCOUT will also not be running cicero analysis to link open chromatin regions to each other as that must have already been done by the user. Instead, the user must provide both a peak-cell type table and cell type-specific co-accessibility tables (output of cicero) to RegSCOUT **in the directory specified by the --output_dir parameter**. More information on these tables and their formats can be found below.
 
-Example peak and cell type table:
-| chr | start | end | cell sub-types | 
+### <ins>Required Files</ins>
+
+### Peak-Cell Type Table
+The path to this file need not be specified as RegSCOUT will look for this file in the directory defined by the --output_dir parameter. This file must be a tab separated file (.tsv) named **cell_peak.tsv**. The table should have four columns "chr", "start", "end", and "cell_types". Each row will represent one region of chromatin that was identified to be open. The "cell_types" column in each row will be a comma separated list of all cell types in which the chromatin region on that row was identified to be open. In the 'cell_types' column, there should be no spaces after each comma. 
+
+Example peak-cell type table:
+| chr | start | end | cell_types | 
 | ---- | ----- | --- | -------------- | 
 | chr1 | 123 | 1000 | plasma_cells,memory_b_cells | 
 | chr11 | 2000 | 2600 | naive_CD8_T_cells,naive_CD4_T_cells | 
 | chr18 | 1 | 678 | classical_monocytes,intermediate_monocytes,nonclassical_monocytes | 
 
-## If mode is set to ATAC_obj (--mode ATAC_obj; Steps 3, 4, and 5)
+### Cell Type-Specific Co-Accessibility Tables
+The path to these files need not be specified as RegSCOUT will look for these files in the directory defined by the --output_dir parameter. These should be the output of cicero after filtering for a certain co-accessibility threshold. RegSCOUT will not perform this co-accessibility filtering if --mode *peak_table* was selected. There will be one table for each of the cell types investigated. The names of each cell type-associated file should follow this naming convention: [cell type name].filtered_coaccessible_sites4s.txt. These tables should be tab-separated and should have three columns named "Peak1", "Peak2", and "coaccess" (coaccessibility value between peak1 and peak2 calculated by cicero). The Peak1 and Peak2 columns should contain underscore-separated locations of open chromatin regions (e.g., chr1_1000_1600). 
 
+Example cell type-specific co-accessibility table:
+| Peak1 | Peak2 | coaccess | 
+| ---- | ---- | ----- | 
+| chr1_1000_1600 | chr1_2000_2600 | 0.13 |
+| chr3_3000_4000 | chr3_5000_5500 | 0.27 |
 
-### <ins>Required parameters</ins>
+### GENCODE Gene Annotation File
+The <ins>path</ins> to the [GENCODE gene annotation](https://www.gencodegenes.org). This gene annotation should be a gff3 file.
+
+### <ins>Output Files</ins>
+
+### atSNP_10runs_results.RDS
+An RDS file containing the results of 10 runs of the ComputePValues function of the atSNP R package which identifies the impact of SNPs on TF binding affinities. 
+
+### Ci_effect_SNPs.txt
+A tab-separated file containing all identified SNPs significantly impacting the binding affinity of at least one TF (<ins>termed Effect-SNPs</ins>), and their associated TFs. This file has 9 columns: 'SNP' (the rsID of a SNP), 'CHR' (the chromosome the SNP is found on), 'Pos' (the position of the SNP on the chromosome), 'Locus' (locus number), 'TF' (TF whose binding affinity was significantly impacted by SNP), 'Raw_P_value' (p-value before FDR correction), 'FDR_corr_P_value' (p-value after FDR correction), 'log_like_ratio' (the log likelihood ratio quantifying the impact of the alternative allele of a SNP on TF binding affinity compared to the reference allele), and 'ppa' (PPA of SNP).
+
+### peak_cluster_matrix.txt
+A binary matrix that contains cell types as columns and open chromatin regions that co-localize with at least one effect-SNP as rows (<ins>these regions are termed risk-mediating peaks</ins>). A '1' indicates that that an RMP was found in a specified cell type whereas a '0' means it was not. This text file is tab separated.
+
+### risk_regions_ppa.txt
+Table that provides more information on risk-mediating peaks found by RegSCOUT. It has three columns: 'region' (the RMP), 'cell' (the cell types in which the open chromatin region was found to be an RMP), and sumPPA (the sum of the PPAs of all effect-SNPs that fall in that RMP).
+
+### cell_peak.svg
+A visual representation of risk_regions_ppa.txt. This heatmap shows risk-mediating peaks on the y-axis and cell types on the x-axis. A heatmap square shaded in red indicates that a certain risk-mediating peak was found in a certain cell type whereas if a square is shaded in white, that RMP was not found in that cell type. The bar on the right of this heatmap with shades of purple shows the summed PPA (sumPPA) value obtained for each risk-mediating peak.
+
+### TF_cluster_matrix.txt
+A binary matrix that contains cell types as columns and TF-SNP pairs as rows. If a TF-SNP pair was found relevant to a certain cell type it would obtain a value of '1', otherwise it would obtain a value of '0'.
+
+### risk_regions_ratio.txt
+Table providing information on risk-mediating peaks and their associated effect-SNPs. This table has 4 columns: 'region' (a risk-mediating peak), 'cell' (the cell type in which this effect SNP was found to fall in this risk-mediating peak), 'TFSNP' (a TF-SNP pair identified by atSNP), and 'log_like_ratio (the log likelihood ratio describing an effect-SNPs effect on a TF's binding affinity).
+
+### cell_snp_tf.svg
+A visual representation of risk_regions_ratio.txt specific to TF-SNP pairs. This heatmap shows TF-SNP pairs on the y-axis and cell types on the x-axis. A heatmap square shaded in blue indicates that a certain TF-SNP pair was found relevant to a certain cell type whereas if a square is shaded in white, that TF-SNP pair was not found relevant to that cell type. The bar on the right of this heatmap with shades of orange shows the log likelihood ratio value obtained for each TF-SNP pair.
+
+### direct_rmp_gene_overlaps.txt
+This is a table of all risk-mediating peak and gene promoter (as defined by GENCODE) overlaps identified by RegSCOUT, output as a tab separated text file. There are 4 columns: 'RMP' (the risk-mediating peak), 'Promoter' (the promoter region defined using GENCODE TSSs, and --prom_th_up and --prom_th_down parameters defined by the user), 'Gene' (the gene associated with that promoter), and 'Cell_Type' (the cell type in which that risk-mediating peak was identified).
+
+### cic_peak_interact_gene.txt
+Table that shows links between RMPs and their target genes using peak-peak links identified by cicero, output as a tab separated text file. This table has 6 columns: 'Peak1' (A risk-mediating peak), 'Peak2' (The peak that co-localized with a gene's promoter), 'coaccess' (the coaccessibility value calculated by cicero between Peak1 and Peak2), 'Promoter' (the promoter region defined using GENCODE TSSs, and --prom_th_up and --prom_th_down parameters defined by the user), 'Gene' (the gene associated with that promoter), and 'Cell_Type' (the cell type in which this RMP-gene link was identified).
+
+### cell_gene_matrix.txt
+A binary matrix that shows genes as columns and cell types as rows. A '1' indicates that a gene was prioritized in a cell type according to risk-mediating peak and gene promoter overlap with cicero results, or by direct co-localization of a risk-mediating peak with a gene's promoter. A '0' indicates that a gene was not prioritized in a cell type according to those criteria. 
+
+### Gene_promoter_matrix.txt
+A binary matrix that shows cell types as columns and RMP-gene pairs as rows. This matrix is specific to those genes whose promoters were overlapped by an RMP. A '1' indicates that that RMP-gene pair was identified in that cell type, whereas a '0' indicates that RMP-gene pair was not found relevant to that cell type. 
+
+### Gene_enhancer_matrix.txt
+A binary matrix that shows cell types as columns and RMP-gene pairs as rows. This matrix is specific to the case where cicero identified a relationship between an RMP and a gene's promoter where the RMP did not overlap the gene's promoter. A '1' indicates that that RMP-gene pair was identified in that cell type, whereas a '0' indicates that RMP-gene pair was not found relevant to that cell type. 
+
+## Mode set to ATAC_obj (--mode ATAC_obj; Steps 3, 4, and 5)
+The *ATAC_obj* option should be used when the user has a scATAC-seq dataset that they would like RegSCOUT to use to identify risk-mediating open chromatin regions and run cicero analysis. More information on how this scATAC-seq dataset should be formatted can be found below. In this case, RegSCOUT will identify open chromatin regions in the scATAC-seq dataset based on a threshold defined using the --peak_th parameter. RegSCOUT will also run cicero analysis according to the user's specifications using the --cic_genomic_window and --coaccess_th parameters. 
+
+### <ins>Required Files</ins>
 
 ### --output_dir: 
 See description above.
@@ -144,34 +205,10 @@ See description above.
 ### --jaspar_mtx:
 In conducting TF analysis this pipeline uses the JASPAR TF binding profile database. If the user has downloaded position frequency matrices (PFMs) from JASPAR placed into a single file. This <ins>path</ins> to this file can be provided using this parameter. Alternatively, if the user would prefer not to upload such a file, this parameter can be set to none (i.e., --jaspar_mtx none). RegSCOUT in this case will obtain PFMs from JASPAR using the [JASPAR2024 library](https://bioconductor.org/packages/release/data/annotation/html/JASPAR2024.html). 
 
-### --genome_built:
-This parameter can be set to either hg19 or hg38 depending on the human genome build used in the GWAS data provided to RegSCOUT.
-
-### --ci_gwas_dir:
-If the finemap parameter was set to Y, this parameter should not be used as fine-mapping results will automatically be passed to RegSCOUT for downstream steps. If fine-mapping was not conducted using RegSCOUT, this parameter should be set to the <ins>path</ins> to the fine-mapping results. 
-
 ### --seurat_obj: 
 The <ins>path</ins> to the Seurat object for the scATAC-seq data to be used in the integrative analysis. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. In addition, cell type labels should be provided as Idents in the Seurat object. The seurat object should be saved as an RData file. 
 
-### --peak_th:
-This parameter is used to define a threshold, above which a open chromatin region is considered to be 'open' in a cell type. For example, if --peak_th is set to 0.1 (i.e., --peak_th 0.1), then greater than 10% of cells in a cell type must have nonzero scATAC-seq read counts at an open chromatin region, for an open chromatin region to be considered 'open' in that cell type.
-
-### --prom_th_up:
-This parameter is used to define the number of bases upstream a gene's transcription start site (TSS) that will be considered part of a gene's promoter. For example, if the user wants this value to be 2000 bases upstream the TSS they would set this parameter as 2000 (i.e., --prom_th_up 2000). 
-
-### --prom_th_down:
-This parameter is used to define the number of bases downstream a gene's TSS that will be considered part of the genes promoter. See example for --prom_th_up.
-
-### --gencode_dir:
-The <ins>path</ins> to the [GENCODE gene annotation](https://www.gencodegenes.org). This gene annotation should be a gff3 file.
-
 ### <ins>Output files</ins>
-
-### atSNP_10runs_results.RDS
-An RDS file containing the results of 10 runs of the ComputePValues function of the atSNP R package which identifies the impact of SNPs on TF binding affinities. 
-
-### Ci_effect_SNPs.txt
-A tab-separated file containing all identified effect-SNPs and their associated TFs. Effect-SNPs are SNPs which significantly affected the binding affinity of at least one TF. This file has 9 columns: SNP (the rsID of a SNP), CHR (the chromosome the SNP is found on), Pos (the position of the SNP on the chromosome), Locus (locus number), TF (TF whose binding affinity was significantly impacted by SNP), Raw_P_value (p-value before FDR correction), FDR_corr_P_value (p-value after FDR correction), log_like_ratio (the log likelihood ratio illustrating the impact of the alternative allele of a SNP on TF binding compared to the reference allele), and ppa (PPA of SNP).
 
 ### cell_peak.xlsx 
 Table that provides genomic locations of peaks considered open in certain cell types (i.e., those that met the CI_thr). This table will have four columns: chr (the chromosome the open chromatin region is found on), start (start position of open chromatin region), end (end position of open chromatin region), and cell sub-types (all cell types in which a peak was considered open).
@@ -179,44 +216,8 @@ Table that provides genomic locations of peaks considered open in certain cell t
 ### [cell type name].filtered_coaccessible_sites4s.txt
 These files are the results of cicero analysis. They will have three columns: Peak1, Peak2, and coaccess (the co-accessibility value calculated between Peak1 and Peak2). Only peak-peak interactions with co-accessibility > 0.05 will be found in these files. One file will be output for each cell type in the scATAC-seq data. 
 
-### risk_regions_ppa.xlsx
-Table that provides information on risk-mediating peaks (RMPs) found by RegSCOUT. RMPs are those open chromatin regions that contain at least one effect-SNP. It has three columns: region (the RMP), cell (the cell types in which the region was found to be an RMP), and sumPPA (the sum of the PPAs of all effect-SNPs that fall in that RMP).
-
-### peak_cluster_matrix.txt
-A binary matrix that contains cell types as columns and RMPs as rows. A '1' indicates that that a RMP was found in a specified cell type whereas a '0' means it was not. 
-
-### cell_peak.png
-A visual representation of risk_regions_ppa.xlsx. This heatmap shows RMPs on the y-axis and cell types on the x-axis. A heatmap cell shaded in red indicates that a certain RMP was found in a certain cell type whereas if a cell is shaded in white, that RMP was not found in that cell type. The bar on the right of this heatmap with shades of blue shows the sumPPA value obtained for each RMP.
-
-### risk_regions_ratio.xlsx
-Table providing information on RMPs and their associated effect-SNPs. This table has 4 columns: TFSNP (a TF-SNP pair identified by atSNP), region (an RMP), cell (the cell type in which this effect SNP was found to fall in this RMP), and log_lik_ratio (the log likelihood ratio describing an effect-SNPs effect on the TF's binding affinity).
-
-### TF_cluster_matrix.txt
-A binary matrix that contains cell types as columns and TF-SNP pairs as rows. If a TF-SNP pair was found relevant to a certain cell type it would obtain a value of '1', otherwise it would obtain a value of '0'.
-
-### cell_tf.png
-A visual representation of risk_regions_ratio specific to TF-SNP pairs. This heatmap shows TF-SNP pairs on the y-axis and cell types on the x-axis. A heatmap cell shaded in red indicates that a certain TF-SNP pair was found relevant to a certain cell type whereas if a cell is shaded in white, that TF-SNP pair was not found relevant to that cell type. The bar on the right of this heatmap with shades of blue shows the log likelihood ratio value obtained for each TF-SNP pair.
-
-### Aff_peak_interact_gene.csv
-Table that shows the links between RMPs and their target genes. This table has 6 columns: Peak1 (An RMP), Peak2 (the co-accessible peak associated with the RMP), coaccess (the co-accessibility value between those two peaks), Promoter (the promoter region of the affected gene defined by --prom_th_up and --prom_th_down parameters), Gene (the id of affected gene), and Cell_Type (the cell type in which this putative RMP-gene interaction was detected). Please note that the rows with identical Peak1 and Peak2 represent the RMPs which directly overlap the promoters of their target genes.
-
-### cell_gene.csv
-A binary matrix that shows genes as columns and cell types as rows. A '1' indicates that a gene was prioritized in a cell type according to cicero (co-accessibility value > 0.05 between an RMP and the gene's promoter), whereas a value of '0' indicates the gene was not prioritized in that cell type. 
-
 ### cell_gene.png
 A visual representation of cell_gene.csv. This heatmap shows cell types on the y-axis and genes on the x-axis. A heatmap cell shaded in red indicates that a certain gene was prioritized to a certain cell type whereas if a cell is shaded in white, that gene was not found relevant to that cell type according to cicero.
-
-### Gene_promoter_matrix.txt
-A binary matrix that shows cell types as columns and RMP-gene pairs as rows. This matrix is specific to those genes whose promoters were overlapped by an RMP. A '1' indicates that that RMP-gene pair was identified in that cell type, whereas a '0' indicates that RMP-gene pair was not found relevant to that cell type. 
-
-### cell_gene_promoter.png
-A visual representation of Gene_promoter_matrix.txt. This heatmap is specific to those genes whose promoters were overlapped by an RMP. This heatmap shows RMP-gene pairs on the y-axis and cell types on the x-axis. A heatmap cell shaded in red indicates that a certain RMP-gene pair was found relevant to a certain cell type whereas if a cell is shaded in white, that pair was not found relevant to that cell type.
-
-### Gene_enhancer_matrix.txt
-A binary matrix that shows cell types as columns and RMP-gene pairs as rows. This matrix is specific to the case where cicero identified a relationship between an RMP and a gene's promoter where the RMP did not overlap the gene's promoter. A '1' indicates that that RMP-gene pair was identified in that cell type, whereas a '0' indicates that RMP-gene pair was not found relevant to that cell type. 
-
-### cell_gene_enhancer.png
-A visual representation of Gene_enhancer_matrix.txt. This heatmap is specific to those genes whose promoters were found to be co-accessible with an RMP but the RMP did not directly overlap the promoter. This heatmap shows RMP-gene pairs on the y-axis and cell types on the x-axis. A heatmap cell shaded in red indicates that a certain RMP-gene pair was found relevant to a certain cell type whereas if a cell is shaded in white, that pair was not found relevant to that cell type.
 
 ## If mode is set to peak_table (--mode peak_table)
 
@@ -225,12 +226,6 @@ Parameters required for --mode peak_table are nearly the same as those required 
 
 ### <ins>The peak and cell type table, and peak-peak interaction tables</ins>
 This peak and cell type table should be named cell_peak.xlsx and should have three columns named "chr", "start", "end" (chromosome, start and end of the open chromatin regions), and a column named “cell sub-types” which represents the cell types in which a peak is considered open. Multiple cells should be comma-separated in this column. There should be one peak-peak interaction table for each cell type to be studied. The names of their associated files should be [cell type name].filtered_coaccessible_sites4s.txt. These tables should be tab-separated and should have three columns named "Peak1", "Peak2", and "coaccess" (coaccessibility value between peak1 and peak2 calculated by cicero). The Peak1 and Peak2 columns should contain underscore-separated locations of open chromatin regions (e.g., chr1_1000_1600). Examples of a peak and cell type table and of a peak-peak interaction table are shown below. 
-
-Example peak-peak interaction table:
-| Peak1 | Peak2 | coaccess | 
-| ---- | ---- | ----- | 
-| chr1_1000_1600 | chr1_2000_2600 | 0.13 |
-| chr3_3000_4000 | chr3_5000_5500 | 0.27 |
 
 ### <ins>Output files</ins>
 The output for this mode would be the same as those listed in --mode ATAC_obj; the difference is that cell_peak.xlsx and [cell type name].filtered_coaccessible_sites4s.txt are not output as they are required as inputs when --mode is set to peak_table. 
