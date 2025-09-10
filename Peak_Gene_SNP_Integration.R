@@ -166,18 +166,18 @@ colnames(cell_peak_filt) = c(colnames(cell_peak),"SNP","TF","log_lik_ratio")
 cell_peak_filt[,colnames(cell_peak)] = cell_peak[queryHits(peak_snp_overlap),]
 cell_peak_filt$SNP = eff_snp$SNP[subjectHits(peak_snp_overlap)]
 cell_peak_filt$TF = eff_snp$TF[subjectHits(peak_snp_overlap)]
-cell_peak_filt$log_lik_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]) # why abs
+cell_peak_filt$log_lik_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)])
 
 cell_tf_snp = as.data.frame(matrix(0, nrow = nrow(cell_peak_filt),
                                    ncol = 4))
-colnames(cell_tf_snp) = c("region","cell","TFSNP","log_lik_ratio")
+colnames(cell_tf_snp) = c("region","cell","TFSNP","log_like_ratio")
 cell_tf_snp$region = paste(cell_peak_filt$chr,
                            cell_peak_filt$start,
                            cell_peak_filt$end,
                            sep = "-")
 cell_tf_snp$cell = cell_peak_filt$cell_types
 cell_tf_snp$TFSNP = paste0(cell_peak_filt$TF,"-",cell_peak_filt$SNP)
-cell_tf_snp$log_lik_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
+cell_tf_snp$log_like_ratio = eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)]
 
 cell_tf_snp = cell_tf_snp %>% separate_rows(cell, sep = ",")
 
