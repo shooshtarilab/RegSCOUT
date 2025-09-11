@@ -403,35 +403,78 @@ if (is.null(coaccess_gene_cell_final)) {
   write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep= "\t", row.names = FALSE, quote = FALSE)
 }
 
-#Filtering the dataframe to only include gene-cell data
-gene_cell_final1 = coaccess_gene_cell_final %>%
-  select(Cell_Type, Gene)
-
-gene_cell_final2 = direct_overlap_df %>%
-  select(Cell_Type, Gene)
-
-gene_cell_final <- rbind(gene_cell_final1, gene_cell_final2)
-
-#Creating a cell by gene matrix 
-gene_names = unique(gene_cell_final$Gene)
-cell_names = unique(gene_cell_final$Cell_Type)
-
-gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
-row.names(gene_cell_matrix) = cell_names
-colnames(gene_cell_matrix) = gene_names
-
-for (i in 1:nrow(gene_cell_final)) {
-  row <- gene_cell_final$Cell_Type[i]
-  col <- gene_cell_final$Gene[i]
-  gene_cell_matrix[row, col] <- 1
+# accounting for different cases where the user might not get results
+if (!is.null(coaccess_gene_cell_final) & length(rmp_promoter_overlap) != 0) {
+  gene_cell_final1 = coaccess_gene_cell_final %>%
+    select(Cell_Type, Gene)
+  
+  gene_cell_final2 = direct_overlap_df %>%
+    select(Cell_Type, Gene)
+  
+  gene_cell_final <- rbind(gene_cell_final1, gene_cell_final2) %>% distinct()
+  
+  #Creating a cell by gene matrix 
+  gene_names = unique(gene_cell_final$Gene)
+  cell_names = unique(gene_cell_final$Cell_Type)
+  
+  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
+  row.names(gene_cell_matrix) = cell_names
+  colnames(gene_cell_matrix) = gene_names
+  
+  for (i in 1:nrow(gene_cell_final)) {
+    row <- gene_cell_final$Cell_Type[i]
+    col <- gene_cell_final$Gene[i]
+    gene_cell_matrix[row, col] <- 1
+  }
+  
+  #Saving the matrix
+  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
+  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
+} else if (!is.null(coaccess_gene_cell_final)) {
+  gene_cell_final = coaccess_gene_cell_final %>%
+    select(Cell_Type, Gene) %>%
+    distinct()
+  
+  #Creating a cell by gene matrix 
+  gene_names = unique(gene_cell_final$Gene)
+  cell_names = unique(gene_cell_final$Cell_Type)
+  
+  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
+  row.names(gene_cell_matrix) = cell_names
+  colnames(gene_cell_matrix) = gene_names
+  
+  for (i in 1:nrow(gene_cell_final)) {
+    row <- gene_cell_final$Cell_Type[i]
+    col <- gene_cell_final$Gene[i]
+    gene_cell_matrix[row, col] <- 1
+  }
+  
+  #Saving the matrix
+  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
+  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
+} else if (length(rmp_promoter_overlap) != 0) {
+  gene_cell_final = direct_overlap_df %>%
+    select(Cell_Type, Gene) %>%
+    distinct()
+  
+  #Creating a cell by gene matrix 
+  gene_names = unique(gene_cell_final$Gene)
+  cell_names = unique(gene_cell_final$Cell_Type)
+  
+  gene_cell_matrix = matrix(0, nrow = length(cell_names), ncol = length(gene_names))
+  row.names(gene_cell_matrix) = cell_names
+  colnames(gene_cell_matrix) = gene_names
+  
+  for (i in 1:nrow(gene_cell_final)) {
+    row <- gene_cell_final$Cell_Type[i]
+    col <- gene_cell_final$Gene[i]
+    gene_cell_matrix[row, col] <- 1
+  }
+  
+  #Saving the matrix
+  cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
+  write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
 }
-
-#Saving the final table and matrix and a heatmap
-cic_peak_interact_dir = paste0(output_file_main, "cic_peak_interact_gene.txt")
-write.table(coaccess_gene_cell_final, file = cic_peak_interact_dir, sep="\t", row.names = FALSE, quote= FALSE)
-
-cell_gene_out = paste0(output_file_main, "cell_gene_matrix.txt")
-write.table(gene_cell_matrix, file = cell_gene_out, row.names = T, quote = F, sep = '\t')
 
 if (length(rmp_promoter_overlap) != 0) {
   promoter_cell_gene = direct_overlap_df
