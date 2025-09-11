@@ -41,10 +41,14 @@ if (genome_build == "hg19"){
 
 #Loading the scATAC-seq object 
 pbmc_dir = args[["seurat_obj_dir"]]
-pbmc_name = load(pbmc_dir) 
-pbmc = get(pbmc_name)
-rm(pbmc_name)
-print("Seurat object loaded")
+
+if (tolower(file_ext(pbmc_dir)) == "rds"){
+  pbmc <- readRDS(pbmc_dir)
+} else if (tolower(file_ext(pbmc_dir)) == "rdata"){
+  pbmc_name = load(pbmc_dir)
+  pbmc = get(pbmc_name)
+  rm(pbmc_name)
+}
 
 #Getting the output directory
 output_file_main = args[["output_dir"]]
