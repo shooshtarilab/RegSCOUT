@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
 ![logo](https://github.com/shooshtarilab/RegSCOUT/blob/main/images/RegSCOUT_logo.png)
 
 # RegSCOUT (<ins>Reg</ins>ulatory <ins>S</ins>ingle <ins>C</ins>ell <ins>O</ins>mics for <ins>U</ins>nravelling <ins>T</ins>rait Loci - Updates in Progress)
@@ -153,6 +159,9 @@ Example cell type-specific co-accessibility table:
 ### GENCODE Gene Annotation File
 The path to this file should be specified using the --gencode_dir parameter. The <ins>path</ins> to the GENCODE gene annotation file downloaded from the [GENCODE website](https://www.gencodegenes.org). Users should download the appropriate .gff3 file in the genome build that all other files are in, that the user is hoping to have RegSCOUT analyze. The .gff3 file should be a comprehensive gene annotation file. RegSCOUT will filter this gene annotation file for specifically the protein coding gene transcripts present and use those transcripts for subsequent analyses, i.e., defining promoter regions.
 
+### JASPAR TF PFM File
+The path to this file should be specified using the --jaspar_mtx_dir parameter. To create this file, the user must download position frequency matrices (PFMs) from [the JASPAR website](https://jaspar.elixir.no) and place them into a single file. In conducting TF analysis, this pipeline uses the JASPAR TF binding profile database. This <ins>path</ins> to this file can be provided using this parameter. Alternatively, if the user would prefer not to upload such a file, this parameter can be set to none (i.e., --jaspar_mtx none). RegSCOUT in this case will obtain PFMs from JASPAR using the [JASPAR2024 library](https://bioconductor.org/packages/release/data/annotation/html/JASPAR2024.html). 
+
 ### <ins>Output Files</ins>
 
 ### atSNP_10runs_results.RDS
@@ -201,17 +210,9 @@ The *ATAC_obj* option should be used when the user has a scATAC-seq dataset that
 The required files when using --mode ATAC_obj are different from those required for --mode peak_table with the exception of the GENCODE gene annotation file, which is still required and the path to this file should still be set with the --gencode_dir parameter. 
 
 ### scATAC-seq Seurat Object
+The path to the scATAC-seq Seurat object should be provided using the --seurat_obj_dir parameter. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. In addition, cell type labels should be provided as cell identities in the Seurat object (and accessible using the Idents() function of Seurat). This article provides more information on how to establish cell identities/class labels (https://satijalab.org/seurat/articles/essential_commands.html). The seurat object can be provided to RegSCOUT as either an RDS or RData file, both will work with the pipeline.
 
-
-
-### --output_dir: 
-See description above.
-
-### --jaspar_mtx:
-In conducting TF analysis this pipeline uses the JASPAR TF binding profile database. If the user has downloaded position frequency matrices (PFMs) from JASPAR placed into a single file. This <ins>path</ins> to this file can be provided using this parameter. Alternatively, if the user would prefer not to upload such a file, this parameter can be set to none (i.e., --jaspar_mtx none). RegSCOUT in this case will obtain PFMs from JASPAR using the [JASPAR2024 library](https://bioconductor.org/packages/release/data/annotation/html/JASPAR2024.html). 
-
-### --seurat_obj: 
-The <ins>path</ins> to the Seurat object for the scATAC-seq data to be used in the integrative analysis. The provided Seurat object should have an Assay named "peaks" which holds a chromatin assay object created from the counts matrix of the scATAC-seq experiment. In addition, cell type labels should be provided as Idents in the Seurat object. The seurat object should be saved as an RData file. 
+### JASPAR TF PFMs and GENCODE Gene Annotation
 
 ### <ins>Output files</ins>
 
