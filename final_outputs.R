@@ -174,7 +174,7 @@ for (i in 1:nrow(final_output)) {
 direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.txt")
 
 if (file.exists(direct_ovlp_res_dir)) {
-  rmp_promoter <- read.table(direct_ovlp_res_dir, header = TRUE)
+  rmp_promoter <- read.table(direct_ovlp_res_dir, header = TRUE, sep = '\t')
   
   rmp_promoter <- rmp_promoter[,c("RMP", "Gene")] %>% distinct()
   
@@ -198,7 +198,7 @@ final_output <- final_output %>% separate_rows(cell_type, sep = ",")
 cicero_dir <- paste0(output_dir, "cic_peak_interact_gene.txt")
 
 if (file.exists(cicero_dir)) {
-  cicero <- read.table(cicero_dir, header = TRUE)
+  cicero <- read.table(cicero_dir, header = TRUE, sep = '\t')
   
   # renaming certain columns
   colnames(cicero)[colnames(cicero) == "Peak1"] <- 'rmp'
@@ -337,8 +337,6 @@ if (file.exists(eqtl_results_dir)) {
   final_output$eqtl_gene <- NULL
 }
 
-write.table(final_output, paste0(output_dir, "final_table.txt"), quote = FALSE, sep = "\t", row.names = F)
-
 # now creating the prioritized table
 final_table <- final_output
 
@@ -424,12 +422,12 @@ if (file.exists(tf_expr_results_dir)) {
   
   # read in tf confirmation analysis results
   tf_confirmed <- read.table(paste0(output_dir, "all_TF_expr_results.txt"), header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-
+  
   # get all unique values possible in the matrix
   type_tf_conf <- unique(unlist(tf_confirmed))
   
   # reading in TF confirmation results to create TF heatmaps and incorporate results in final_table_new
-  if (all(c("rna", "atac") %in% type_tf_conf)) { # if both atac and rna confirmation were done
+  if (all(c("rna", "atac") %in% type_tf_conf) | "both" %in% type_tf_conf) { # if both atac and rna confirmation were done
     ## creating a TF by cell type heatmap with tf expression information
     # creating a TF by cell type matrix from final_table_new
     tf_cell_df <- risk_regions_ratio[,c('cell', 'tf')] %>% distinct()
@@ -684,7 +682,6 @@ write.table(final_table_new, file = paste0(output_dir, "complete_table.txt"), ro
 
 # now performing gene filtering, prioritization
 # first determining if filtering by tf score is desired
-
 tf_score_th  <- if (is.null(args[["tf_score_th"]])) {
   message("Using default tf_score_th value: ", defaults$tf_score_th)
   defaults$tf_score_th
@@ -822,3 +819,94 @@ message(paste(summary_stat, collapse = "   "))
 
 # save prioritized table
 write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
+
+# creating a condensed version of the prioritized table
+if (file.exists(tf_expr_results_dir)) {
+  summary_table <- prioritized_table %>%
+    mutate(tf_dir = gsub("[()]", "", tf_dir))
+} else {
+  # first making it so that each row only has one TF listed
+  prioritized_table <- prioritized_table %>%
+    separate_rows(tf, sep = ", ") %>%
+    mutate(tf = str_trim(tf))
+  
+  # establishing separate columns for TF direction and TF name
+  prioritized_table$tf_dir <- sub("^[^\\(]+", "", prioritized_table$tf)
+  prioritized_table$tf <- gsub("\\(.*?\\)", "", prioritized_table$tf)
+  
+  summary_table <- prioritized_table %>%
+    mutate(tf_dir = gsub("[()]", "", tf_dir))
+}
+
+# establish a new column with tfs and a summary of their scores/directions
+if (file.exists(tf_expr_results_dir)) {
+  if (all(c("rna", "atac") %in% type_tf_conf) | "both" %in% type_tf_conf) {
+    summary_table <- summary_table %>%
+      mutate(`tfs (direction, score)` = paste0(tf, " (", tf_dir, ", ", tf_score, ")"))
+  } else if ("rna" %in% type_tf_conf) {
+    summary_table$tf_rna[is.na(summary_table$tf_rna)] <- 0 # such that there are no NA values in the new column
+    summary_table <- summary_table %>%
+      mutate(`tfs (direction, score)` = paste0(tf, " (", tf_dir, ", ", tf_rna, ")"))
+  } else if ("atac" %in% type_tf_conf) {
+    summary_table$tf_peak[is.na(summary_table$tf_peak)] <- 0 # such that there are no NA values in the new column
+    summary_table <- summary_table %>%
+      mutate(`tfs (direction, score)` = paste0(tf, " (", tf_dir, ", ", tf_peak, ")"))
+  }
+} else {
+  summary_table <- summary_table %>%
+    mutate(`tfs (direction)` = paste0(tf, " (", tf_dir, ")"))
+}
+
+# remove certain columns
+columns_to_remove <- c('tf_score', 'tf_dir', 'tf', 'directly_mapped_gene', 'cicero_gene', 'hic_gene',
+            'eqtl_gene', 'tf_peak', 'tf_rna')
+
+summary_table <- summary_table %>%
+  select(-any_of(columns_to_remove)) %>% 
+  distinct()
+
+# summarizing some stats relevant to genes before putting them into summary table
+summary_table$gene_sum_ppa <- round(summary_table$gene_sum_ppa, 2)
+summary_table <- summary_table %>%
+  group_by(effect_snp, rmp, cell_type, gene) %>%
+  mutate(gene_score = max(gene_score)) %>%
+  ungroup() %>%
+  distinct()
+
+# establish a new column with genes and a summary of their scores/ppas
+summary_table <- summary_table %>%
+  mutate(`genes (score, sum_ppa)` = paste0(gene, " (", gene_score, ", ", gene_sum_ppa, ")"))
+
+# remove certain columns
+summary_table <- summary_table %>%
+  select(-c(gene_score, gene_sum_ppa, gene)) %>% 
+  distinct()
+
+# grouping TFs and genes based on effect SNP, RMP, and cell type
+if (file.exists(tf_expr_results_dir)) {
+  table_results_combined <- summary_table %>%
+    group_by(effect_snp, rmp, cell_type) %>%
+    mutate(
+      `tfs (direction, score)` = paste(unique(`tfs (direction, score)`), collapse = ", "),
+      `genes (score, sum_ppa)` = paste(unique(`genes (score, sum_ppa)`), collapse = ", ")
+    ) %>%
+    ungroup() %>%
+    distinct()
+} else {
+  table_results_combined <- summary_table %>%
+    group_by(effect_snp, rmp, cell_type) %>%
+    mutate(
+      `tfs (direction)` = paste(unique(`tfs (direction)`), collapse = ", "),
+      `genes (score, sum_ppa)` = paste(unique(`genes (score, sum_ppa)`), collapse = ", ")
+    ) %>%
+    ungroup() %>%
+    distinct()
+}
+
+# cleaning up some numerical values
+table_results_combined <- table_results_combined %>%
+  mutate(effect_ppa = round(effect_ppa, 4),
+         lead_ppa = round(lead_ppa, 4))
+
+# write this file out
+write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.txt"), quote = FALSE, sep = "\t")
