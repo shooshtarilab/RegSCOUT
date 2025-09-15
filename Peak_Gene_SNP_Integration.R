@@ -161,12 +161,12 @@ peak_snp_overlap = findOverlaps(cell_peak_grg, eff_snp_grg)
 cell_peak_filt = as.data.frame(matrix(0,nrow = length(peak_snp_overlap),
                                       ncol=(ncol(cell_peak)+3)))
 
-colnames(cell_peak_filt) = c(colnames(cell_peak),"SNP","TF","log_lik_ratio")
+colnames(cell_peak_filt) = c(colnames(cell_peak),"SNP","TF","log_like_ratio")
 
 cell_peak_filt[,colnames(cell_peak)] = cell_peak[queryHits(peak_snp_overlap),]
 cell_peak_filt$SNP = eff_snp$SNP[subjectHits(peak_snp_overlap)]
 cell_peak_filt$TF = eff_snp$TF[subjectHits(peak_snp_overlap)]
-cell_peak_filt$log_lik_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)])
+cell_peak_filt$log_like_ratio = abs(eff_snp$log_like_ratio[subjectHits(peak_snp_overlap)])
 
 cell_tf_snp = as.data.frame(matrix(0, nrow = nrow(cell_peak_filt),
                                    ncol = 4))
@@ -224,7 +224,7 @@ risk_tfs = unique(risk_tfs)
 rownames(risk_tfs) = NULL
 risk_tfs <- risk_tfs %>%
   group_by(TFSNP) %>%
-  summarize(log_lik_ratio = max(abs(log_lik_ratio)), .groups = 'drop')
+  summarize(log_like_ratio = max(abs(log_like_ratio)), .groups = 'drop')
 risk_tfs = tibble::column_to_rownames(risk_tfs, var = "TFSNP")
 risk_tfs = as.matrix(risk_tfs)
 
