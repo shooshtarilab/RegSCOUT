@@ -149,7 +149,6 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
 
 if (tolower(args[["hic_analysis"]]) == "y") {
   hic_instruct_dir = args[["hic_instruct_dir"]]
-  # hic_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv"
   check_path(hic_instruct_dir)
   hic_instruct = read_file(hic_instruct_dir, nrows = -1)
   colnames(hic_instruct) = tolower(colnames(hic_instruct))
@@ -169,7 +168,6 @@ if (tolower(args[["hic_analysis"]]) == "y") {
   #     stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
   #   }
   # }
-  # message("HI-C instructions columns present.")
 }
 
 # need to check if cell type columns matches
