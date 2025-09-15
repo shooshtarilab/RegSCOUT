@@ -1,11 +1,12 @@
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(tools))
+# check for libraries
 
 args = commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 # Helper function that determines what input file format the user used
 # Function to read file based on extension
-read_file <- function(file_path, nrows = 0) {
+read_file <- function(file_path, nrows = 1) {
   ext <- file_ext(file_path)
   if (ext == "csv") {
     df = read.csv(file_path, header = TRUE,nrows=nrows)
@@ -14,6 +15,7 @@ read_file <- function(file_path, nrows = 0) {
   } else {
     df = read.table(file_path, header = TRUE,nrows=nrows)
   }
+  # xlsx
   return(df)
 }
 
@@ -142,13 +144,12 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
       stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
     }
   }
-  # check content's columns
-  
   # message("Histone mark instructions columns present.")
 }
 
 if (tolower(args[["hic_analysis"]]) == "y") {
   hic_instruct_dir = args[["hic_instruct_dir"]]
+  # hic_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv"
   check_path(hic_instruct_dir)
   hic_instruct = read_file(hic_instruct_dir, nrows = -1)
   colnames(hic_instruct) = tolower(colnames(hic_instruct))
@@ -158,9 +159,16 @@ if (tolower(args[["hic_analysis"]]) == "y") {
     stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
   }
   # check if contents of hic instruct directories exist
-  for (i in hic_instruct$hic_dir){
-    check_path(i, verbose = 0)
-  }
+  # for (i in hic_instruct$hic_dir){
+  #   check_path(i, verbose = 0)
+  #   hic_file = read_file(i)
+  #   colnames(hic_file) = tolower(colnames(hic_file))
+  #   req_list <- c("chr1", "start1", "end1", "chr2", "start2", "end2")
+  #   missing_cols = setdiff(req_list, colnames(hic_file))
+  #   if (length(missing_cols) > 0) {
+  #     stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
+  #   }
+  # }
   # message("HI-C instructions columns present.")
 }
 
@@ -218,7 +226,7 @@ settings_msg <- paste(
   "|                                  |\n",
   "| Finemapping             : %-6s |\n",
   "| TF Expression Analysis  : %-6s |\n",
-  "| Histone Marker Analysis : %-6s |\n",
+  "| Histone Mark Analysis   : %-6s |\n",
   "| Hi-C Analysis           : %-6s |\n",
   "| eQTL Analysis           : %-6s |\n",
   "------------------------------------\n",

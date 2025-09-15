@@ -24,14 +24,14 @@ genome_build = args[["genome_build"]]
 
 #Loading the reference genome object based on the genome built of the data 
 if (genome_build == "hg19"){
-  library(BSgenome.Hsapiens.UCSC.hg19)
+  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
   genome = "BSgenome.Hsapiens.UCSC.hg19"  
   hg_19_ref = BSgenome.Hsapiens.UCSC.hg19@seqinfo
   hg_19_dat = as.data.frame(matrix(NA, nrow = length(hg_19_ref@seqnames), ncol = 2))
   hg_19_dat$V1 = hg_19_ref@seqnames
   hg_19_dat$V2 = hg_19_ref@seqlengths
 }else if(genome_build == "hg38"){
-  library(BSgenome.Hsapiens.UCSC.hg38)
+  suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
   genome = "BSgenome.Hsapiens.UCSC.hg38" 
   hg_38_ref = BSgenome.Hsapiens.UCSC.hg38@seqinfo
   hg_38_dat = as.data.frame(matrix(NA, nrow = length(hg_38_ref@seqnames), ncol = 2))
