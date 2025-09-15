@@ -1,14 +1,10 @@
 suppressPackageStartupMessages(library(Seurat))
 suppressPackageStartupMessages(library(Signac))
-suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(stringr))
-suppressPackageStartupMessages(library(circlize))
-suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(ape))
-suppressPackageStartupMessages(library(Repitools))
 suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tools))
 
 #Setting command line arguments
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
