@@ -59,11 +59,11 @@ risk_regions_ratio <- risk_regions_ratio %>%
     snp = str_extract(TFSNP, "[^\\-]+$") 
   )
 
-## defining impact of SNP on tf based on log_lik_ratio
+## defining impact of SNP on tf based on log_like_ratio
 risk_regions_ratio$direction <- NA
 
 for (i in 1:nrow(risk_regions_ratio)) {
-  if (risk_regions_ratio$log_lik_ratio[i] > 0) {
+  if (risk_regions_ratio$log_like_ratio[i] > 0) {
     risk_regions_ratio$direction[i] <- "(+)"
   } else {
     risk_regions_ratio$direction[i] <- "(-)"
