@@ -1,4 +1,3 @@
-suppressPackageStartupMessages(library(ape))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
