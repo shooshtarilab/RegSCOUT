@@ -1,4 +1,5 @@
 suppressPackageStartupMessages(library(GenomicRanges))
+suppressPackageStartupMessages(library(Signac))
 suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
