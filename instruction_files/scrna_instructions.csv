@@ -1,0 +1,18 @@
+scrna_dir,atac_cell_types,rna_cell_types,one_cell_type_seurat,matrix_loc
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,act_cd4_t,CD4+ activated T,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,naive_cd4_t,CD4+ Tn,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,tReg,CD4+ Treg,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,cyto_cd8_t,"CD8+ activated T,CD8+ Teff,CD8+ Tem",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,naive_cd8_t,CD8+ Tn,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,mem_cd8_t,"CD8+ Tcm,CD8+ Tem,CD8+ Trm",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,mem_b,Memory B,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,naive_b,Naive B,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,ncMono,Non-classical monocyte,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,cMono,Classical monocyte,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,iMono,"Classical monocyte,Non-classical monocyte",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,cDC,"cDC1,cDC2",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,pDC,pDC,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,mkc,Megakaryocyte,FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,plasma,"IgG plasma,Cycling plasma,IgA-IgG- plasma,IgA plasma",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,adaptive_NK,"CD16+ NK,CD56+ SELL_high NK,CD56+ SELL_low NK",FALSE,counts
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds,cyto_nk,"CD16+ NK,CD56+ SELL_high NK,CD56+ SELL_low NK",FALSE,counts
