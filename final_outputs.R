@@ -902,10 +902,10 @@ if (file.exists(tf_expr_results_dir)) {
     distinct()
 }
 
-# cleaning up some numerical values
-table_results_combined <- table_results_combined %>%
-  mutate(effect_ppa = round(effect_ppa, 4),
-         lead_ppa = round(lead_ppa, 4))
+# # cleaning up some numerical values
+# table_results_combined <- table_results_combined %>%
+#   mutate(effect_ppa = round(effect_ppa, 4),
+#          lead_ppa = round(lead_ppa, 4))
 
 # write this file out
 write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.txt"), quote = FALSE, sep = "\t")

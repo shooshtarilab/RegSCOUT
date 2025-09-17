@@ -180,7 +180,6 @@ if (length(eqtl_results_list) == 0) {
   # save this dataframe
   write.table(all_results, file = paste0(output_dir, "all_eqtl_results.txt"), row.names = F, quote = F,
               sep = '\t')
-  
 }
 
   

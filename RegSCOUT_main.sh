@@ -76,7 +76,7 @@ master_log="$output_dir/RegSCOUT_pipeline.log"
 pipeline_start_time=$(date +%s)
 echo "=== Pipeline started at $(date) ===" > "$master_log"
 
-Rscript sanity_check.R \
+run_rscript sanity_check.R \
     --output_dir "$output_dir" --mode "$mode" --genome_build "$genome_build" \
     --finemap "$finemap" --gencode_dir "$gencode_dir" \
     --snp_ref_dir "$snp_ref_dir" --population "$population" \

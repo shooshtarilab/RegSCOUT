@@ -15,7 +15,7 @@ genome_build = args[["genome_build"]]
 # read in SNP, rmp information
 snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt")
 snp_rmp_df = read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
-snp_rmp_df$log_lik_ratio <- NULL
+snp_rmp_df$log_like_ratio <- NULL
 colnames(snp_rmp_df)[colnames(snp_rmp_df) == "region"] <- "rmp"
 
 # separating snps from TFs in TFSNP column
@@ -170,7 +170,6 @@ if (length(eqtl_results_list) == 0) {
   # save this dataframe
   write.table(all_results, file = paste0(output_dir, "all_eqtl_results.txt"), row.names = F, quote = F,
               sep = '\t')
-  
 }
 
   

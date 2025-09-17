@@ -4,16 +4,16 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(data.table))
 
 # read in tabix dataset
-eqtl_dir <- '/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files'
+eqtl_dir <- '/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files/raw_eqtl'
 
 eqtl_files <- list.files(eqtl_dir, pattern = "\\.gz$", full.names = TRUE)
 
+output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files/"
 # Iterate over them
 for (file_path in eqtl_files) {
-  file_path = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files/QTD000066.all.tsv.gz"
   filename = basename(file_path)
   filename <- sub("\\.gz$", "", filename)
-  print(filename)
+
   # Read only necessary columns
   eqtl_df <- fread(
     file_path,
@@ -57,7 +57,7 @@ for (file_path in eqtl_files) {
   # save this as a tsv file
   write.table(
     eqtl_df,
-    file = paste0("/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_filtered_files/",filename),
+    file = paste0(output_dir,filename),
     sep = "\t",
     quote = FALSE,
     row.names = FALSE,
@@ -66,10 +66,11 @@ for (file_path in eqtl_files) {
 
   # adding the column names back in, but as a commented line (i.e., starting with #)
   writeLines(
-    c(column_names, readLines(paste0("/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_filtered_files/",filename))),
-    con = paste0("/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_filtered_files/",filename)
+    c(column_names, readLines(paste0(output_dir,filename))),
+    con = paste0(output_dir,filename)
   )
-  input_file = paste0("/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_filtered_files/",filename)
+  input_file = paste0(output_dir,filename)
+  print(input_file)
   output_file <- paste0(input_file,".gz")
 
   # Compress with bgzip
@@ -79,17 +80,6 @@ for (file_path in eqtl_files) {
   system(paste("tabix -s 1 -b 2 -e 2", shQuote(output_file)))
   print(c("done ", filename))
 }
-
-
-
-# run these lines of code in command line make sure bgzip and tabix are installed
-# bgzip < test_data.tsv > test_data.tsv.gz (first file is input, second file is output)
-# tabix -s 1 -b 2 -e 2 test_data.tsv.gz
-  # -s is the number of the column that has chromosome numbers
-  # -b is the column that has start position
-  # -e is the end position
-  # -b and -e can be identical
-
 
 
 
