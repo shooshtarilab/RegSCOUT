@@ -13,19 +13,18 @@
 # Call your existing Bash script with all required arguments
 ./RegSCOUT_main.sh \
   --mode peak_table \
-  --finemap Y \
+  --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/ \
   --snp_ref_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/ \
   --sum_stats_dir /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/GCST90132224_buildGRCh37_p.tsv \
+  --genome_build hg19 \
+  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v49lift37.annotation.gff3.gz  \
+  --finemap Y \
   --lead_snps_dir /home/ubunkun/Lab/RA_project/RegSCOUT/1preprocess/lead_snps_EAS.txt \
   --sample_num 173633 \
   --population EAS \
-  --output_dir /home/ubunkun/Lab/RA_project/RegSCOUT/EAS/ \
-  --jaspar_mtx /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/combined_755_motifs_jaspar2024.txt \
-  --genome_build hg19 \
-  --gencode_dir /home/ubunkun/Lab/RA_project/RegSCOUT/inputs/gencode.v49lift37.annotation.gff3.gz  \
   --histone_mark_analysis N \
   --tf_expr_analysis atac \
   --hic_analysis Y \
   --eqtl_analysis Y \
-  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/hic_instructions.tsv \
-  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instructions_spreadsheets/eqtl_instructions.tsv
+  --hic_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instruction_files/hic_instructions.tsv \
+  --eqtl_instruct_dir /home/ubunkun/Lab/RA_project/RegSCOUT/instruction_files/eqtl_instructions.tsv

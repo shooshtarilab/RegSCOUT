@@ -1,0 +1,2 @@
+scrna_dir	atac_cell_types	rna_cell_types	one_cell_type_seurat	matrix_loc
+/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/scRNA/scIBD_healthy_filtered.rds	nEN,earlyEN	nENs,RG	FALSE	counts
