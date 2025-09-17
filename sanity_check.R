@@ -157,6 +157,7 @@ if (tolower(args[["hic_analysis"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
   }
+
   # check if contents of hic instruct directories exist
   # for (i in hic_instruct$hic_dir){
   #   check_path(i, verbose = 0)
@@ -173,6 +174,7 @@ if (tolower(args[["hic_analysis"]]) == "y") {
 # need to check if cell type columns matches
 if (tolower(args[["eqtl_analysis"]]) == "y") {
   eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
+  eqtl_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instruction_files/eqtl_instructions.tsv"
   check_path(eqtl_instruct_dir)
   eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
   colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
@@ -183,8 +185,25 @@ if (tolower(args[["eqtl_analysis"]]) == "y") {
   }
 
   # check if contents of eqtl instruct directories exist
-  for (i in eqtl_instruct$eqtl_dir){
-    check_path(i, verbose = 0)
+  for (i in 1:nrow(eqtl_instruct)){
+    check_path(eqtl_instruct$eqtl_dir[i], verbose = 0)
+    # check if tabix file and index file exists if tabix option is T
+    if ("tabix" %in% colnames(eqtl_instruct) && as.logical(eqtl_instruct$tabix[i])) {
+      check_path(paste0(eqtl_instruct$eqtl_dir[i],".tbi"), verbose = 0)
+    } else { # for non tabix file, ensure colnames exist
+    # user must either provide "snp" OR "chr+pos" OR both
+      eqtl_data = read_file(eqtl_instruct$eqtl_dir[i])
+      colnames(eqtl_data) = tolower(colnames(eqtl_data))
+      req_snp <- "snp"
+      req_chrpos <- c("chr", "pos")
+      has_snp <- req_snp %in% colnames(eqtl_data)
+      has_chrpos <- all(req_chrpos %in% colnames(eqtl_data))
+      if (!(has_snp || has_chrpos)) {
+        stop('Must have either "chr" & "pos" OR "snp" columns (or both) in: ', basename(eqtl_instruct$eqtl_dir[i]))
+      } else if (has_snp && !has_chrpos) { # warn user that they only have a snp column
+        warning('Only "snp" column found (no "chr" & "pos") in: ', basename(eqtl_instruct$eqtl_dir[i]))
+      }
+    }
   }
   # message("eQTL instructions columns present.")
 }
