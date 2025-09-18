@@ -48,6 +48,14 @@ check_path = function(path, verbose = 1){
 output_dir = args[["output_dir"]]
 check_path(output_dir)
 
+# create folder structure
+# input? images
+image_dir = paste0(output_dir,"images")
+if (dir.exists(image_dir)) {
+  unlink(image_dir, recursive = TRUE, force = TRUE) # deletes images folder
+}
+dir.create(image_dir)
+
 if (tolower(args[["finemap"]]) == "y") {
   # check if plink_binary and fgwas_src param exists
   if (nzchar(args[["plink2_dir"]])){ 
@@ -187,8 +195,8 @@ if (tolower(args[["eqtl_analysis"]]) == "y") {
   # check if contents of eqtl instruct directories exist
   for (i in 1:nrow(eqtl_instruct)){
     check_path(eqtl_instruct$eqtl_dir[i], verbose = 0)
-    # check if tabix file and index file exists if tabix option is T
-    if ("tabix" %in% colnames(eqtl_instruct) && as.logical(eqtl_instruct$tabix[i])) {
+    # check if index file exists if tabix option is T
+    if ("tabix" %in% colnames(eqtl_instruct) && as.logical(toupper(eqtl_instruct$tabix[i]))) {
       check_path(paste0(eqtl_instruct$eqtl_dir[i],".tbi"), verbose = 0)
     } else { # for non tabix file, ensure colnames exist
     # user must either provide "snp" OR "chr+pos" OR both

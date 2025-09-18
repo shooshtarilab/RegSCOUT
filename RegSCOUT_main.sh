@@ -65,7 +65,7 @@ while [[ "$#" -gt 0 ]]; do
     --gene_sum_ppa_th) gene_sum_ppa_th="$2"; shift;;
     --gene_score_th) gene_score_th="$2"; shift;;
     --ncores) ncores="$2"; shift;;
-    --format) format="$2"; shift;;
+    --file_f) file_f="$2"; shift;;
   esac
   shift
 done
@@ -120,7 +120,7 @@ if [ "$mode" == "ATAC_obj" ]; then
 
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
-        --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir"
+        --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir" --img_f "$img_f"
 
 elif [ "$mode" == "peak_table" ]; then
     run_rscript EffectSNP.R \
@@ -129,7 +129,7 @@ elif [ "$mode" == "peak_table" ]; then
 
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
-        --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir"
+        --prom_th_down "$prom_th_down" --gencode_dir "$gencode_dir" --img_f "$img_f"
 fi
 
 if [ "$tf_expr_analysis" == "atac" ] || [ "$tf_expr_analysis" == "rna" ] || [ "$tf_expr_analysis" == "both" ]; then
@@ -162,7 +162,7 @@ if [ -n "$mode" ]; then
         --output_dir "$output_dir" --finemap "$finemap" \
         --ci_gwas_dir "$ci_gwas_dir" --tf_score_th "$tf_score_th" \
         --gene_score_th "$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th" \
-        --format "$format"
+        --file_f "$file_f" --img_f "$img_f"
 fi
 
 # Calculate total pipeline time

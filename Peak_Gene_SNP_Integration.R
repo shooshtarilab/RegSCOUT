@@ -15,8 +15,15 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 #Defining default parameter values
 defaults <- list(
   prom_th_up = 2000,
-  prom_th_down = 2000
+  prom_th_down = 2000,
+  img_f = "svg"
 )
+
+img_f = if (nzchar(args[["img_f"]])) {
+  args[["img_f"]]
+} else {
+  defaults$img_f
+} 
 
 #Getting the working directory
 output_dir = args[["output_dir"]]
@@ -137,8 +144,13 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-output_peak_file = paste0(output_dir,"cell_peak.svg")
-svg(output_peak_file, width = ((ncol(peak_cluster_matrix) + ncol(risk_regions)) + 10) / 2.54, height = (nrow(peak_cluster_matrix) + 10)/ 2.54)
+if (img_f == "svg"){
+  output_peak_file = paste0(output_dir,"images/cell_peak.svg")
+  svg(output_peak_file, width = ((ncol(peak_cluster_matrix) + ncol(risk_regions)) + 10) / 2.54, height = (nrow(peak_cluster_matrix) + 10)/ 2.54)
+} else if (img_f == "png"){
+  output_peak_file = paste0(output_dir,"images/cell_peak.png")
+  png(output_peak_file, width = 2400, height = 8000, res = 300)
+}
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
@@ -250,11 +262,13 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-output_tf_file = paste0(output_dir,"cell_snp_tf.svg")
-svg(output_tf_file,
-    width = (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54,
-    height = (nrow(tf_cluster_matrix) + 10) / 2.54)
-
+if (img_f == "svg"){
+  output_tf_file = paste0(output_dir,"images/cell_snp_tf.svg")
+  svg(output_tf_file, width = (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54, height = (nrow(tf_cluster_matrix) + 10) / 2.54)
+  } else if (img_f == "png"){
+  output_tf_file = paste0(output_dir,"images/cell_snp_tf.png")
+  png(output_tf_file, width = 2400, height = 8000, res = 300)
+}
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
