@@ -815,12 +815,6 @@ svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(ge
 print(heatmap_genes)
 invisible(dev.off())
 
-format = if (nzchar(args[["format"]])) {
-  args[["format"]]
-} else {
-  defaults$format
-} 
-
 # printing a summary of findings for this dataset
 summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)), 
                   "Genes" = length(unique(prioritized_table$gene)), 
@@ -917,14 +911,18 @@ if (file.exists(tf_expr_results_dir)) {
 table_results_combined <- table_results_combined %>%
   mutate(across(any_of(c("effect_ppa", "lead_ppa")), ~ round(.x, 4)))
 
+format = if (nzchar(args[["format"]])) {
+  args[["format"]]
+} else {
+  defaults$format
+} 
+
 if (format == "tsv"){
-  message("tsv")
   write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
   write.table(final_table_new, file = paste0(output_dir, "complete_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
   write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
-} else {
-  message("xlsx")
+} else if (format == "xlsx") {
   write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
-  write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.txt"))
-  write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.txt"))
+  write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
+  write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.xlsx"))
 }

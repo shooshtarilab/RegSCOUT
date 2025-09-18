@@ -65,7 +65,7 @@ while [[ "$#" -gt 0 ]]; do
     --gene_sum_ppa_th) gene_sum_ppa_th="$2"; shift;;
     --gene_score_th) gene_score_th="$2"; shift;;
     --ncores) ncores="$2"; shift;;
-    --format) ncores="$2"; shift;;
+    --format) format="$2"; shift;;
   esac
   shift
 done
