@@ -6,6 +6,7 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(circlize))
+suppressPackageStartupMessages(library(readxl))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -16,7 +17,8 @@ output_dir <- args[["output_dir"]]
 defaults <- list(
   gene_sum_ppa_th = 0.05,
   gene_score_th = 2,
-  tf_score_th = 0
+  tf_score_th = 0,
+  format = ".tsv"
 )
 
 # Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
@@ -902,10 +904,10 @@ if (file.exists(tf_expr_results_dir)) {
     distinct()
 }
 
-# # cleaning up some numerical values
-# table_results_combined <- table_results_combined %>%
-#   mutate(effect_ppa = round(effect_ppa, 4),
-#          lead_ppa = round(lead_ppa, 4))
+# cleaning up some numerical values
+table_results_combined <- table_results_combined %>%
+  mutate(across(any_of(c("effect_ppa", "lead_ppa")), ~ round(.x, 4)))
+
 
 # write this file out
-write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.txt"), quote = FALSE, sep = "\t")
+write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.txt"), quote = FALSE, sep = "\t", row.names = F)
