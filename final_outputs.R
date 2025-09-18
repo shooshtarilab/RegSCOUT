@@ -6,7 +6,8 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(circlize))
-suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(writexl))
+
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -18,7 +19,7 @@ defaults <- list(
   gene_sum_ppa_th = 0.05,
   gene_score_th = 2,
   tf_score_th = 0,
-  format = ".tsv"
+  format = "tsv"
 )
 
 # Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
@@ -42,6 +43,7 @@ user_finemap <- args[["finemap"]]
 if (user_finemap == "Y") {
   fine_loci_head <- read.table(ci_gwas_dir, sep = '\t', header = T)
   
+
   # reading in loci info file and adding its information to fine_loci_head
   loci_info <- read.table(paste0(output_dir, 'loci_info.txt'), sep = '\t', header = T)
   
@@ -678,8 +680,11 @@ if (file.exists(tf_expr_results_dir)) {
       )
   }
 }
-
-write.table(final_table_new, file = paste0(output_dir, "complete_table.txt"), row.names = FALSE, quote = FALSE, sep = "\t")
+format = if (nzchar(args[["format"]])) {
+  args[["format"]]
+} else {
+  defaults$format
+} 
 
 # now performing gene filtering, prioritization
 # first determining if filtering by tf score is desired
@@ -810,6 +815,12 @@ svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(ge
 print(heatmap_genes)
 invisible(dev.off())
 
+format = if (nzchar(args[["format"]])) {
+  args[["format"]]
+} else {
+  defaults$format
+} 
+
 # printing a summary of findings for this dataset
 summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)), 
                   "Genes" = length(unique(prioritized_table$gene)), 
@@ -818,8 +829,6 @@ summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)),
 message("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
 message(paste(summary_stat, collapse = "   "))
 
-# save prioritized table
-write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.txt"), quote = FALSE, sep = "\t")
 
 # creating a condensed version of the prioritized table
 if (file.exists(tf_expr_results_dir)) {
@@ -908,6 +917,14 @@ if (file.exists(tf_expr_results_dir)) {
 table_results_combined <- table_results_combined %>%
   mutate(across(any_of(c("effect_ppa", "lead_ppa")), ~ round(.x, 4)))
 
-
-# write this file out
-write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.txt"), quote = FALSE, sep = "\t", row.names = F)
+if (format == "tsv"){
+  message("tsv")
+  write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+  write.table(final_table_new, file = paste0(output_dir, "complete_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+  write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+} else {
+  message("xlsx")
+  write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
+  write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.txt"))
+  write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.txt"))
+}

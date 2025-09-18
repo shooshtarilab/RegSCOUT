@@ -65,6 +65,7 @@ while [[ "$#" -gt 0 ]]; do
     --gene_sum_ppa_th) gene_sum_ppa_th="$2"; shift;;
     --gene_score_th) gene_score_th="$2"; shift;;
     --ncores) ncores="$2"; shift;;
+    --format) ncores="$2"; shift;;
   esac
   shift
 done
@@ -151,7 +152,7 @@ if [ "$hic_analysis" == "Y" ]; then
 fi 
 
 if [ "$eqtl_analysis" == "Y" ]; then
-    run_rscript eQTL_Analysis.R \
+    run_rscript eQTL_Analysis_hg19.R \
         --output_dir "$output_dir" --eqtl_instruct_dir "$eqtl_instruct_dir" \
         --genome_build "$genome_build"
 fi 
@@ -160,7 +161,8 @@ if [ -n "$mode" ]; then
     run_rscript final_outputs.R \
         --output_dir "$output_dir" --finemap "$finemap" \
         --ci_gwas_dir "$ci_gwas_dir" --tf_score_th "$tf_score_th" \
-        --gene_score_th "$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th"
+        --gene_score_th "$gene_score_th" --gene_sum_ppa_th "$gene_sum_ppa_th" \
+        --format "$format"
 fi
 
 # Calculate total pipeline time
