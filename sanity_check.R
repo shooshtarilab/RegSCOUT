@@ -115,6 +115,9 @@ if (tolower(args[["finemap"]]) == "y") {
   if (length(missing_cols) > 0) {
     stop("Required columns missing in credible interval SNPs: ", paste(missing_cols, collapse = ", "))
   }
+  if (nrow(ci_gwas) == 0){
+    stop("Provided finemapped data (ci_gwas_dir) have no results.")
+  }
  # message("Credible interval gwas columns present.")
 }
 
@@ -140,6 +143,9 @@ if (tolower(args[["histone_mark_analysis"]]) == "y") {
   missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
   if (length(missing_cols) > 0) {
     stop("Required columns missing in histone mark instructions file: ", paste(missing_cols, collapse = ", "))
+  }
+  if (nrow(hist_mark_instruct)==0){
+    stop("Histone mark instruction file is empty.")
   }
   # check if contents of histone marker instruct directories exist
   for (i in hist_mark_instruct$chromhmm_dir){
@@ -182,7 +188,6 @@ if (tolower(args[["hic_analysis"]]) == "y") {
 # need to check if cell type columns matches
 if (tolower(args[["eqtl_analysis"]]) == "y") {
   eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
-  eqtl_instruct_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/instruction_files/eqtl_instructions.tsv"
   check_path(eqtl_instruct_dir)
   eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
   colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
