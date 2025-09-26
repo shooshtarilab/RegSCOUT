@@ -812,7 +812,7 @@ heatmap_genes <- Heatmap(
   rect_gp = gpar(col= "#84878a"),
   column_title_side = "bottom",
   heatmap_legend_param = list(
-    title = "Confidence Score",
+    title = "Gene Score",
     at = break_points,
     labels = legend_levels,
     color_bar = "discrete",
