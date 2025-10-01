@@ -95,7 +95,7 @@ ci_gwas_data = ci_gwas_data[ci_gwas_data$chr %in% chr_list,]
 
 # removing all SNPs with PPA <= CI PPA threshold
 
-ci_ppa_th = if (is.null(args[["ci_th"]])) {
+ci_ppa_th = if (is.null(args[["ci_ppa_th"]])) {
   message("Using default ci_ppa_th value: ", defaults$ci_th)
   defaults$ci_th
 } else if (! nzchar(args[["ci_ppa_th"]])) {
