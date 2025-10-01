@@ -1,7 +1,7 @@
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(genetics.binaRies)) # plink v1.9
+suppressPackageStartupMessages(library(genetics.binaRies))
 
 ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_alleles=FALSE)
 {
@@ -213,8 +213,6 @@ for (i in c(1:length(new_loci_head$SNP))){
     new_gwas_data[(new_gwas_data$SNP %in% snp_list_loc),'locus_start'] = new_gwas_data$POS[index] - locus_region
     new_gwas_data[(new_gwas_data$SNP %in% snp_list_loc),'locus_end'] = new_gwas_data$POS[index] + locus_region
   }
-  
-  # print(paste0("step ",i," completed"))
 }
 
 files_to_delete <- file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
