@@ -637,43 +637,48 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   all_results_df <- all_rmp_gene_df
   
   # checking to see if chicago scores or p-values are provided
+  filtered_results <- list()
   if (signif_th >= 1) {
     message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
-    for (cell_type in names(cell_type_combos)) { 
-      column_name <- cell_type_combos[[cell_type]]
-      all_results_df <- all_results_df %>%
-        filter(!(cell == cell_type & get(column_name) < signif_th))
+    for (i in seq_along(cell_type_combos)) {
+      cell_type <- names(cell_type_combos)[i]
+      column_name <- cell_type_combos[[i]]
+      rows_to_keep <- all_results_df$cell == cell_type & all_results_df[[column_name]] >= signif_th
+      filtered_results[[i]] <- all_results_df[rows_to_keep, ]
     }
   } else {
-    for (cell_type in names(cell_type_combos)) { 
-      column_name <- cell_type_combos[[cell_type]]
-      all_results_df <- all_results_df %>%
-        filter(!(cell == cell_type & get(column_name) > signif_th))
+    for (i in seq_along(cell_type_combos)) {
+      cell_type <- names(cell_type_combos)[i]
+      column_name <- cell_type_combos[[i]]
+      rows_to_keep <- all_results_df$cell == cell_type & all_results_df[[column_name]] <= signif_th
+      filtered_results[[i]] <- all_results_df[rows_to_keep, ]
     }
   }
   
-  # check to see if all_results_df is now empty
-  if (nrow(all_results_df) == 0) {
+  final_results <- bind_rows(filtered_results) %>% distinct()
+  
+  # check to see if final_results is now empty
+  if (nrow(final_results) == 0) {
     return('none')
   } else {
     # finalize this dataframe
-    all_results_df$promRegion <- paste(all_results_df$promChr,
-                                       all_results_df$promStart, 
-                                       all_results_df$promEnd, sep = "-")  
+    final_results$promRegion <- paste(final_results$promChr,
+                                      final_results$promStart, 
+                                      final_results$promEnd, sep = "-")  
     
-    all_results_df$oeRegion <- paste(all_results_df$rmpChr, 
-                                     all_results_df$rmpStart, 
-                                     all_results_df$rmpEnd, sep = "-")
+    final_results$oeRegion <- paste(final_results$rmpChr, 
+                                    final_results$rmpStart, 
+                                    final_results$rmpEnd, sep = "-")
     
-    all_results_df <- all_results_df %>%
+    final_results <- final_results %>%
       select(-rmpChr, -rmpStart, -rmpEnd, -promChr, -promStart, -promEnd, -Promoter) %>%
       arrange(cell)
     
-    colnames(all_results_df)[colnames(all_results_df) == 'Gene'] <- "gene"
+    colnames(final_results)[colnames(final_results) == 'Gene'] <- "gene"
     
-    all_results_df <- all_results_df[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
+    final_results <- final_results[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
     
-    return(all_results_df)
+    return(final_results)
   }
 }
 
@@ -799,27 +804,32 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
     overlap_df_filt <- overlap_df
     
     # checking if p-values or chicago scores are provided
+    filtered_results <- list()
     if (signif_th >= 1) {
       message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
-      for (cell_type in names(cell_type_combos)) { 
-        column_name <- cell_type_combos[[cell_type]]
-        overlap_df_filt <- overlap_df_filt %>%
-          filter(!(cell == cell_type & get(column_name) < signif_th))
+      for (i in seq_along(cell_type_combos)) {
+        cell_type <- names(cell_type_combos)[i]
+        column_name <- cell_type_combos[[i]]
+        rows_to_keep <- overlap_df_filt$cell == cell_type & overlap_df_filt[[column_name]] >= signif_th
+        filtered_results[[i]] <- overlap_df_filt[rows_to_keep, ]
       }
     } else {
-      for (cell_type in names(cell_type_combos)) { 
-        column_name <- cell_type_combos[[cell_type]]
-        overlap_df_filt <- overlap_df_filt %>%
-          filter(!(cell == cell_type & get(column_name) > signif_th))
+      for (i in seq_along(cell_type_combos)) {
+        cell_type <- names(cell_type_combos)[i]
+        column_name <- cell_type_combos[[i]]
+        rows_to_keep <- overlap_df_filt$cell == cell_type & overlap_df_filt[[column_name]] <= signif_th
+        filtered_results[[i]] <- overlap_df_filt[rows_to_keep, ]
       }
     }
-
-    # check to see if overlap_df_filt is empty
-    if (nrow(overlap_df_filt) == 0) {
+    
+    final_results <- bind_rows(filtered_results) %>% distinct()
+    
+    # check to see if final_results is empty
+    if (nrow(final_results) == 0) {
       return('none')
     } else {
       # cleaning up dataframe
-      overlap_df_filt <- overlap_df_filt %>%
+      final_results <- final_results %>%
         mutate(
           rmpRegion = paste(rmpChr, rmpStart, rmpEnd, sep = "-"),
           promRegion = paste(baitchr, baitstart, baitend, sep = "-"),
@@ -830,18 +840,18 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
         arrange(cell)
       
       # removing NAs in baitNames
-      overlap_df_filt <- overlap_df_filt[!is.na(overlap_df_filt$baitname),]
+      final_results <- final_results[!is.na(final_results$baitname),]
       
       # rename baitName and cell column and make it so there is one gene per row
-      colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitname'] <- "gene"
+      colnames(final_results)[colnames(final_results) == 'baitname'] <- "gene"
       
-      overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
+      final_results <- final_results[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
       
-      overlap_df_filt <- overlap_df_filt %>%
+      final_results <- final_results %>%
         separate_rows(gene, sep = ";") %>%
         distinct()
       
-      return(overlap_df_filt)
+      return(final_results)
     }
   }
 }
