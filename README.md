@@ -1,7 +1,7 @@
 ![logo](https://github.com/shooshtarilab/RegSCOUT/blob/main/images/RegSCOUT_logo.png)
 
 # RegSCOUT (<ins>Reg</ins>ulatory <ins>S</ins>ingle <ins>C</ins>ell <ins>O</ins>mics for <ins>U</ins>nravelling <ins>T</ins>rait Loci - Updates in Progress)
-RegSCOUT is a computational pipeline that integrates disease-associated SNPs, identified through genome-wide association studies (GWAS), with scATAC-seq, Hi-C, eQTL, TF position frequency matrices (PFMs), scRNA-seq, and GENCODE gene annotation data. Through this comprehensive integrative approach, RegSCOUT prioritizes putative gene regulatory networks relevant to the pathogenesis of complex diseases. We have made RegSCOUT into an executable docker application for ease of use; however, RegSCOUT can also be run in bash, example bash scripts can be found on the github page in the bash_scripts folder. While this ReadMe will provide a general overview of the pipeline and how it can be run, it is highly recommended that users read the more comprehensive user manual in the github (RegSCOUT_User_Manual.pdf).
+RegSCOUT is a computational pipeline that integrates disease-associated SNPs, identified through genome-wide association studies (GWAS), with scATAC-seq, Hi-C, eQTL, TF position frequency matrices (PFMs), scRNA-seq, and GENCODE gene annotation data. Through this comprehensive integrative approach, RegSCOUT prioritizes putative gene regulatory networks relevant to the pathogenesis of complex diseases. We have made RegSCOUT into an executable docker application for ease of use; however, RegSCOUT can also be run in bash, example bash scripts can be found on the github page in the bash_scripts folder. While this README will provide a general overview of the pipeline and how it can be run, <ins>it is highly recommended that users read the more comprehensive user manual in the github</ins> (RegSCOUT_User_Manual.pdf).
 
 ## Required R version and libraries:
 RegSCOUT can be run on R versions 4.4.x and 4.5.x. It requires these libraries: tools, Seurat, Signac, GenomicRanges, genetics.binaRies, R.utils, atSNP, TFBSTools, JASPAR2024, stringr, circlize, ComplexHeatmap, R.utils, monocle3, cicero, Repitools, reshape2, dplyr, purrr, BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, rtracklayer, data.table, writexl, tidyr, and tibble. <ins>Monocle3 must be installed prior to installing cicero</ins> (cicero analysis will not run properly if not). Cicero should be installed following instructions found in this link: https://cole-trapnell-lab.github.io/cicero-release/docs_m3/. 
@@ -9,60 +9,26 @@ RegSCOUT can be run on R versions 4.4.x and 4.5.x. It requires these libraries: 
 ## Note about genome builds:
 When using RegSCOUT please ensure that all files provided to this pipeline are in the same genome build. E.g., PLINK bfiles (.bed, .bim, .fam), GWAS summary statistics, GWAS lead SNPs, GWAS locus region information, fine-mapped GWAS data, scATAC-seq datasets, Hi-C datasets, eQTL datasets, histone mark results datasets, and GENCODE gene information. RegSCOUT does not perform the lifting over of genome coordinates from one genome annotation version to another, this must be done prior to use of the pipeline. 
 
+## Important Notes When Using RegSCOUT
+i.	All directories specified in parameters passed to RegSCOUT should end with “/”. 
+ii.	Downstream stages of the pipeline will not work if the --mode parameter is not used (see sections 1.5, 4, and 5 of this manual). Please ensure you select a mode for RegSCOUT and provide scATAC-seq data to the pipeline.
+iii.	Please note that case (lower/upper case) matters in all aspects of this pipeline (parameters, column names for input files, etc.). Please keep this in mind when using parameters and creating input files, for example. 
+iv.	When providing numerical values to parameters, do not incorporate commas or spaces for thousands, e.g., use 100000 not 100,000.
+v.	All chromosome numbers provided in files to RegSCOUT must be of the following naming convention 'chr' + 'number' (no space between). For example: chr8.
+vi.	Please see below explanation of mandatory RegSCOUT parameter:
+
+
 ## Pipeline Overview
 ![Pipeline Overview](https://github.com/shooshtarilab/RegSCOUT/blob/main/images/Workflow_schematic.png)
 
-Above is a general overview of the RegSCOUT workflow. Each step will be explained below with a description of inputs and outputs. Although these steps are numbered 1-10, many are optional and dependent on what datasets are available to the user:
+Above is a general overview of the RegSCOUT workflow. In the following sections of this README, descriptions of parameters, inputs, and outputs, for each step, will be provided. Although the steps shown in the figure are numbered sequentially from 1-8, many are optional and dependent on what data is available to the user.
 - If --mode *peak_table* is requested, step 3 will not be run. 
-- If the --finemap parameter is not specified, steps 1-2 will not run. 
-- If the --hic_analysis parameter is not specified, step 6 will not run.
-- If the --eqtl_analysis parameter is not specified, step 7 will not run.
-- If the --histone_mark_analysis parameter is not specified, step 8 will not run.
-- If the --tf_expr_analysis parameter is not specified, step 9 will not run.
+- If the --finemap parameter is not specified, steps 1 & 2 will not run. 
+- If the --hic_analysis parameter is not specified, step 5b will not run.
+- If the --eqtl_analysis parameter is not specified, step 5c will not run.
+- If the --histone_mark_analysis parameter is not specified, step 6 will not run.
+- If the --tf_expr_analysis parameter is not specified, step 7 will not run.
 
-A table of all parameters included in RegSCOUT including which steps the parameter is relevant to, potential values, default value, and general purpose of the parameter can also be found below.
-
-## Table of All Parameters
-| Parameter | Purpose and Potential Values | Default Value | Relevant Steps |
-| --------------------- | ----------------------------------------------------- | ---------------- | ---------------------- |
-| --snp_ref_dir | Specifies the directory containing the bfiles used for PLINK preprocessing of GWAS data and LD analysis. | No default, must be set by user. | 1 |
-| --population | Specifies the population/ancestry that the bfiles were created from (e.g., EUR, EAS). | No default, must be set by user. | 1 |
-| --sum_stats_dir | Specifies the path to the GWAS summary statistics. | No default, must be set by user | 1 |
-| --lead_snps_dir | Specifies the path to GWAS lead SNP information. | No default, must be set by user | 1 |
-| --plink2_dir | Specifies the path to the Plink2 executable. | No default, must be set by user | 1 |
-| --sample_num | Sample size (total number of cases and controls) of the GWAS. If a sample size column (N) with sample size for each SNP is provided in the GWAS summary statistics, this parameter should be set to *present*. Alternatively, an integer value can be provided in this parameter to specify the overall sample size of the GWAS, this should only be provided if a sample size for each SNP is not readily available. | *present* | 1 |
-| --locus_region | The # of bps to add on both sides of lead SNP positions to define locus regions. | 1,000,000 | 1 |
-| --ld_th | SNPs are not included in a locus if they obtain an abs(LD value) (absolute value), with the lead SNP, less than or equal to this threshold. | 0.25 | 1 |
-| --fgwas_dir | Specifies the path to the fgwas executable. | No default, must be set by user | 2 |
-| --ci_th | For each locus, RegSCOUT filters for the smallest group of SNPs whose cumulative posterior probabilities of association (PPAs) add up to this threshold. | 0.95 | 2 |
-| --ci_ppa_th | Each CI SNP must have a PPA greater than this threshold. | 0.01 | 2 |
-| --finemap | Set this parameter to *Y* if fine-mapping should be conducted by RegSCOUT using [fgwas](https://github.com/joepickrell/fgwas). If fine-mapping is not desired (i.e., the user already has fine-mapping results), this parameter should not be used. | Not conducted | 1, 2 |
-| --seurat_obj_dir | Specifies the path to the scATAC-seq Seurat object. | No default, must be set by user | 3 |
-| --cell_count_th | Cell types with less than this number of cells in the scATAC-seq dataset will be removed. | 3 | 3 |
-| --coaccess_th | The co-accessibility value between two peaks must be greater than this threshold to be output in cicero results. | 0.05 | 3 |
-| --cic_genomic_window | Size of the regions on either side of an open chromatin region that cicero will look for peak to peak links in. | 2,000,000 | 3 |
-| --peak_th | The threshold above which a peak is considered to be open in a cell type. E.g., a peak can be considered open if it is accessible in 1/10 or 10% of cells of a cell type. | 0.1 | 3 |
-| --jaspar_mtx_dir | Specifies the path to a user provided file with JASPAR TF PFMs. If set to *none*, the JASPAR2024 R library will be used to obtain TF PFMs. | *none* | 4 |
-| --ci_gwas_dir | Only use this parameter if fine-mapping <ins>was not</ins> conducted by RegSCOUT. Specifies the path to fine-mapping results. | If fine-mapping was not conducted by RegSCOUT: no default, must be set by user | 4 |
-| --ncores | Number of cores to use when computing TF-SNP pair p-values using atSNP. Generally a greater number of cores means faster computing time. | 2 | 4 |
-| --genome_build | The reference genome that RegSCOUT should conduct analyses in, either hg19 or hg38. | No default, must be set by user | 3, 4 |
-| --prom_th_up | Number of bps to add upstream a TSS to define the gene promoter. | 2,000 | 5 |
-| --prom_th_down | Number of bps to add downstream a TSS to define the gene promoter. | 2,000 | 5 |
-| --gencode_dir | Specifies the path to GENCODE gene information. | No default, must be set by user | 5 |
-| --mode | The user must indicate whether they have a scATAC-seq Seurat object or if they have a table of open chromatin regions as well as cicero results already generated. If the user is providing a seurat object, this parameter should be set to *ATAC_obj*. If the user is providing a peak table and cicero results, this parameter should be set to *peak_table*. | No default, must be set by user | 3, 4, 5 |
-| --hic_analysis | Set this parameter to *Y* if gene regulatory analysis using Hi-C analysis is desired. If Hi-C analysis is not desired, do not use this parameter | Analysis not conducted | 6 |
-| --hic_instruct_dir | Specifies the path to user generated Hi-C analysis instructions. | No default, must be set by user | 6 |
-| --eqtl_analysis | Set this parameter to *Y* if gene regulatory analysis using eQTL analysis is desired. | Analysis not conducted | 7 |
-| --eqtl_instruct_dir | Specifies the path to user generated eQTL analysis instructions. | No default, must be set by user | 7 |
-| --histone_mark_analysis | Set this parameter to *Y* if analysis of risk-mediating peaks using user-provided histone mark data is desired | Analysis not conducted | 8 |
-| --hist_mark_instruct_dir | Specifies the path to user generated histone mark analysis instructions. | No default, must be set by user | 8 |
-| --tf_expr_analysis | Only use this parameter if TF expression analysis using scATAC-seq, scRNA-seq, or both is desired. Set to *atac* if TF expression analysis is desired using scATAC-seq data that was provided as input earlier for --mode *peak_table* or *ATAC_obj*. Set to *rna* if analysis is desired using user-provided scRNA-seq data. Set to *both* if both scATAC-seq and scRNA-seq analyses are desired. | No conducted | 9 |
-| --scrna_instruct_dir | Specifies the path to user generated scRNA-seq analysis instructions spreadsheet. | No default, must be set by user | 9 |
-| --tf_rna_quantile_th | The quantile for percent expression of genes in a cell type, above which a TF will be considered expressed in that cell type. | 0.25 | 9 |
-| --tf_score_th | Genes will only be prioritized if one of their associated TFs attains a score higher than this threshold. | -1 | 10 |
-| --gene_sum_ppa_th | Genes will only be prioritized if their sum ppa value is greater than this threshold. | 0.05 | 10 |
-| --gene_score_th | Genes will only be prioritized if their gene score is greater than this threshold. | 1 | 10 |
-| --output_dir | The directory in which all RegSCOUT output files will be stored. | No default, must be set by user | 1 through 10 |
 
 *All directories specified in parameters should end with "/".
 
