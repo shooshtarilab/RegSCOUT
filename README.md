@@ -182,4 +182,109 @@ These datasets should be organized as tab-separated files (either as a .txt or .
 - *Gene information provided + not cell sorted (i.e., bulk or just containing one cell type)*: For such data, seven columns must be present in the dataset, ‘baitchr’ (the chromosome of the region considered a gene’s promoter), ‘baitstart’ (the start position of that region), ‘baitend’ (the end position of that region), ‘baitname’ (the name of the gene), ‘oechr’ (the chromosome of the interacting region), ‘oestart’ (the start position of the interacting region), and ‘oeend’ (the end position of the interacting region). This dataset <ins>must be filtered for statistical significance before</ins> being provided to RegSCOUT.
 - *Gene information provided + cell sorted (i.e., containing > 1 cell type)*: For such data, a variable number of columns is required just depending on how many cell types are present in the Hi-C dataset, specifically how many of those cell types should be used in RegSCOUT Hi-C analysis. Seven columns must always be present which are: ‘baitchr’, ‘baitstart’, ‘baitend’, ‘baitname’, ‘oechr’, ‘oestart’, and ‘oeend’. Descriptions of these columns can be found in the description of the previous file type (iii). In addition to these columns, there must be one column for each cell type that the user wants to use in the Hi-C dataset, e.g., if using adaptive and cytotoxic NK cells in the Hi-C dataset to inform risk-mediating peak to gene interactions in those cell types, there must be one column for each of those cell types in the Hi-C dataset. These cell type-specific columns should contain significance values for each chromatin interaction for the cell types specified. These column names should match the names of cell types in the ‘hic_cell_types’ column of the user provided Hi-C instructions file. In this case, <ins>RegSCOUT will perform filtering for significance</ins>.
 
+### <ins>Output files</ins>
+| Output file | Description |
+| ----------- | ----------- |
+| all_hic_results.txt | The main output of Hi-C analysis. This is a table of all Hi-C interactions that linked risk-mediating peaks to genes. This table will have five columns: ‘cell’ (the scATAC-seq cell type in which the interaction was found), ‘gene’ (the gene name), ‘rmpRegion’ (the risk-mediating peak region), ‘promRegion’ (the Hi-C region that represents the gene’s promoter), ‘oeRegion’ (the Hi-C region interacting with the gene promoter that also colocalized with the risk-mediating peak region). |
 
+## eQTL Analysis (--eqtl_analysis Y; Step 5c)
+If analysis of eQTL data provided by the user, to assist in the prioritization of genes, is desired, the user can set the --eqtl_analysis parameter to *Y*.
+
+### <ins>Parameters</ins>
+| Parameter | Purpose and Potential Values | Default Value | 
+| --------- | ---------------------------- | ------------- | 
+| --eqtl_analysis | Set this parameter to Y if analysis of user provided eQTL data, to assist in prioritization of genes, is desired. If eQTL analysis is not desired, do not use this parameter. | Analysis not conducted |
+| --eqtl_instruct_dir | Specifies the path to user-generated eQTL analysis instructions file. | Specifies the path to user-generated eQTL analysis instructions file. |
+
+### <ins>Input files</ins>
+
+### eQTL Instructions File
+This file must be provided to RegSCOUT as either a .tsv, .csv, or space/tab-separated .txt file. This must be a user-generated file which is used to inform RegSCOUT about how it should conduct eQTL analysis. The instructions file needs to have 3 columns labelled: ‘eqtl_dir’, ‘atac_cell_types’, and ‘tabix’. 
+
+Each row of the instructions file should refer to one eQTL dataset. The ‘eqtl_dir’ parameter specifies the path to this eQTL dataset. Effect-SNPs identified earlier by RegSCOUT were colocalized with open chromatin regions in scATAC-seq data, in step 5a. Through that step, effect-SNPs are linked to certain cell types. The ‘atac_cell_types’ column indicates for which cell types (in the scATAC-seq data) the eQTL dataset should be used to link SNPs to gene expression. If there are multiple cell types, these cell types should be comma, but not space, separated. The ‘tabix’ column should always be present and set to TRUE or FALSE. The column should only be set to TRUE if the user would like to use Tabix indexing (https://pmc.ncbi.nlm.nih.gov/articles/PMC3042176/) in their eQTL analysis. More information on Tabix and its incorporation in the pipeline can be found in the user manual. RegSCOUT can handle a combination of Tabix and nontabix files, it will handle each dataset separately when performing eQTL analysis. If a Tabix file is being used, ‘eqtl_dir’ should provide the path to the bgzipped file (.gz) used to create the tabix file (.tbi), not the Tabix file itself. Both the .tbi and .gz file are required for Tabix analysis to run and should be placed in the same directory. An example of an eQTL instructions file can be found in the instruction_files folder on the github.
+
+### eQTL Datasets
+RegSCOUT will not filter any of the eQTL datasets provided to it for significance, the user must conduct this filtering prior to using the pipeline. The pipeline also operates off gene names (e.g., TBXT) and not ENSEMBL gene IDs (e.g., ENSG00000164458). Gene IDs must be converted to gene names prior to using the pipeline. 
+
+For datasets that are not being used for Tabix-based analysis, they should be organized as tab-separated files (either as a .txt or .tsv) with a header. These files should contain at least two columns: ‘snp’ (SNP rsIDs) and ‘gene’ (the gene with expression linked to the SNP). If only those two columns are provided, RegSCOUT will conduct eQTL analysis by matching SNPs based on rsIDs. Two other columns can be provided to avoid matching based on rsIDs if not desired: ‘chr’ (the chromosome the SNP is on) and ‘pos’ (the position of the SNP on the chromosome). If these two columns are provided alongside the ‘snp’ and ‘gene’ columns, RegSCOUT will conduct eQTL analysis by matching SNPs based on chromosome and position number. 
+
+If Tabix-based analysis is desired, the user must provide their eQTL datasets as both a bgzipped file (.gz) and Tabix file (.tbi). If the user does not have these files, they can convert their tab-separated eQTL results file into these two files. More info on this can be found in the user manual.
+
+### <ins>Output files</ins>
+| Output file | Description |
+| ----------- | ----------- |
+| all_eqtl_results.txt | The main output of eQTL analysis. This is a table of all eQTL results that colocalized with risk-mediating peak overlapping effect-SNPs, in a cell type-specific manner. This table will have four columns: ‘snp’ (SNP rsID), ‘rmp’ (the risk-mediating peak that the effect-SNP overlapped), ‘cell’ (the cell type that the SNP-gene link was established in), ‘gene’ (the name of the gene). |
+
+## Histone Mark Analysis (--histone_mark_analysis Y; Step 6)
+If analysis of histone mark data provided by the user, to investigate the functions of risk-mediating peaks, is desired, the user can set the –histone_mark_analysis parameter to Y. Histone mark analysis is conducted based on results generated by chromHMM (https://compbio.mit.edu/ChromHMM/).
+
+### <ins>Parameters</ins>
+| Parameter | Purpose and Potential Values | Default Value | 
+| --------- | ---------------------------- | ------------- | 
+| --histone_mark_analysis | Set this parameter to Y if analysis of user provided histone mark data, to investigate functions of risk-mediating peaks, is desired. If this is not desired, do not use this parameter. | Analysis not conducted |
+| --hist_mark_instruct_dir | Specifies the path to user generated histone mark analysis instructions file. | No default, must be set by user |
+
+### <ins>Input files</ins>
+
+### Histone Mark Instructions File
+This file must be provided to RegSCOUT as either a .tsv, .csv, or space/tab-separated .txt file. This must be a user-generated file which is used to inform RegSCOUT about how it should conduct histone mark analysis. The instructions file needs to have 3 columns labelled: ‘chromHMM_dir’, ‘atac_cell_types’, and ‘chromHMM_cell_types’. 
+
+Each row of the instructions file should refer to one cell type-specific chromHMM dataset. Additionally, each row of the file should refer to a different dataset. The ‘chromHMM_dir’ column specifies the path to each chromHMM dataset. The ‘atac_cell_types’ column refers to the scATAC-seq cell types whose risk-mediating peaks should be analyzed using the chromHMM dataset. If there are multiple cell types, these cell types should be comma, but not space, separated (see example table below). The ‘chromHMM_cell_types’ column should specify the cell type in which chromHMM analysis was conducted. Each entry of the ‘chromHMM_cell_types’ should only contain <ins>one cell type name</ins>. This cell type name can be arbitrary and created by the user, e.g., ‘neurons_chromhmm’, a name just must be present. Each chromHMM dataset provided to RegSCOUT should only contain chromHMM results for <ins>one cell type</ins>. An example of a histone mark instructions file can be found in the instruction_files folder on the github.
+
+### Histone Mark Datasets
+RegSCOUT will not do any preprocessing/filtering of these chromHMM results datasets that it is provided, any preprocessing/filtering must be conducted by the user prior to running the pipeline. These datasets must be cell type-specific, and each dataset should only contain chromHMM results for one cell type. These files should be tab-separated files (.tsv or .txt), with a header. Additionally, these files should contain at least these four columns: ‘chr’ (the chromosome of the region analyzed), ‘start’ (the start position of the region), ‘end’ (the end position of the region), and ‘state’ (the chromHMM label assigned to the region). 
+
+### <ins>Output files</ins>
+| Output file | Description |
+| ----------- | ----------- |
+| all_histone_mark_results.txt | The main output of histone mark analysis. This is a table of all risk-mediating peaks that colocalized with chromHMM results in a cell type-specific manner. This table will have four columns: ‘rmp’ (a risk-mediating peak), ‘state’ (the chromHMM labels associated with the peak), ‘version’ (the number of chromatin states chromHMM worked with e.g., 15-state or 18-state chromHMM), and ‘cell’ (the cell type that the function of this risk-mediating peak was established in). |
+
+## TF Expression Analysis (--tf_expr_analysis atac, rna, or both; Step 7)
+Disease-relevant TFs are first determined through identification of fine-mapped SNP-TF pairs in step 4 of RegSCOUT (note that the SNPs in these pairs are termed effect-SNPs). These SNP-TF pairs are then colocalized in step 5a with cell type-specific open chromatin regions – this is how cell type-specific TFs relevant to a disease are initially identified. If analysis of scATAC-seq data and/or scRNA-seq data provided by the user to contribute evidence toward the expression of TFs in the cell types they have been linked to in step 5 is desired, the --tf_expr_analysis parameter should be used. 
+
+### <ins>Parameters</ins> 
+| Parameter | Purpose and Potential Values | Default Value | 
+| --------- | ---------------------------- | ------------- | 
+| --tf_expr_analysis | Only use this parameter if TF expression analysis using scATAC-seq, scRNA-seq, or both is desired. Set to *atac* if TF expression analysis is desired using only scATAC-seq data that was provided as input for RegSCOUT earlier, for --mode peak_table or ATAC_obj. Set to *rna* if analysis is desired using only user-provided scRNA-seq data. Set to *both* if both scATAC-seq and scRNA-seq analyses are desired. E.g., --tf_expr_analysis both. | Analysis not conducted |
+| --scrna_instruct_dir | Specifies the path to user-generated scRNA-seq analysis instructions file. Only required if scRNA-seq analysis has been requested, e.g., do not use this parameter if running --tf_expr_analysis atac. | No default, must be set by user |
+
+### <ins>Input files</ins>
+
+### scATAC-seq Seurat Object
+Only one of a Seurat object or a peak-cell type table need to have been provided to RegSCOUT. This was provided to RegSCOUT if --mode was set to *ATAC_obj* and does not need to be provided again.
+
+### Peak-Cell Type Table
+Only one of a Seurat object or a peak-cell type table need to have been provided to RegSCOUT. This was provided to RegSCOUT if –mode was set to *peak_table* and does not need to be provided again.
+
+### scRNA-seq Instructions File
+For a thorough explanation of this instructions file, please see section 9.2 of the user manual on the github. An example of a scRNA-seq instructions file can be found in the instruction_files folder on the github.
+
+### scRNA-seq Seurat Object
+All scRNA-seq data should be provided in the form of a Seurat object. This data should be preprocessed before use in RegSCOUT. The provided Seurat objects should hold their gene-by-cell counts matrices in either the ‘counts’ or ‘data’ layer of the object. In addition, cell type labels should be provided as cell identities in the Seurat object (and accessible using the Idents() function of Seurat). This article provides more information on how to establish cell identities/class labels: https://satijalab.org/seurat/articles/essential_commands.html (under the ‘Identity class labels’ heading). The Seurat object can be provided to RegSCOUT as either an .RDS or .RData file, both will work.
+
+### <ins>Output files</ins>
+| Output file | Description |
+| ----------- | ----------- |
+| all_TF_expr_results.txt | The main output of TF expression analysis. This is a matrix with column names as cell types and row names as TFs. If --tf_expr_analysis was set to both, then the matrix can have values of ‘none’, ‘atac’, ‘rna’, or ‘both’, depending on what lines of evidence support the expression of a TF in a specific cell type. For example, if for the TF BACH2 in interneurons, the result was ‘rna’, then only scRNA-seq analysis supports the expression of that TF in that cell type. Whereas, if it was ‘both’ then both scATAC-seq and scRNA-seq analysis support its expression. If it was ‘none’ then neither scATAC-seq or scRNA-seq support the expression of that TF in the cell type. If --tf_expr_analysis was set to atac, then only the values of ‘none’ or ‘atac’ will be present in the matrix. If --tf_expr_analysis was set to rna, then only the values of ‘none’ or ‘rna’ will be present in the matrix. |
+| cell_tf.svg | This heatmap combines results of TF-SNP pair colocalization with cell type-specific open chromatin regions, and results of cell type-specific TF expression analysis. Cell types can be found on the x-axis and TFs can be found on the y-axis. This heatmap will have up to 5 different categories in its legend depending on the type of TF expression analysis requested by the user (i.e., atac, rna, or both). The labels on the legend include ‘no evidence’ (when no evidence for the relevance of the TF in the cell type is found), ‘snp impact’ (when the TF’s binding affinity is impacted by a SNP and that SNP-TF pair colocalizes to an open chromatin region in that cell type), ‘snp impact + atac’ (includes the criteria of ‘snp impact’ + scATAC-seq analysis supports the expression of the TF in that cell type), ‘snp impact + rna’ (includes the criteria of ‘snp impact’ + scRNA-seq analysis supports the expression of the TF in that cell type), and ‘snp impact + atac + rna’ (includes the criteria of ‘snp impact’ and both scRNA-seq and scATAC-seq analysis support the expression of the TF in that cell type). |
+
+## Gene Prioritization (Step 8)
+This step will always run as long as the --mode parameter is used; no other parameter must be specified for this step to run. This step will perform gene prioritization based on criteria that can be set by the user, but defaults are available. More information the criteria used can be found in section 10 of the user manual.
+
+### <ins>Parameters</ins>
+See section 10 of user manual for explanations of gene score, gene sum PPA, and TF score. Set any of these parameters to 0 if prioritization using that parameter is not desired (note: gene score will always have a value of at least 1). By default, RegSCOUT does not prioritize using TF score.
+
+| Parameter | Purpose and Potential Values | Default Value | 
+| --------- | ---------------------------- | ------------- | 
+| --gene_score_th | The threshold for gene score (lines of evidence supporting a gene) that a gene should obtain a score <ins>greater than or equal to</ins> in order to be prioritized. | 2 |
+| --gene_sum_ppa_th | Genes will only be prioritized if their sum ppa value is <ins>greater than or equal to</ins> this threshold. | 0.05 |
+| --tf_score_th | A SNP-TF pair to gene link will only be prioritized if the TF attains a score <ins>greater than or equal to</ins> this threshold. | 0 |
+
+### <ins>Output files</ins>
+| Output file | Description |
+| ----------- | ----------- |
+| prioritized_table_condensed.tsv/xlsx | This is the most condensed table output by RegSCOUT, which only contains results after gene prioritization. This is a summary table for all prioritized results. An explanation of columns in this table can be found in section 10.2 of the user manual. |
+| cell_gene.svg | This is a heatmap that shows the genes that were prioritized by RegSCOUT and the cell types that they were prioritized in. The x-axis consists of cell types and prioritized gene names are located on the y-axis. The colour of each heatmap square corresponds to the gene score obtained by that gene in that cell type. |
+
+## Using Bash Scripts
+RegSCOUT is available as a docker application for ease of use; however, it can also be run using bash scripts. Example bash scripts can be found on the github repository, in the bash_scripts folder. Section 11 of the user manual offers further explanation for how RegSCOUT can be run in bash. 
