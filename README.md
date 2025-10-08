@@ -159,6 +159,23 @@ Output files listed below are in addition to files output using --mode peak_tabl
 | [cell type name].filtered_coaccessible_sites4s.txt | These files are the outputs of cicero analysis. They will have three columns: ‘Peak1’, ‘Peak2’, and ‘coaccess’ (the co-accessibility value calculated between Peak1 and Peak2). Only peak-peak interactions with co-accessibility greater than the threshold set using --coaccess_th will be found in these files. One file will be output for each cell type in the scATAC-seq data. |
 
 ## Hi-C Analysis (--hic_analysis Y; Step 5b)
+If analysis of Hi-C data, provided by the user, to assist in the prioritization of genes is desired, the user can set the --hic_analysis parameter to *Y*. 
+
+### <ins>Parameters</ins>
+
+| Parameter | Purpose and Potential Values | Default Value | 
+| --------- | ---------------------------- | ------------- | 
+| --hic_analysis | Set this parameter to Y if analysis of user-provided Hi-C data to assist in prioritization of genes is desired. If Hi-C analysis is not desired, do not use this parameter. | Analysis not conducted |
+| --hic_instruct_dir | Specifies the path to user generated Hi-C analysis instructions file. | No default, must be set by user |
+
+### <ins>Input files</ins>
+
+### Hi-C Instructions File
+This file must be provided to RegSCOUT as either a .tsv, .csv, or space/tab-separated .txt file. This must be a user-generated file which is used to inform RegSCOUT about how it should conduct Hi-C analysis. The instructions file needs to have 6 columns labelled: ‘hic_dir’, ‘genes_present’, ‘cell_sorted’, ‘atac_cell_types’, ‘hic_cell_types’, and ‘signif_threshold’. 
+
+Each row of the instructions file will refer to one Hi-C dataset. The ‘hic_dir’ column will denote the path to the Hi-C dataset. The ‘genes_present’ column will indicate whether the Hi-C dataset contains genes linked to one of the two genomic regions, this column will have a value of either TRUE or FALSE. If set to FALSE, this means the Hi-C dataset does not contain any gene names (no promoter capture experiment or gene colocalization analysis was conducted). The ‘cell_sorted’ column will indicate whether a Hi-C dataset has > 1 cell type identified in it. This column will have values of TRUE or FALSE, if set to TRUE this means that > 1 cell type can be found in the dataset. If FALSE, that means the dataset only contains Hi-C information for a single cell type. The ‘atac_cell_types’ column indicates the cell types from scATAC-seq for which risk-mediating peak and gene interactions should be investigated using the Hi-C dataset. If there are multiple cell types, they should be comma, but not space, separated (see example below). The ‘hic_cell_types’ column should only be used when the Hi-C dataset has > 1 cell type. It should indicate what cell types in the Hi-C dataset will be used for Hi-C analysis in RegSCOUT. These cell types should also be comma, but not space, separated. Please note that the list of cell types in ‘atac_cell_types’ should correspond directly with the list in ‘hic_cell_types’. For example, if the user hopes to use one broad Hi-C cell type to provide evidence for two separate cell types identified in scATAC-seq, that Hi-C cell type can be listed twice in the same order that the scATAC-seq cell types are listed. An example of this case can be seen in the example instructions table below (see second row). Finally, the ‘signif_threshold’ column can be left blank, unless ‘cell_sorted’ is set to TRUE (the dataset has > 1 cell type). In this case, RegSCOUT will filter Hi-C results for significance according to the threshold provided in this column, in a cell type-specific manner (this is the only case where RegSCOUT will filter a user-provided dataset for significance). RegSCOUT will expect Hi-C dataset column names to include cell type names, where for each cell type, significance scores are provided under its associated column. RegSCOUT can filter based on CHiCAGO scores as well as p-values and will automatically detect which has been provided (if signif_threshold is >= 1, it is assumed to be filtering for CHiCAGO scores). An example of a Hi-C instructions file can be found in the instruction_files folder on the github.
+
+
 
 
 
