@@ -103,7 +103,7 @@ if (tolower(args[["finemap"]]) == "y") {
   extension_list = c(".bed",".bim",".fam") # plink2 also have an alternative extension name for binary files, see pgen
   for (ext in extension_list){
     filename = paste0(prefix_name, ext)
-    check_path(paste0(output_dir,filename))
+    check_path(paste0(snp_ref_dir,filename))
   }
 } else {
   # ci_gwas_dir
