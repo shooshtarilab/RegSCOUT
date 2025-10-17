@@ -118,8 +118,7 @@ confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, pro
 # has only one cell type
 gene_percent_expr_ct <- function(seurat_obj, matrix_location) { 
   # obtaining gene expression data
-  assay = seurat_obj[["RNA"]]
-  expr_data = slot(assay, matrix_location)
+  expr_data = LayerData(seurat_obj, assay = "RNA", layer = matrix_location)
   
   # calculating gene expression frequencies
   results <- rowSums(expr_data > 0) / ncol(expr_data)
@@ -183,8 +182,7 @@ quant_per_celltype <- function(percent_df, quantile_threshold) {
 # function 3a: creating function for TF expression analysis, if scRNA-seq dataset only has one cell type
 tf_expression_analysis_ct <- function(seurat_obj, TF_list, quant_val, cell_types, matrix_location) {
   # obtaining gene expression data
-  assay = seurat_obj[["RNA"]]
-  expr_data = slot(assay, matrix_location)
+  expr_data = LayerData(seurat_obj, assay = "RNA", layer = matrix_location)
   
   # obtain TF expression data
   expr_data = expr_data[rownames(expr_data) %in% TF_list,]
