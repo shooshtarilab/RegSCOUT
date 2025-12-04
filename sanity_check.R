@@ -121,130 +121,132 @@ if (tolower(args[["finemap"]]) == "y") {
  # message("Credible interval gwas columns present.")
 }
 
-# genome_build
-genome_build = args[["genome_build"]]
-genome_build = tolower(genome_build)
-req_builds = c("hg19","hg38")
-if (!(genome_build %in% req_builds)) {
-  stop("Invalid genome build: '", genome_build, 
-       "'. Allowed values are: ", paste(req_builds, collapse = ", "))
-}
-
-# gencode_dir
-gene_annot_dir = args[["gencode_dir"]]
-check_path(gene_annot_dir)
-
-if (tolower(args[["histone_mark_analysis"]]) == "y") {
-  hist_mark_instruct_dir = args[["hist_mark_instruct_dir"]]
-  check_path(hist_mark_instruct_dir)
-  hist_mark_instruct = read.table(hist_mark_instruct_dir, header = T, nrows = -1)
-  colnames(hist_mark_instruct) = tolower(colnames(hist_mark_instruct))
-  req_list = c("chromhmm_dir","atac_cell_types","chromhmm_cell_types")
-  missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
-  if (length(missing_cols) > 0) {
-    stop("Required columns missing in histone mark instructions file: ", paste(missing_cols, collapse = ", "))
-  }
-  if (nrow(hist_mark_instruct)==0){
-    stop("Histone mark instruction file is empty.")
-  }
-  # check if contents of histone marker instruct directories exist
-  for (i in hist_mark_instruct$chromhmm_dir){
-    check_path(i, verbose = 0)
-    hist_mark = read_file(i)
-    colnames(hist_mark) = tolower(colnames(hist_mark))
-    req_list = c("chr","start","end","state")
-    missing_cols = setdiff(req_list, colnames(hist_mark))
-    if (length(missing_cols) > 0) {
-      stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
-    }
-  }
-  # message("Histone mark instructions columns present.")
-}
-
-if (tolower(args[["hic_analysis"]]) == "y") {
-  hic_instruct_dir = args[["hic_instruct_dir"]]
-  check_path(hic_instruct_dir)
-  hic_instruct = read_file(hic_instruct_dir, nrows = -1)
-  colnames(hic_instruct) = tolower(colnames(hic_instruct))
-  req_list = c("hic_dir","genes_present","cell_sorted","atac_cell_types","hic_cell_types")
-  missing_cols = setdiff(req_list, colnames(hic_instruct))
-  if (length(missing_cols) > 0) {
-    stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
-  }
-
-  # check if contents of hic instruct directories exist
-  # for (i in hic_instruct$hic_dir){
-  #   check_path(i, verbose = 0)
-  #   hic_file = read_file(i)
-  #   colnames(hic_file) = tolower(colnames(hic_file))
-  #   req_list <- c("chr1", "start1", "end1", "chr2", "start2", "end2")
-  #   missing_cols = setdiff(req_list, colnames(hic_file))
-  #   if (length(missing_cols) > 0) {
-  #     stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
-  #   }
-  # }
-}
-
-# need to check if cell type columns matches
-if (tolower(args[["eqtl_analysis"]]) == "y") {
-  eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
-  check_path(eqtl_instruct_dir)
-  eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
-  colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
-  req_list = c("eqtl_dir","atac_cell_types")
-  missing_cols = setdiff(req_list, colnames(eqtl_instruct))
-  if (length(missing_cols) > 0) {
-    stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
-  }
-
-  # check if contents of eqtl instruct directories exist
-  for (i in 1:nrow(eqtl_instruct)){
-    check_path(eqtl_instruct$eqtl_dir[i], verbose = 0)
-    # check if index file exists if tabix option is T
-    if ("tabix" %in% colnames(eqtl_instruct) && as.logical(toupper(eqtl_instruct$tabix[i]))) {
-      check_path(paste0(eqtl_instruct$eqtl_dir[i],".tbi"), verbose = 0)
-    } else { # for non tabix file, ensure colnames exist
-    # user must either provide "snp" OR "chr+pos" OR both
-      eqtl_data = read_file(eqtl_instruct$eqtl_dir[i])
-      colnames(eqtl_data) = tolower(colnames(eqtl_data))
-      req_snp <- "snp"
-      req_chrpos <- c("chr", "pos")
-      has_snp <- req_snp %in% colnames(eqtl_data)
-      has_chrpos <- all(req_chrpos %in% colnames(eqtl_data))
-      if (!(has_snp || has_chrpos)) {
-        stop('Must have either "chr" & "pos" OR "snp" columns (or both) in: ', basename(eqtl_instruct$eqtl_dir[i]))
-      } else if (has_snp && !has_chrpos) { # warn user that they only have a snp column
-        warning('Only "snp" column found (no "chr" & "pos") in: ', basename(eqtl_instruct$eqtl_dir[i]))
-      }
-    }
-  }
-  # message("eQTL instructions columns present.")
-}
-
-tf_setting = args[["tf_expr_analysis"]]
-tf_setting = tolower(tf_setting)
-tf_list = c("atac","rna","both","none")
-if (!(tf_setting %in% tf_list)) {
-  stop("Invalid TF option: '", tf_setting, 
-       "'. Allowed values are: ", paste(tf_list, collapse = ", "))
-}
-
-if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
-  scrna_instruct_dir = args[["scrna_instruct_dir"]]
-  check_path(scrna_instruct_dir)
-  scrna_instruct = read_file(scrna_instruct_dir, nrows=-1)
-  colnames(scrna_instruct) = tolower(colnames(scrna_instruct))
-  req_list = c("scrna_dir","atac_cell_types","rna_cell_types","one_cell_type_seurat","matrix_loc")
-  missing_cols = setdiff(req_list, colnames(scrna_instruct))
-  if (length(missing_cols) > 0) {
-    stop("Required columns missing in scrna instructions file: ", paste(missing_cols, collapse = ", "))
+if (nzchar(args[["mode"]]) && tolower(args[["mode"]]) %in% c("atac_obj", "peak_table")) {
+  # genome_build
+  genome_build = args[["genome_build"]]
+  genome_build = tolower(genome_build)
+  req_builds = c("hg19","hg38")
+  if (!(genome_build %in% req_builds)) {
+    stop("Invalid genome build: '", genome_build, 
+         "'. Allowed values are: ", paste(req_builds, collapse = ", "))
   }
   
-  # check if contents of eqtl instruct directories exist
-  for (i in scrna_instruct$scrna_dir){
-    check_path(i, verbose = 0)
+  # gencode_dir
+  gene_annot_dir = args[["gencode_dir"]]
+  check_path(gene_annot_dir)
+  
+  if (tolower(args[["histone_mark_analysis"]]) == "y") {
+    hist_mark_instruct_dir = args[["hist_mark_instruct_dir"]]
+    check_path(hist_mark_instruct_dir)
+    hist_mark_instruct = read.table(hist_mark_instruct_dir, header = T, nrows = -1)
+    colnames(hist_mark_instruct) = tolower(colnames(hist_mark_instruct))
+    req_list = c("chromhmm_dir","atac_cell_types","chromhmm_cell_types")
+    missing_cols = setdiff(req_list, colnames(hist_mark_instruct))
+    if (length(missing_cols) > 0) {
+      stop("Required columns missing in histone mark instructions file: ", paste(missing_cols, collapse = ", "))
+    }
+    if (nrow(hist_mark_instruct)==0){
+      stop("Histone mark instruction file is empty.")
+    }
+    # check if contents of histone marker instruct directories exist
+    for (i in hist_mark_instruct$chromhmm_dir){
+      check_path(i, verbose = 0)
+      hist_mark = read_file(i)
+      colnames(hist_mark) = tolower(colnames(hist_mark))
+      req_list = c("chr","start","end","state")
+      missing_cols = setdiff(req_list, colnames(hist_mark))
+      if (length(missing_cols) > 0) {
+        stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
+      }
+    }
+    # message("Histone mark instructions columns present.")
   }
-  # message("scrna instructions columns present.")
+  
+  if (tolower(args[["hic_analysis"]]) == "y") {
+    hic_instruct_dir = args[["hic_instruct_dir"]]
+    check_path(hic_instruct_dir)
+    hic_instruct = read_file(hic_instruct_dir, nrows = -1)
+    colnames(hic_instruct) = tolower(colnames(hic_instruct))
+    req_list = c("hic_dir","genes_present","cell_sorted","atac_cell_types","hic_cell_types")
+    missing_cols = setdiff(req_list, colnames(hic_instruct))
+    if (length(missing_cols) > 0) {
+      stop("Required columns missing in HI-C instructions file: ", paste(missing_cols, collapse = ", "))
+    }
+    
+    # check if contents of hic instruct directories exist
+    # for (i in hic_instruct$hic_dir){
+    #   check_path(i, verbose = 0)
+    #   hic_file = read_file(i)
+    #   colnames(hic_file) = tolower(colnames(hic_file))
+    #   req_list <- c("chr1", "start1", "end1", "chr2", "start2", "end2")
+    #   missing_cols = setdiff(req_list, colnames(hic_file))
+    #   if (length(missing_cols) > 0) {
+    #     stop("Required columns missing in ", i, ": ",paste(missing_cols, collapse = ", "))
+    #   }
+    # }
+  }
+  
+  # need to check if cell type columns matches
+  if (tolower(args[["eqtl_analysis"]]) == "y") {
+    eqtl_instruct_dir = args[["eqtl_instruct_dir"]]
+    check_path(eqtl_instruct_dir)
+    eqtl_instruct = read_file(eqtl_instruct_dir, nrows= -1)
+    colnames(eqtl_instruct) = tolower(colnames(eqtl_instruct))
+    req_list = c("eqtl_dir","atac_cell_types")
+    missing_cols = setdiff(req_list, colnames(eqtl_instruct))
+    if (length(missing_cols) > 0) {
+      stop("Required columns missing in eQTL instructions file: ", paste(missing_cols, collapse = ", "))
+    }
+    
+    # check if contents of eqtl instruct directories exist
+    for (i in 1:nrow(eqtl_instruct)){
+      check_path(eqtl_instruct$eqtl_dir[i], verbose = 0)
+      # check if index file exists if tabix option is T
+      if ("tabix" %in% colnames(eqtl_instruct) && as.logical(toupper(eqtl_instruct$tabix[i]))) {
+        check_path(paste0(eqtl_instruct$eqtl_dir[i],".tbi"), verbose = 0)
+      } else { # for non tabix file, ensure colnames exist
+        # user must either provide "snp" OR "chr+pos" OR both
+        eqtl_data = read_file(eqtl_instruct$eqtl_dir[i])
+        colnames(eqtl_data) = tolower(colnames(eqtl_data))
+        req_snp <- "snp"
+        req_chrpos <- c("chr", "pos")
+        has_snp <- req_snp %in% colnames(eqtl_data)
+        has_chrpos <- all(req_chrpos %in% colnames(eqtl_data))
+        if (!(has_snp || has_chrpos)) {
+          stop('Must have either "chr" & "pos" OR "snp" columns (or both) in: ', basename(eqtl_instruct$eqtl_dir[i]))
+        } else if (has_snp && !has_chrpos) { # warn user that they only have a snp column
+          warning('Only "snp" column found (no "chr" & "pos") in: ', basename(eqtl_instruct$eqtl_dir[i]))
+        }
+      }
+    }
+    # message("eQTL instructions columns present.")
+  }
+  
+  tf_setting = args[["tf_expr_analysis"]]
+  tf_setting = tolower(tf_setting)
+  tf_list = c("atac","rna","both","none")
+  if (!(tf_setting %in% tf_list)) {
+    stop("Invalid TF option: '", tf_setting, 
+         "'. Allowed values are: ", paste(tf_list, collapse = ", "))
+  }
+  
+  if (tolower(args[["tf_expr_analysis"]]) %in% c("rna", "both")) {
+    scrna_instruct_dir = args[["scrna_instruct_dir"]]
+    check_path(scrna_instruct_dir)
+    scrna_instruct = read_file(scrna_instruct_dir, nrows=-1)
+    colnames(scrna_instruct) = tolower(colnames(scrna_instruct))
+    req_list = c("scrna_dir","atac_cell_types","rna_cell_types","one_cell_type_seurat","matrix_loc")
+    missing_cols = setdiff(req_list, colnames(scrna_instruct))
+    if (length(missing_cols) > 0) {
+      stop("Required columns missing in scrna instructions file: ", paste(missing_cols, collapse = ", "))
+    }
+    
+    # check if contents of eqtl instruct directories exist
+    for (i in scrna_instruct$scrna_dir){
+      check_path(i, verbose = 0)
+    }
+    # message("scrna instructions columns present.")
+  } 
 }
 
 # Settings output
