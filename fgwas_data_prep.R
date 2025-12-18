@@ -1,60 +1,40 @@
 suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
-suppressPackageStartupMessages(library(genetics.binaRies))
 
-ld_matrix_local_mod <- function(variants, bfile, plink_bin, fn_file, with_alleles=FALSE)
+ld_matrix_local_mod <- function(variants, bfile, plink2_bin, fn_file, with_alleles=FALSE)
 {
   # Make textfile
   shell <- ifelse(Sys.info()['sysname'] == "Windows", "cmd", "sh")
   fn = fn_file
   write.table(data.frame(variants), file=fn, row.names=F, col.names=F, quote=F)
   
-  
-  fun1 <- paste0(
-    shQuote(plink_bin, type=shell),
-    " --bfile ", shQuote(bfile, type=shell),
-    " --extract ", shQuote(fn, type=shell), 
-    " --make-just-bim ", 
-    " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell),
+  cmd_ld <- paste0(
+    shQuote(plink2_bin, type = shell),
+    " --bfile ", shQuote(bfile, type = shell),
+    " --extract ", shQuote(fn, type = shell),
+    " --r2-unphased square",
+    " --out ", shQuote(fn, type = shell),
     " --silent"
   )
-  system(fun1)
+  system(cmd_ld)
   
-  bim <- read.table(paste0(fn, ".bim"), stringsAsFactors=FALSE)
-  
-  fun2 <- paste0(
-    shQuote(plink_bin, type=shell),
-    " --bfile ", shQuote(bfile, type=shell),
-    " --extract ", shQuote(fn, type=shell), 
-    " --r square ", 
-    " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell),
-    " --silent"
+  # getting vcor and vars files
+  vcor_candidates <- list.files(
+    path = dirname(fn),
+    pattern = paste0("^", basename(fn), ".*\\.vcor"),
+    full.names = TRUE
   )
-  system(fun2)
+  vcor_file <- vcor_candidates[!grepl("\\.vars$", vcor_candidates)][1]
   
-  fun3 <- paste0(
-    shQuote(plink_bin, type=shell),
-    " --bfile ", shQuote(bfile, type=shell),
-    " --extract ", shQuote(fn, type=shell), 
-    " --freqx ", 
-    " --keep-allele-order ",
-    " --out ", shQuote(fn, type=shell),
-    " --silent"
-  )
-  system(fun3)
+  vars_file <- paste0(vcor_file, ".vars")
   
-  
-  res <- read.table(paste0(fn, ".ld"), header=FALSE) %>% as.matrix
-  if(with_alleles)
-  {
-    rownames(res) <- colnames(res) <- paste(bim$V2, bim$V5, bim$V6, sep="_")
-  } else {
-    rownames(res) <- colnames(res) <- bim$V2
-  }
-  return(res)
+  # creating output matrix
+  ids <- readLines(vars_file)
+  mat <- as.matrix(read.table(vcor_file, header = FALSE))
+  storage.mode(mat) <- "numeric"
+  rownames(mat) <- colnames(mat) <- ids
+  return(mat)
 }
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
@@ -63,7 +43,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 defaults <- list(
   sample_num = "present",
   locus_region = 1000000,
-  ld_th = 0.25
+  ld_th = 0.1
 )
 
 #Setting the output directory
@@ -180,9 +160,9 @@ for (i in c(1:length(new_loci_head$SNP))){
   #Setting population reference files path and prefix
   fn_temp = paste0(output_dir,"temp")
   #Calculating the ld matrix in the locus
-  ld_mat = ld_matrix_local_mod(
+  ld_mat <- ld_matrix_local_mod(
     snp_list,
-    plink_bin = genetics.binaRies::get_plink_binary(),
+    plink2_bin = plink2_bin,
     bfile = snp_ref_files,
     fn_file = fn_temp
   )
@@ -197,9 +177,9 @@ for (i in c(1:length(new_loci_head$SNP))){
     new_lead_snp = new_gwas_loc$SNP[new_gwas_loc$Z == max(new_gwas_loc$Z)] 
   }
   
-  #Filtering the SNPs with ld value of less than 0.25 with the lead SNP
+  #Filtering the SNPs with ld value of less than a certain threshold with the lead SNP
   ld_signal = ld_mat[,new_lead_snp]
-  found_index = abs(ld_signal) > ld_th
+  found_index = ld_signal > ld_th
   snp_list_loc = snp_list[found_index]
   
   #Assigning locus id to the SNPs
