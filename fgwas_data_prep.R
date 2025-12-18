@@ -195,10 +195,8 @@ for (i in c(1:length(new_loci_head$SNP))){
   }
 }
 
-files_to_delete <- file.path(output_dir, c("temp", "temp.bim", "temp.frqx", "temp.ld", "temp.log", "temp.nosex"))
-
 # delete the files
-invisible(suppressWarnings(file.remove(files_to_delete)))
+invisible(suppressWarnings(unlink(list.files(output_dir, pattern = "^temp(\\..*)?$", full.names = TRUE))))
 
 #Filtering the SNPs outside of the loci
 filt_gwas_data = new_gwas_data[new_gwas_data$SEGNUM != 'None',]
