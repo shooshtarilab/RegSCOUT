@@ -49,7 +49,6 @@ user_finemap <- args[["finemap"]]
 ## assigning the locus number to each ci_snp, read in CI (credible interval) SNP file
 if (user_finemap == "Y") {
   fine_loci_head <- read.table(ci_gwas_dir, sep = '\t', header = T)
-  
 
   # reading in loci info file and adding its information to fine_loci_head
   loci_info <- read.table(paste0(output_dir, 'loci_info.txt'), sep = '\t', header = T)

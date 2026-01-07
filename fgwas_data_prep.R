@@ -1,4 +1,3 @@
-suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(R.utils))
 
@@ -201,6 +200,16 @@ invisible(suppressWarnings(unlink(list.files(output_dir, pattern = "^temp(\\..*)
 #Filtering the SNPs outside of the loci
 filt_gwas_data = new_gwas_data[new_gwas_data$SEGNUM != 'None',]
 
+#Performing a check to see if any loci were merged together
+locus_numbers <- unique(as.integer(filt_gwas_data$SEGNUM))
+numbers_vec <- 0:max(locus_numbers)
+missing_loci <- setdiff(numbers_vec, locus_numbers)
+
+# passing a warning message if loci are suspected to have been merged together
+if (length(missing_loci) > 0) {
+  warning('Some lead SNPs were found to have LD > ', ld_th, ' with each other. One reason this can occur is if the LD threshold used to identify lead SNPs differs from the LD threshold provided to RegSCOUT to create loci.')
+}
+
 #Creating a file with just locus number and region information
 loci_df = filt_gwas_data[, c('SEGNUM', 'lead_snp', 'locus_chr', 'locus_start', 'locus_end')] %>% distinct()
 loci_df$SEGNUM <- as.integer(loci_df$SEGNUM)
@@ -209,7 +218,7 @@ colnames(loci_df)[colnames(loci_df) == "SEGNUM"] <- "chunk"
 loci_df$locus_start[loci_df$locus_start < 0] <- 0
 loci_df$locus_chr = paste0("chr", loci_df$locus_chr)
 
-loci_info_dir = paste0(output_dir,"loci_info.txt")
+loci_info_dir = paste0(output_dir,"loci_info_temp.txt")
 write.table(loci_df, file = loci_info_dir, col.names = TRUE, sep = '\t',
             row.names = FALSE, quote = FALSE)
 

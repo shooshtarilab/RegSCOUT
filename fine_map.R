@@ -1,4 +1,5 @@
 suppressPackageStartupMessages(library(R.utils))
+suppressPackageStartupMessages(library(dplyr))
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
@@ -17,6 +18,7 @@ if (!nzchar(fgwas_src)){
 }
 
 fgwas_file = paste0(output_dir,"final_gwas_data.txt")
+loci_info_file = paste0(output_dir, "loci_info_temp.txt")
 ci_suff = "CI"
 ci_files = paste0(output_dir,ci_suff)
 
@@ -29,9 +31,7 @@ fun <- paste0(
     " -fine ",
     " -print"
 )
-system(fun) # silence fgwas print messages
-
-#system(fun, ignore.stdout = TRUE) # silence fgwas print messages
+system(fun)
 
 ci_file_bfs = paste0(ci_files,".bfs.gz")
 
@@ -47,15 +47,41 @@ system(fun)
 ci_files_bfs = paste0(ci_files,".bfs")
 ci_data = read.table(ci_files_bfs, sep = " ", header = TRUE)
 fgwas_data = read.table(fgwas_file, sep = "\t", header = TRUE)
+loci_info = read.table(loci_info_file, sep = "\t", header = TRUE)
+
+# adding loci information to fgwas data
+fgwas_data <- fgwas_data %>% 
+  left_join(loci_info, by = c("SEGNUMBER" = "chunk"))
+
+fgwas_data <- fgwas_data %>% 
+  mutate(SEGNUMBER = dense_rank(SEGNUMBER))
+
+# outputting new loci_info text file, deleting previous file
+loci_df = fgwas_data[, c('SEGNUMBER', 'lead_snp', 'locus_chr', 'locus_start', 'locus_end')] %>% distinct()
+loci_df$SEGNUMBER <- as.integer(loci_df$SEGNUMBER)
+loci_df <- loci_df[order(loci_df$SEGNUMBER),]
+colnames(loci_df)[colnames(loci_df) == "SEGNUMBER"] <- "chunk"
+
+loci_info_dir = paste0(output_dir,"loci_info.txt")
+write.table(loci_df, file = loci_info_dir, col.names = TRUE, sep = '\t',
+            row.names = FALSE, quote = FALSE)
+
+unlink(loci_info_file)
+
+# ensuring locus/chunk numbers remain consistent
+ci_data$locus <- NA
+ci_data$locus <- fgwas_data$SEGNUMBER[match(ci_data$id, fgwas_data$SNPID)] 
+ci_data$chunk <- ci_data$locus
+ci_data$locus <- NULL
+
+# adding reference and alternate allele information to fgwas results
+ci_data$a1 <- fgwas_data$A1[match(ci_data$id, fgwas_data$SNPID)] 
+ci_data$a2 <- fgwas_data$A2[match(ci_data$id, fgwas_data$SNPID)]
 
 ## Removing SNPs with more than one base as either the alternate or reference allele
-fgwas_data = fgwas_data[which(nchar(as.character(fgwas_data$A1)) == 1 & nchar(as.character(fgwas_data$A2)) == 1),]
-
-ci_data[["a1"]] = fgwas_data$A1
-ci_data[["a2"]] = fgwas_data$A2
+ci_data = ci_data[which(nchar(as.character(ci_data$a1)) == 1 & nchar(as.character(ci_data$a2)) == 1),]
 
 # obtaining smallest number of SNPs whose PPAs sum up to ci_th
-
 ci_th <- if (is.null(args[["ci_th"]])) {
   message("Using default ci_th value: ", defaults$ci_th)
   defaults$ci_th
@@ -65,7 +91,6 @@ ci_th <- if (is.null(args[["ci_th"]])) {
 } else {
   as.numeric(args[["ci_th"]])
 }
-
 
 ci_final_list = list()
 region_list = unique(ci_data$chunk)
@@ -84,7 +109,6 @@ for (i in region_list){
     }
   }
   ci_final_list = append(ci_final_list, region_data[ci_index,]$id)
-  
 }
 ci_final_list = unlist(ci_final_list)
 ci_gwas_data = ci_data[ci_data$id %in% ci_final_list,]
@@ -94,7 +118,6 @@ chr_list = paste0("chr", c(1:22))
 ci_gwas_data = ci_gwas_data[ci_gwas_data$chr %in% chr_list,]
 
 # removing all SNPs with PPA <= CI PPA threshold
-
 ci_ppa_th = if (is.null(args[["ci_ppa_th"]])) {
   message("Using default ci_ppa_th value: ", defaults$ci_th)
   defaults$ci_th
@@ -111,7 +134,7 @@ ci_dir = paste0(output_dir,"gwas_CI.txt")
 write.table(ci_gwas_data, file = ci_dir, col.names = TRUE, sep="\t",
             row.names = FALSE, quote = FALSE)
 
-files_to_delete <-file.path(output_dir, c("CI.bfs", "CI.llk", "CI.params", "CI.ridgeparams", "CI.segbfs.gz"))
+files_to_delete <- file.path(output_dir, c("CI.bfs", "CI.llk", "CI.params", "CI.ridgeparams", "CI.segbfs.gz"))
 
 # delete the files
 invisible(suppressWarnings(file.remove(files_to_delete)))
