@@ -68,6 +68,14 @@ write.table(loci_df, file = loci_info_dir, col.names = TRUE, sep = '\t',
 
 unlink(loci_info_file)
 
+# outputting new final_gwas_data text file, overwriting previous
+columns_to_remove <- c('lead_snp', 'locus_chr', 'locus_start', 'locus_end')
+fgwas_data_out <- fgwas_data[,!(colnames(fgwas_data) %in% columns_to_remove)]
+
+final_gwas_dir = paste0(output_dir,"final_gwas_data.txt")
+write.table(fgwas_data_out, file = final_gwas_dir, sep = "\t", col.names = TRUE,
+            row.names = FALSE, quote = FALSE)
+
 # ensuring locus/chunk numbers remain consistent
 ci_data$locus <- NA
 ci_data$locus <- fgwas_data$SEGNUMBER[match(ci_data$id, fgwas_data$SNPID)] 
