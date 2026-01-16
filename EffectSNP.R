@@ -67,7 +67,7 @@ if (genome_build == "hg19"){
   snp_table$a1 = eff_snp$a1
   snp_table$a2 = eff_snp$a2
 
-  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+  snp_table_dir = paste0(output_dir, "snp_table.txt")
   write.table(snp_table, file = snp_table_dir, col.names = TRUE,
               row.names = FALSE, quote = FALSE)
 
@@ -89,7 +89,7 @@ if (genome_build == "hg19"){
   snp_table$a1 = eff_snp$a1
   snp_table$a2 = eff_snp$a2
 
-  snp_table_dir = paste0(getwd(), "/", "snp_table.txt")
+  snp_table_dir = paste0(output_dir, "snp_table.txt")
   write.table(snp_table, file = snp_table_dir, col.names = TRUE,
               row.names = FALSE, quote = FALSE)
 
