@@ -3,5 +3,7 @@ Docker/
 run*.sh
 .vscode/
 
-renv*
-.Rprofile
+renv/library
+renv/staging
+renv/.gitignore
+
