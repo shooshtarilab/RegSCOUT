@@ -49,7 +49,6 @@ for (i in c(1:length(jaspar_pwm_list))){
 
 # reading in GWAS data
 ci_gwas_file = args[["ci_gwas_file"]]
-ci_gwas_file = "/home/ubunkun/Lab/RA_project/RegSCOUT/RA/test/gwas_CI.txt"
 ci_gwas_data = read.table(file=ci_gwas_file, sep="\t", header=TRUE)
 
 # Preparing CI SNPs for motif analysis
@@ -102,25 +101,25 @@ if (genome_build == "hg19"){
 
 ncores = if (nzchar(args[["ncores"]])) {as.numeric(args[["ncores"]])} else {defaults$ncores}
 
-# # Calculating Effect SNPs
-# results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
+# Calculating Effect SNPs
+results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
 
-# # Initialize an empty list to store the results
-# all_results <- list()
+# Initialize an empty list to store the results
+all_results <- list()
 
-# # Loop ComputePValues() function 10 times and obtain all results
-# for (i in 1:10) {
-#   results_pval_i <- suppressMessages(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T))
-#   all_results[[i]] <- results_pval_i
-#   message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
-# }
+# Loop ComputePValues() function 10 times and obtain all results
+for (i in 1:10) {
+  results_pval_i <- suppressMessages(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T))
+  all_results[[i]] <- results_pval_i
+  message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
+}
 
-# # Combine all data frames into one big data frame
-# results_pval <- do.call(rbind, all_results)
+# Combine all data frames into one big data frame
+results_pval <- do.call(rbind, all_results)
 
-#save this dataframe as RDS
-# saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
-results_pval = readRDS(paste0(output_dir,'atSNP_10runs_results.RDS'))
+# save this dataframe as RDS
+saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+# results_pval = readRDS(paste0(output_dir,'atSNP_10runs_results.RDS'))
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff

@@ -93,7 +93,7 @@ for (i in 1:num_eqtl) {
   
   if (!tabix) {
     # read in eqtl dataset
-    eqtl_dataset <- read.table(file = eqtl_dir, sep = '\t', header = TRUE)
+    eqtl_dataset <- read.table(file = eqtl_dir, sep = '\t', header = T, comment.char="")
     
     # filter snp_rmp_df
     snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% atac_cell_types,]

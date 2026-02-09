@@ -2,3 +2,6 @@ RA/
 Docker/
 run*.sh
 .vscode/
+
+renv*
+.Rprofile
