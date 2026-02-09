@@ -31,7 +31,7 @@ ncores=2
 
 # Optional parameter initializations
 # Finemap
-locus_region="" ld_th="" ci_th="" ci_ppa_th="" fgwas_dir="" plink2_dir="" ci_gwas_file=""
+locus_region="" ld_th="" ci_th="" ci_ppa_th="" fgwas_dir="" plink2_dir="" ci_gwas_file="" population="" snp_ref_dir="" lead_snp_file="" sum_stats_file=""
 # Mode peak_table
 jaspar_mtx_file="" prom_th_up="" prom_th_down=""
 # Mode atac_obj

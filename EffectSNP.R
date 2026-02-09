@@ -32,7 +32,7 @@ if (jaspar_mtx_file == 'none') {
     opts = list(species = 9606, all_versions = FALSE)
   )
 } else {
-  jaspar_pwm <- readJASPARMatrix(jaspar_mtx_dir, matrixClass = c("PFM", "PWM", "PWMProb"))
+  jaspar_pwm <- readJASPARMatrix(jaspar_mtx_file, matrixClass = c("PFM", "PWM", "PWMProb"))
 }
 
 jaspar_pwm_list = jaspar_pwm@listData

@@ -29,7 +29,7 @@ ${SCRIPT}/bash_scripts/RegSCOUT_main.sh \
   --sample_num 97173 \
   --population EUR \
   --output_dir ${DATA}/../outputs/ \
-  --jaspar_mtx ${DATA}/combined_755_motifs_jaspar2024.txt \
+  --jaspar_mtx_file ${DATA}/combined_755_motifs_jaspar2024.txt \
   --genome_build hg19 \
   --histone_mark_analysis Y \
   --tf_expr_analysis both \
