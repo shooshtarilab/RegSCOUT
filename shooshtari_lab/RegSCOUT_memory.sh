@@ -10,11 +10,12 @@ run_rscript() {
     
     echo "=== Running $script_name ===" | tee -a "$master_log"
     echo "Start time: $(date)" | tee -a "$master_log"
-
+    
     start_time=$(date +%s)
     /usr/bin/time -v Rscript "$script_name" "$@" 2>&1 | tee -a "$master_log"
+    # for Compute Canada replace /usr/bin/time with /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/bin/time
     end_time=$(date +%s)
-
+    
     elapsed=$((end_time - start_time))
     hours=$((elapsed / 3600))
     minutes=$(((elapsed % 3600) / 60))

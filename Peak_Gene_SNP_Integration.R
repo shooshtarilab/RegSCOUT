@@ -18,8 +18,6 @@ defaults <- list(
   prom_th_down = 2000
 )
 
-
-
 #Getting the working directory
 output_dir = args[["output_dir"]]
 peak_cell_file = args[["peak_cell_file"]]
