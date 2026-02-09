@@ -98,7 +98,7 @@ for (i in 1:num_eqtl) {
     # filter snp_rmp_df
     snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% atac_cell_types,]
     
-    if ('chr' %in% colnames(eqtl_dataset) & 'pos' %in% colnames(eqtl_dataset)) { # if chromosome and position columns are present then using those columns
+    if ('chr' %in% colnames(eqtl_dataset) && 'pos' %in% colnames(eqtl_dataset)) { # if chromosome and position columns are present then using those columns
       # preparing for inner_join between snp_rmp_filt and eqtl_dataset
       snp_rmp_filt$Pos <- as.integer(snp_rmp_filt$Pos)
       eqtl_dataset$pos <- as.integer(eqtl_dataset$pos)
