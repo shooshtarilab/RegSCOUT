@@ -391,7 +391,8 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
+
+  peak_file_dir = args[["peak_cell_file"]]
   
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
                                                peak_file_dir, tf_table_filt)
@@ -422,8 +423,9 @@ if (tf_expr_req == "atac") {
   suppressPackageStartupMessages(library(methods))
   
   # obtain user instructions
-  scrna_instruct_dir <- args[["scrna_instruct_dir"]]
+  scrna_instruct_dir <- args[["scrna_instruct"]]
   
+  print(scrna_instruct_dir)
   # checking to see if scRNA-seq instructions provided
   if (!file.exists(scrna_instruct_dir)) {
     stop("scRNA-seq analysis requested but scRNA-seq instructions spreadsheet not found, please ensure path is correct/provided. Or if scRNA-seq analysis is not desired please set the tf_expr_analysis parameter to 'atac' or do not use this parameter.")
@@ -590,7 +592,7 @@ if (tf_expr_req == "atac") {
   
   # first conducting RNA-seq analysis
   # obtain user instructions
-  scrna_instruct_dir <- args[["scrna_instruct_dir"]]
+  scrna_instruct_dir <- args[["scrna_instruct"]]
   
   # checking to see if scRNA-seq instructions provided
   if (!file.exists(scrna_instruct_dir)) {
@@ -742,7 +744,7 @@ if (tf_expr_req == "atac") {
   } else {
     defaults$prom_th_down
   }
-  peak_file_dir = paste0(output_dir, "cell_peak.tsv")
+  peak_file_dir = args[["peak_cell_file"]]
   
   # predict TF expression using ATAC-seq
   tf_expr_results <- confirm_tf_promoter_peaks(TFs, TF_heterodimers, prom_thr_up, prom_thr_down, 
@@ -827,4 +829,4 @@ if (tf_expr_req == "atac") {
   } else { # no results found
     message('TF expression analysis complete, no results were found over both the scRNA-seq and scATAC-seq analyses.')
   }
-} 
+}

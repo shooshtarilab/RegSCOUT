@@ -34,7 +34,7 @@ snp_rmp_df <- snp_rmp_df %>%
   )
 
 # read in user instructions
-eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
+eqtl_instruct_dir <- args[["eqtl_instruct"]]
 if (!file.exists(eqtl_instruct_dir)) {
   stop("eQTL analysis requested but eQTL instructions spreadsheet not found, please ensure path is correct/provided. Or if eQTL analysis is not desired please do not use --hic_eqtl_analysis parameter.")
 } 

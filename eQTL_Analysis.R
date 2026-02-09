@@ -49,7 +49,7 @@ snp_rmp_df <- snp_rmp_df %>%
   )
 
 # read in user instructions
-eqtl_instruct_dir <- args[["eqtl_instruct_dir"]]
+eqtl_instruct_dir <- args[["eqtl_instruct"]]
 if (!file.exists(eqtl_instruct_dir)) {
   stop("eQTL analysis requested but eQTL instructions spreadsheet not found, please ensure path is correct/provided. Or if eQTL analysis is not desired please do not use --hic_eqtl_analysis parameter.")
 } 
@@ -138,7 +138,7 @@ for (i in 1:num_eqtl) {
     # defining genomic ranges for SNPs
     snp_granges <- GRanges(seqnames = snp_rmp_filt$CHR,
                                ranges = IRanges(start = snp_rmp_filt$Pos, end = snp_rmp_filt$Pos))
-    
+
     eqtl_tabix <- scanTabix(eqtl_dataset, param = snp_granges)
     
     # add metadata from snp_rmp_filt for each matched row

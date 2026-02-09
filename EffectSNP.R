@@ -7,7 +7,7 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
 #Defining default parameter values
 defaults <- list(
-  jaspar_mtx_dir = "none",
+  jaspar_mtx_file = "none",
   ncores = 2
 )
 
@@ -15,14 +15,13 @@ defaults <- list(
 output_dir = args[["output_dir"]]
 
 # read in and prepare JASPAR matrix file
-jaspar_mtx_dir <- if (nzchar(args[["jaspar_mtx_dir"]])) {
-  args[["jaspar_mtx_dir"]]
+jaspar_mtx_file <- if (nzchar(args[["jaspar_mtx_file"]])) {
+  args[["jaspar_mtx_file"]]
 } else {
-  message("Using default jaspar_mtx_dir value: ", defaults$jaspar_mtx_dir)
-  defaults$jaspar_mtx_dir
+  defaults$jaspar_mtx_file
 }
 
-if (jaspar_mtx_dir == 'none') {
+if (jaspar_mtx_file == 'none') {
   # load required libraries for obtaining JASPAR matrix
   suppressPackageStartupMessages(library(JASPAR2024))
   
@@ -49,8 +48,9 @@ for (i in c(1:length(jaspar_pwm_list))){
 }
 
 # reading in GWAS data
-ci_gwas_dir = args[["ci_gwas_dir"]]
-ci_gwas_data = read.table(file=ci_gwas_dir, sep="\t", header=TRUE)
+ci_gwas_file = args[["ci_gwas_file"]]
+ci_gwas_file = "/home/ubunkun/Lab/RA_project/RegSCOUT/RA/test/gwas_CI.txt"
+ci_gwas_data = read.table(file=ci_gwas_file, sep="\t", header=TRUE)
 
 # Preparing CI SNPs for motif analysis
 genome_build = args[["genome_build"]]
@@ -102,24 +102,25 @@ if (genome_build == "hg19"){
 
 ncores = if (nzchar(args[["ncores"]])) {as.numeric(args[["ncores"]])} else {defaults$ncores}
 
-# Calculating Effect SNPs
-results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
+# # Calculating Effect SNPs
+# results = suppressMessages(ComputeMotifScore(jaspar_pwm_atsnp, reg1_snp_data, ncores = ncores))
 
-# Initialize an empty list to store the results
-all_results <- list()
+# # Initialize an empty list to store the results
+# all_results <- list()
 
-# Loop ComputePValues() function 10 times and obtain all results
-for (i in 1:10) {
-  results_pval_i <- suppressMessages(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T))
-  all_results[[i]] <- results_pval_i
-  message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
-}
+# # Loop ComputePValues() function 10 times and obtain all results
+# for (i in 1:10) {
+#   results_pval_i <- suppressMessages(ComputePValues(jaspar_pwm_atsnp, reg1_snp_data, results$motif.scores, ncores = ncores, testing.mc=T))
+#   all_results[[i]] <- results_pval_i
+#   message(paste0("Running ComputePValues step ",i)) # progress bar otherwise this can take too long and can look like the pipeline is stuck
+# }
 
-# Combine all data frames into one big data frame
-results_pval <- do.call(rbind, all_results)
+# # Combine all data frames into one big data frame
+# results_pval <- do.call(rbind, all_results)
 
-# save this dataframe as RDS
-saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+#save this dataframe as RDS
+# saveRDS(results_pval, file = paste0(output_dir,'atSNP_10runs_results.RDS'))
+results_pval = readRDS(paste0(output_dir,'atSNP_10runs_results.RDS'))
 
 # Correction for multiple testing
 results_pval_val = results_pval$pval_diff
@@ -146,6 +147,7 @@ final_effect_snp_frame = data.frame(matrix(data = NA,
 colnames(final_effect_snp_frame) = c("SNP","CHR","Pos","Locus", "TF", "Raw_P_value", "FDR_corr_P_value",
                                      "log_like_ratio", "ppa")
 
+
 for (i in c(1:length(results_pval_sig$snpid))){
   temp_id = results_pval_sig$snpid[i]
   ci_effect_index = which(ci_gwas_data$id == temp_id)
@@ -156,7 +158,6 @@ for (i in c(1:length(results_pval_sig$snpid))){
   temp_pval = results_pval_sig$pval_diff[i]
   temp_pval_corr = results_pval_sig$results_pval_val_cor[i]
   temp_log_ratio = results_pval_sig$log_lik_ratio[i]
-  
   final_effect_snp_frame[i,]$ppa = ci_gwas_data$PPA[ci_effect_index]
   final_effect_snp_frame[i,]$SNP = temp_id
   final_effect_snp_frame[i,]$CHR = temp_chr
@@ -167,6 +168,7 @@ for (i in c(1:length(results_pval_sig$snpid))){
   final_effect_snp_frame[i,]$Raw_P_value = temp_pval
   final_effect_snp_frame[i,]$log_like_ratio = temp_log_ratio
 }
+
 
 Ci_effect_SNPs <- final_effect_snp_frame %>%
   distinct() %>%

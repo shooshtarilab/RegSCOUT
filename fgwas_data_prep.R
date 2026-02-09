@@ -63,7 +63,7 @@ snp_population = args[["population"]]
 snp_ref_files = paste0(snp_ref,snp_population)
 
 #Loading the summary statistics file
-gwas_data_dir = args[["sum_stats_dir"]]
+gwas_data_dir = args[["sum_stats_file"]]
 gwas_data = read.table(gwas_data_dir, sep = "\t", header = TRUE)
 gwas_data = gwas_data[!is.na(gwas_data$P),]
 gwas_data = gwas_data[gwas_data$P < 1e-02,]
@@ -71,7 +71,7 @@ gwas_data = gwas_data[gwas_data$P < 1e-02,]
 gwas_data$CHR = gsub("chr", "", tolower(gwas_data$CHR))
 
 #Loading the lead SNP data
-loci_head_dir = args[["lead_snps_dir"]]
+loci_head_dir = args[["lead_snps_file"]]
 loci_head = read.table(loci_head_dir, sep = "\t", header = TRUE)
 
 # defining a locus number column to be filled in

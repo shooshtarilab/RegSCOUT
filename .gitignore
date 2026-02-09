@@ -1,2 +1,4 @@
 RA/
 Docker/
+*.sh
+.vscode/

@@ -29,7 +29,7 @@ read_file <- function(file_path) {
 output_dir = args[["output_dir"]]
 
 # read in user instructions
-hist_mark_instruct_dir <- args[["hist_mark_instruct_dir"]]
+hist_mark_instruct_dir <- args[["histone_mark_instruct"]]
 
 # loading in user instructions
 user_instruct <- read_file(hist_mark_instruct_dir)

@@ -15,22 +15,17 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 #Defining default parameter values
 defaults <- list(
   prom_th_up = 2000,
-  prom_th_down = 2000,
-  img_f = "svg"
+  prom_th_down = 2000
 )
 
-img_f = if (nzchar(args[["img_f"]])) {
-  args[["img_f"]]
-} else {
-  defaults$img_f
-} 
+
 
 #Getting the working directory
 output_dir = args[["output_dir"]]
+peak_cell_file = args[["peak_cell_file"]]
 
 #Getting the cell by peak table
-cell_peak_file = paste0(output_dir,"cell_peak.tsv")
-cell_peak = read.delim(cell_peak_file, header = TRUE)
+cell_peak = read.delim(peak_cell_file, header = TRUE)
 peaks_cell_types = unique(unlist(str_split(cell_peak$cell_types, ",")))
 
 #Getting the file of effect SNPs and loading them
@@ -144,13 +139,10 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-if (img_f == "svg"){
-  output_peak_file = paste0(output_dir,"images/cell_peak.svg")
-  svg(output_peak_file, width = ((ncol(peak_cluster_matrix) + ncol(risk_regions)) + 10) / 2.54, height = (nrow(peak_cluster_matrix) + 10)/ 2.54)
-} else if (img_f == "png"){
-  output_peak_file = paste0(output_dir,"images/cell_peak.png")
-  png(output_peak_file, width = 2400, height = 8000, res = 300)
-}
+
+output_peak_file = paste0(output_dir,"figures/cell_peak.svg")
+svg(output_peak_file, width = ((ncol(peak_cluster_matrix) + ncol(risk_regions)) + 10) / 2.54, height = (nrow(peak_cluster_matrix) + 10)/ 2.54)
+
 combined_heatmaps <- HeatmapList(heatmap_peaks + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
@@ -262,13 +254,10 @@ heatmap_ppa <- Heatmap(
 )
 
 # combine the two heatmaps and save it 
-if (img_f == "svg"){
-  output_tf_file = paste0(output_dir,"images/cell_snp_tf.svg")
-  svg(output_tf_file, width = (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54, height = (nrow(tf_cluster_matrix) + 10) / 2.54)
-  } else if (img_f == "png"){
-  output_tf_file = paste0(output_dir,"images/cell_snp_tf.png")
-  png(output_tf_file, width = 2400, height = 8000, res = 300)
-}
+
+output_tf_file = paste0(output_dir,"figures/cell_snp_tf.svg")
+svg(output_tf_file, width = (ncol(risk_tfs) + ncol(tf_cluster_matrix) + 10) / 2.54, height = (nrow(tf_cluster_matrix) + 10) / 2.54)
+
 combined_heatmaps <- HeatmapList(heatmap_TFs + heatmap_ppa)
 print(combined_heatmaps)
 invisible(dev.off())
@@ -288,7 +277,7 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
   defaults$prom_th_down
 }
 
-gene_annot_dir = args[["gencode_dir"]]
+gene_annot_dir = args[["gencode_file"]]
 gencode_transcripts  <- import(gene_annot_dir, format = "gff3", feature.type = "transcript")
 gene_transcript_data <- gencode_transcripts[gencode_transcripts$transcript_type == "protein_coding"]
 gene_id_lists <- mcols(gene_transcript_data)$gene_name 
@@ -353,10 +342,11 @@ if (length(rmp_promoter_overlap) != 0) {
 
 #Getting the list of all Cicero files in the working directory and
 #loading them and creating the list of cell types based on the file names
-cicero_file_list = list.files(path = output_dir, pattern = "filtered_coaccessible_sites4s.txt",
-                              full.names = FALSE)
-cell_type_list = sub(".filtered_coaccessible_sites4s.txt","",cicero_file_list)
-cicero_file_list = paste0(output_dir, cicero_file_list)
+cicero_dir = args[["cicero_dir"]]
+cicero_file_list = list.files(path = cicero_dir, pattern = "filtered_coaccessible_sites4s.txt",
+                              full.names = T)
+
+cell_type_list = sub(".filtered_coaccessible_sites4s.txt","",basename(cicero_file_list))
 
 #Looping through the cell types, reading the Cicero file of that cell type
 #and linking them to the Effect SNPs and gene promoters

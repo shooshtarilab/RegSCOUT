@@ -33,7 +33,7 @@ defaults <- list(
 )
 
 # read hic instructions directory
-hic_instruct_dir <- args[["hic_instruct_dir"]]
+hic_instruct_dir <- args[["hic_instruct"]]
 
 # check if instructions spreadsheet exists
 if (!file.exists(hic_instruct_dir)) {

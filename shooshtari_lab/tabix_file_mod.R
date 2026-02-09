@@ -9,6 +9,7 @@ eqtl_dir <- '/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files/raw_eqtl'
 eqtl_files <- list.files(eqtl_dir, pattern = "\\.gz$", full.names = TRUE)
 
 output_dir = "/home/ubunkun/Lab/RA_project/RegSCOUT/inputs/eqtl_files/"
+
 # Iterate over them
 for (file_path in eqtl_files) {
   filename = basename(file_path)
@@ -77,7 +78,7 @@ for (file_path in eqtl_files) {
   system(paste("bgzip -f", shQuote(input_file)))
 
   # Index with tabix
-  system(paste("tabix -s 1 -b 2 -e 2", shQuote(output_file)))
+  system(paste("tabix -f -s 1 -b 2 -e 2", shQuote(output_file)))
   print(c("done ", filename))
 }
 

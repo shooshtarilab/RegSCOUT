@@ -18,16 +18,8 @@ output_dir <- args[["output_dir"]]
 defaults <- list(
   gene_sum_ppa_th = 0.05,
   gene_score_th = 2,
-  tf_score_th = 0,
-  file_f = "tsv",
-  img_f = "svg"
+  tf_score_th = 0
 )
-
-img_f = if (nzchar(args[["img_f"]])) {
-  args[["img_f"]]
-} else {
-  defaults$img_f
-} 
 
 # Remove gencode file generated in Peak_Gene_Integration, used in TF expression analysis and HIC
 invisible(suppressWarnings(file.remove(paste0(output_dir, "gene_tss_granges.rds"))))
@@ -41,7 +33,7 @@ colnames(final_output) <- c("locus", "locus_region",	"lead_snp",	"lead_ppa",
                             "hic_gene",	"eqtl_gene", "cell_type")
 
 # read in ci_gwas_dir
-ci_gwas_dir = args[["ci_gwas_dir"]]
+ci_gwas_dir = args[["ci_gwas_file"]]
 
 # read in if fine-mapping was desired
 user_finemap <- args[["finemap"]]
@@ -520,13 +512,10 @@ if (file.exists(tf_expr_results_dir)) {
       height = unit(1 * nrow(tf_heatmap_mtx), "cm")
     ) 
     
-    if (img_f == "svg"){
-      output_tf_file = paste0(output_dir,"images/cell_tf.svg")
-      svg(output_tf_file, width = (ncol(tf_heatmap_mtx) + 10)/2.54, height = (nrow(tf_heatmap_mtx) + 10)/2.54)
-    } else if (img_f == "png"){
-      output_tf_file = paste0(output_dir,"images/cell_tf.png")
-      png(output_tf_file, width = 2400, height = 8000, res = 300)
-    }
+
+    output_tf_file = paste0(output_dir,"figures/cell_tf.svg")
+    svg(output_tf_file, width = (ncol(tf_heatmap_mtx) + 10)/2.54, height = (nrow(tf_heatmap_mtx) + 10)/2.54)
+    
     print(heatmap_TFs)
     invisible(dev.off())
     
@@ -654,13 +643,10 @@ if (file.exists(tf_expr_results_dir)) {
       height = unit(1 * nrow(tf_heatmap_mtx), "cm")
     ) 
     
-    if (img_f == "svg"){
-    output_tf_file = paste0(output_dir,"images/cell_tf.svg")
+
+    output_tf_file = paste0(output_dir,"figures/cell_tf.svg")
     svg(output_tf_file, width = (ncol(tf_heatmap_mtx) + 10)/2.54, height = (nrow(tf_heatmap_mtx) + 10)/2.54)
-    } else if (img_f == "png"){
-      output_tf_file = paste0(output_dir,"images/cell_tf.png")
-      png(output_tf_file, width = 2400, height = 8000, res = 300)
-    }
+
     print(heatmap_TFs)
     invisible(dev.off())
     
@@ -821,13 +807,10 @@ heatmap_genes <- Heatmap(
   height = unit(1 * nrow(gene_cell_mtx), "cm")
 ) 
 
-if (img_f == "svg"){
-  output_gene_file = paste0(output_dir,"images/cell_gene.svg")
-  svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(gene_cell_mtx) + 10)/2.54)
-} else if (img_f == "png"){
-  output_gene_file = paste0(output_dir,"images/cell_gene.png")
-  png(output_gene_file, width = 2400, height = 8000, res = 300)
-}
+
+output_gene_file = paste0(output_dir,"figures/cell_gene.svg")
+svg(output_gene_file, width = (ncol(gene_cell_mtx) + 10)/2.54, height = (nrow(gene_cell_mtx) + 10)/2.54)
+
 print(heatmap_genes)
 invisible(dev.off())
 
@@ -927,18 +910,11 @@ if (file.exists(tf_expr_results_dir)) {
 table_results_combined <- table_results_combined %>%
   mutate(across(any_of(c("effect_ppa", "lead_ppa")), ~ round(.x, 4)))
 
-file_f = if (nzchar(args[["file_f"]])) {
-  args[["file_f"]]
-} else {
-  defaults$file_f
-} 
-
-if (file_f == "tsv"){
-  write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
-  write.table(final_table_new, file = paste0(output_dir, "complete_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
-  write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
-} else if (file_f == "xlsx") {
-  write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
-  write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
-  write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.xlsx"))
-}
+write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(final_table_new, file = paste0(output_dir, "complete_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
+# } else if (file_f == "xlsx") {
+#   write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
+#   write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
+#   write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.xlsx"))
+# }

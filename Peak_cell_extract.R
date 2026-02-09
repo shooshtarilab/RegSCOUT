@@ -16,7 +16,7 @@ defaults <- list(
 )
 
 #Loading the scATAC-seq object 
-pbmc_dir = args[["seurat_obj_dir"]]
+pbmc_dir = args[["seurat_obj_file"]]
 
 if (tolower(file_ext(pbmc_dir)) == "rds"){
   pbmc <- readRDS(pbmc_dir)
@@ -111,3 +111,4 @@ output_file_main = args[["output_dir"]]
 #Saving the final table in the output directory
 output_file = paste0(output_file_main, "cell_peak.tsv")
 write.table(final_peak_cell_df, file = output_file, quote = F, row.names = F, sep = '\t')
+cat(output_file)
