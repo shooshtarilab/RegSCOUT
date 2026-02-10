@@ -111,4 +111,3 @@ output_file_main = args[["output_dir"]]
 #Saving the final table in the output directory
 output_file = paste0(output_file_main, "cell_peak.tsv")
 write.table(final_peak_cell_df, file = output_file, quote = F, row.names = F, sep = '\t')
-cat(output_file)

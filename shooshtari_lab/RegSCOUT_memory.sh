@@ -187,19 +187,21 @@ if [ "${mode,,}" == "atac_obj" ]; then
         --output_dir "$output_dir" --jaspar_mtx_file "$jaspar_mtx_file" \
         --ci_gwas_file "$ci_gwas_file" --genome_build "$genome_build" --ncores "$ncores"
 
-    peak_cell_file=$(run_rscript Peak_cell_extract.R \
+    run_rscript Peak_cell_extract.R \
         --seurat_obj_file "$seurat_obj_file" --output_dir "$output_dir" \
-        --peak_th "$peak_th" --cell_count_th "$cell_count_th")
+        --peak_th "$peak_th" --cell_count_th "$cell_count_th"
+    peak_cell_file="${output_dir}cell_peak.tsv"
 
-    cicero_dir=$(run_rscript peak_interaction_extract.R \
+    run_rscript peak_interaction_extract.R \
         --genome_build "$genome_build" --seurat_obj_file "$seurat_obj_file" \
         --output_dir "$output_dir" --coaccess_th "$coaccess_th" \
         --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th")
 
+    cicero_dir="${output_dir}"
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
-        --peak_cell_file "$peak_cell_file"
+        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir"
 
 elif [ "${mode,,}" == "peak_table" ]; then
     run_rscript EffectSNP.R \
