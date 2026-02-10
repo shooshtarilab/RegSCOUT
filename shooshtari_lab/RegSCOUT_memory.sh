@@ -32,7 +32,7 @@ ncores=2
 
 # Optional parameter initializations
 # Finemap
-locus_region="" ld_th="" ci_th="" ci_ppa_th="" fgwas_dir="" plink2_dir="" ci_gwas_file=""
+locus_region="" ld_th="" ci_th="" ci_ppa_th="" fgwas_dir="" plink2_dir="" ci_gwas_file="" population="" snp_ref_dir="" lead_snps_file="" sum_stats_file=""
 # Mode peak_table
 jaspar_mtx_file="" prom_th_up="" prom_th_down=""
 # Mode atac_obj
@@ -197,7 +197,7 @@ if [ "${mode,,}" == "atac_obj" ]; then
         --output_dir "$output_dir" --coaccess_th "$coaccess_th" \
         --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th")
     cicero_dir="${output_dir}"
-    
+
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
