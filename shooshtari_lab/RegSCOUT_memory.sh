@@ -196,8 +196,8 @@ if [ "${mode,,}" == "atac_obj" ]; then
         --genome_build "$genome_build" --seurat_obj_file "$seurat_obj_file" \
         --output_dir "$output_dir" --coaccess_th "$coaccess_th" \
         --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th")
-
     cicero_dir="${output_dir}"
+    
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
