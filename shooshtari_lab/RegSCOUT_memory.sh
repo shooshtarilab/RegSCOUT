@@ -182,7 +182,7 @@ if [ "${mode,,}" == "atac_obj" ]; then
     run_rscript peak_interaction_extract.R \
         --genome_build "$genome_build" --seurat_obj_file "$seurat_obj_file" \
         --output_dir "$output_dir" --coaccess_th "$coaccess_th" \
-        --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th")
+        --cic_genomic_window "$cic_genomic_window" --peak_th "$peak_th"
     cicero_dir="${output_dir}"
 
     run_rscript Peak_Gene_SNP_Integration.R \
