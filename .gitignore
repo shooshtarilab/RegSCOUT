@@ -7,3 +7,4 @@ renv/library
 renv/staging
 renv/.gitignore
 
+temp_instruct_vars.sh
