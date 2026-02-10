@@ -3,6 +3,8 @@ set -e
 set -o pipefail
 set -u
 
+trap 'rm -f "temp_instruct_vars.sh"' EXIT
+
 # Function to run R script and track time
 run_rscript() {
     local script_name="$1"
