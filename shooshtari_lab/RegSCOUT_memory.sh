@@ -34,7 +34,7 @@ ncores=2
 # Finemap
 locus_region="" ld_th="" ci_th="" ci_ppa_th="" fgwas_dir="" plink2_dir="" ci_gwas_file="" population="" snp_ref_dir="" lead_snps_file="" sum_stats_file=""
 # Mode peak_table
-jaspar_mtx_file="" prom_th_up="" prom_th_down=""
+jaspar_mtx_file="" prom_th_up="" prom_th_down="" peak_cell_file=""
 # Mode atac_obj
 seurat_obj_file="" cell_count_th="" coaccess_th="" cic_genome_window="" peak_th=""
 # Instruction files

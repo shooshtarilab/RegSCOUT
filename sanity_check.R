@@ -138,7 +138,7 @@ if (tolower(args[["finemap"]]) == "n" || !nzchar(args[["finemap"]])) {
 
 # Check mode peak_table
 if (tolower(args[["mode"]] == "peak_table")){
-  message("\n--- Checking mode setting peak_table---")
+  message("\n--- Checking mode setting peak_table ---")
   check_path(args[["peak_cell_file"]])
   check_col_diff(args[["peak_cell_file"]], c("chr","start", "end", "cell_types"), name = "Peak-Cell file") 
 
@@ -156,22 +156,21 @@ if (tolower(args[["mode"]] == "peak_table")){
   if (!(genome_build %in% req_builds)) {
     stop("Invalid genome build: '", genome_build, 
          "'. Allowed values are: ", paste(req_builds, collapse = ", "))
-
-    check_path(args[["gencode_file"]])
-    gencode_file = tolower(basename(args[["gencode_file"]]))
-
-    if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3" || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf"))){
-    } else {
-      stop(paste("Error: Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz"), call. = FALSE)
-    }
-
-    if (!nzchar(args[["jaspar_mtx_file"]])){
-      warning("--jaspar_mtx_file is unset. Using pipeline default file.")
-    }
-    
   }
-  message("Pass")
+  check_path(args[["gencode_file"]])
+  gencode_file = tolower(basename(args[["gencode_file"]]))
+
+  if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3" || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf"))){
+  } else {
+    stop(paste("Error: Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz"), call. = FALSE)
+  }
+
+  if (!nzchar(args[["jaspar_mtx_file"]])){
+    warning("--jaspar_mtx_file is unset. Using pipeline default file.")
+  }
+    
 }
+message("Pass")
 
 # Check mode atac_obj
 if (tolower(args[["mode"]] == "atac_obj")){
@@ -225,7 +224,7 @@ if (tolower(args[["histone_mark_analysis"]]) == "y" || tolower(args[["hic_analys
     "atac_cell_types,matrix_loc,rna_cell_types,scrna_dir,one_cell_type_seurat" = "scrna_instruct"
   )
 
-bash_vars <- c()
+  bash_vars <- c()
 
   for (f in instruct_files){
     f_basename = basename(f)
@@ -298,9 +297,10 @@ bash_vars <- c()
     if (args[["tf_expr_analysis"]] %in% c("both","rna") && !scrna_f) {
     stop("Hi-C analysis enabled but instruction file not found. Check column headers.", call. = FALSE)
   }
+
+  message("Pass")
+  writeLines(bash_vars, "temp_instruct_vars.sh")
 }
-message("Pass")
-writeLines(bash_vars, "temp_instruct_vars.sh")
   
 #   # check if contents of eqtl instruct directories exist
 #   for (i in 1:nrow(eqtl_instruct)){
