@@ -18,7 +18,7 @@ defaults <- list(
 #Getting the genome built of the scATAC-seq data
 genome_build = args[["genome_build"]]
 
-#Loading the reference genome object based on the genome built of the data 
+#Loading the reference genome object based on the genome build of the data 
 if (genome_build == "hg19"){
   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
   genome = "BSgenome.Hsapiens.UCSC.hg19"  
@@ -36,7 +36,7 @@ if (genome_build == "hg19"){
 }
 
 #Loading the scATAC-seq object 
-pbmc_dir = args[["seurat_obj_dir"]]
+pbmc_dir = args[["seurat_obj_file"]]
 
 if (tolower(file_ext(pbmc_dir)) == "rds"){
   pbmc <- readRDS(pbmc_dir)
