@@ -133,7 +133,16 @@ if (tolower(args[["finemap"]]) == "y") {
     
     if (nzchar(args[["loci_info_file"]])){
       check_path(args[["loci_info_file"]])
-      check_col_diff(args[["loci_info_file"]],c("chunk",""),name= "Loci information file")
+      check_col_diff(args[["loci_info_file"]],c("chunk"),name= "Loci information file")
+
+      # Warning for "locus_chr", "locus_start", "locus_end"
+      header = read_file(args[["loci_info_file"]], nrows= 0)
+      loci_cols = c("locus_chr", "locus_start", "locus_end")
+      missing_cols = setdiff(tolower(loci_cols), tolower(colnames(header)))
+      is_missing = !(tolower(loci_cols) %in% tolower(colnames(header)))
+      if (any(is_missing)) {
+        warning("Loci info file is missing: ", paste(loci_cols[is_missing], collapse = ", "), ". This information will not be included in final tables.")
+      }
     }
   message("Pass")
 }
@@ -177,6 +186,7 @@ if (tolower(args[["mode"]] == "peak_table")){
 # Check mode atac_obj
 if (tolower(args[["mode"]] == "atac_obj")){
   message("\n--- Checking mode setting atac_obj---")
+  check_path(args[["seurat_obj_file"]])
   if (tolower(file_ext(args[["seurat_obj_file"]])) == "rds"){
     seurat_obj <- readRDS(args[["seurat_obj_file"]])
   } else if (tolower(file_ext(args[["seurat_obj_file"]])) == "rdata"){

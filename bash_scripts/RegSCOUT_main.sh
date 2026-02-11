@@ -145,7 +145,7 @@ run_rscript sanity_check.R \
     --plink2_dir "$plink2_dir" --fgwas_dir "$fgwas_dir" --jaspar_mtx_file "$jaspar_mtx_file"\
     --ci_gwas_file "$ci_gwas_file" --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir" --hic_analysis "$hic_analysis" \
     --eqtl_analysis "$eqtl_analysis" --tf_expr_analysis "$tf_expr_analysis" \
-    --instruction_file_dir "$instruction_file_dir" \
+    --instruction_file_dir "$instruction_file_dir" --loci_info_file "$loci_info_file" \
     --histone_mark_analysis "$histone_mark_analysis" --seurat_obj_file "$seurat_obj_file" --ncores "$ncores"
 
 if [[ "${finemap,,}" != "y" && "${loci_info_file,,}" == "" ]]; then
