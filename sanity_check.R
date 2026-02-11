@@ -126,16 +126,19 @@ if (tolower(args[["finemap"]]) == "y") {
     stop(paste("Error: Missing required PLINK files:", paste(missing, collapse = ", ")), call. = FALSE)
   } 
   message("Pass")
-}
-
-# Check finemapping data
-if (tolower(args[["finemap"]]) == "n" || !nzchar(args[["finemap"]])) {
-  message("\n--- Checking finemapping data ----")
-  check_path(args[["ci_gwas_file"]])
-  check_col_diff(args[["ci_gwas_file"]],c("id","pos","chr","a1","a2","chunk","ppa"), name= "Finemapped SNP file")
+} else {
+    message("\n--- Checking finemapping data ----")
+    check_path(args[["ci_gwas_file"]])
+    check_col_diff(args[["ci_gwas_file"]],c("id","pos","chr","a1","a2","chunk","ppa"), name= "Finemapped SNP file")
+    
+    if (nzchar(args[["loci_info_file"]])){
+      check_path(args[["loci_info_file"]])
+      check_col_diff(args[["loci_info_file"]],c("chunk",""),name= "Loci information file")
+    }
   message("Pass")
 }
 
+# Check finemapping date
 # Check mode peak_table
 if (tolower(args[["mode"]] == "peak_table")){
   message("\n--- Checking mode setting peak_table ---")
@@ -168,9 +171,8 @@ if (tolower(args[["mode"]] == "peak_table")){
   if (!nzchar(args[["jaspar_mtx_file"]])){
     warning("--jaspar_mtx_file is unset. Using pipeline default file.")
   }
-    
+  message("Pass")
 }
-message("Pass")
 
 # Check mode atac_obj
 if (tolower(args[["mode"]] == "atac_obj")){
@@ -181,31 +183,12 @@ if (tolower(args[["mode"]] == "atac_obj")){
     seurat_obj = load(args[["seurat_obj_file"]])
     seurat_obj= get(seurat_obj)
   }
+  message("Pass")
 }
 
   # Check for assay named peaks
   # from counts matrix
   # cell type labels, acessible using Idents
-
-  genome_build = tolower(args[["genome_build"]])
-  req_builds = c("hg19","hg38")
-  if (!(genome_build %in% req_builds)) {
-    stop("Invalid genome build: '", genome_build, 
-         "'. Allowed values are: ", paste(req_builds, collapse = ", "))
-  
-  check_path(args[["gencode_file"]])
-  gencode_file = tolower(basename(args[["gencode_file"]]))
-
-  if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3" || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf"))){
-  } else {
-     stop("Error: Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz", call. = FALSE)
-  }
-
-  if (!nzchar(args[["jaspar_mtx_file"]])){
-    warning("--jaspar_mtx_file is unset. Using pipeline default file.")
-  }
-  message("Pass")
-}
 
 # Checking instruction file directory
 if (tolower(args[["histone_mark_analysis"]]) == "y" || tolower(args[["hic_analysis"]]) == "y" || tolower(args[["eqtl_analysis"]]) == "y"|| tolower(args[["tf_expr_analysis"]]) %in% c("atac", "both", "rna")){

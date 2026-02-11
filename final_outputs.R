@@ -38,12 +38,14 @@ ci_gwas_dir = args[["ci_gwas_file"]]
 # read in if fine-mapping was desired
 user_finemap <- args[["finemap"]]
 
+loci_info_file = args[["loci_info_file"]]
+
 ## assigning the locus number to each ci_snp, read in CI (credible interval) SNP file
 if (user_finemap == "Y") {
   fine_loci_head <- read.table(ci_gwas_dir, sep = '\t', header = T)
 
   # reading in loci info file and adding its information to fine_loci_head
-  loci_info <- read.table(paste0(output_dir, 'loci_info.txt'), sep = '\t', header = T)
+  loci_info <- read.table(loci_info_file, sep = '\t', header = T)
   
   # bring locus information into fine_loci_head
   fine_loci_head <- merge(fine_loci_head, loci_info, by = "chunk")
