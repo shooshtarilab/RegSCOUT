@@ -1,5 +1,6 @@
 suppressPackageStartupMessages(library(Repitools))
 suppressPackageStartupMessages(library(Seurat))
+suppressPackageStartupMessages(library(Signac))
 suppressPackageStartupMessages(library(monocle3))
 suppressPackageStartupMessages(library(cicero))
 suppressPackageStartupMessages(library(R.utils))
