@@ -187,7 +187,7 @@ if [ "${mode,,}" == "atac_obj" ]; then
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
-        --peak_cell_file "$peak_cell_file"
+        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir"
 
 elif [ "${mode,,}" == "peak_table" ]; then
     run_rscript EffectSNP.R \
