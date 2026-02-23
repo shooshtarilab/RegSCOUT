@@ -1,10 +1,19 @@
+
+# Jon's files
 RA/
 Docker/
 run*.sh
-.vscode/
 
-renv/library
-renv/staging
-renv/.gitignore
+# RV package manager
+rv
+toDelete
+rproject.toml
+rv.lock
+.Rprofile
 
+# Dev Container
+.devcontainer
+.github 
+
+# Script temp Files
 temp_instruct_vars.sh
