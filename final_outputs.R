@@ -6,8 +6,6 @@ suppressPackageStartupMessages(library(GenomicRanges))
 suppressPackageStartupMessages(library(R.utils))
 suppressPackageStartupMessages(library(ComplexHeatmap))
 suppressPackageStartupMessages(library(circlize))
-suppressPackageStartupMessages(library(writexl))
-
 
 args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 
