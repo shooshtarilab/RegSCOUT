@@ -588,7 +588,6 @@ if (tf_expr_req == "atac") {
   suppressPackageStartupMessages(library(methods))
   suppressPackageStartupMessages(library(ape))
   suppressPackageStartupMessages(library(GenomicRanges))
-  suppressPackageStartupMessages(library(tibble))
   
   # first conducting RNA-seq analysis
   # obtain user instructions
