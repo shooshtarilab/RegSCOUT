@@ -29,7 +29,7 @@ if (jaspar_mtx_file == 'none') {
   
   jaspar_pwm <- getMatrixSet(
     x = jaspar_sql@db,
-    opts = list(species = 9606, all_versions = FALSE)
+    opts = list(species = 9606, all_versions = FALSE, collection = "CORE")
   )
 } else {
   jaspar_pwm <- readJASPARMatrix(jaspar_mtx_file, matrixClass = c("PFM", "PWM", "PWMProb"))
