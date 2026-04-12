@@ -177,15 +177,39 @@ direct_ovlp_res_dir <- paste0(output_dir, "direct_rmp_gene_overlaps.txt")
 if (file.exists(direct_ovlp_res_dir)) {
   rmp_promoter <- read.table(direct_ovlp_res_dir, header = TRUE, sep = '\t')
   
-  rmp_promoter <- rmp_promoter[,c("RMP", "Gene")] %>% distinct()
+  rmp_promoter <- rmp_promoter[,c("RMP", "Gene", "Transcript_Type", "Gene_Type")] %>% distinct()
   
-  rmp_gene <- rmp_promoter %>% group_by(RMP) %>% summarise(gene = paste0(Gene, collapse = ", "))
+  # creating one column that summarizes all unique genes associated with each RMP with transcript/gene type info in brackets
+  rmp_summary <- rmp_promoter %>%
+    group_by(RMP, Gene) %>%
+    distinct(Transcript_Type, Gene_Type) %>%
+    summarise(
+      types = {
+        all_types <- unique(c(Transcript_Type, Gene_Type))
+        all_types <- sort(all_types)
+        all_types <- all_types[!is.na(all_types)] # removing NA entries
+        if (length(all_types) == 0) {
+          ""
+        } else {
+          paste(all_types, collapse = "; ")
+        }
+      },
+      .groups = "drop"
+    ) %>%
+    group_by(RMP) %>%
+    summarise(
+      summary = paste(
+        ifelse(types == "", Gene, paste0(Gene, " (", types, ")")),
+        collapse = ", "
+      ),
+      .groups = "drop"
+    )
   
   for (i in 1:nrow(final_output)) {
     current_rmp <- final_output$rmp[i]
-    match_index <- which(rmp_gene$RMP == current_rmp)
+    match_index <- which(rmp_summary$RMP == current_rmp)
     if (length(match_index) > 0) {
-      final_output$directly_mapped_gene[i] <- rmp_gene$gene[match_index]
+      final_output$directly_mapped_gene[i] <- rmp_summary$summary[match_index]
     }
   }
 } else {
@@ -207,22 +231,37 @@ if (file.exists(cicero_dir)) {
   colnames(cicero)[colnames(cicero) == "Cell_Type"] <- 'cell_type'
   
   # filter this dataframe to add cicero_prom and cicero_gene information
-  cicero_gene_df <- cicero[,c('rmp', 'prom_peak', 'cell_type', 'Gene')] %>% distinct()
+  cicero_gene_df <- cicero[,c('rmp', 'prom_peak', 'cell_type', 'Gene', 'Transcript_Type', 'Gene_Type')] %>% distinct()
   
   # group genes that had same promoter peak
-  cicero_gene_df <- cicero_gene_df %>%
+  cicero_gene_sum <- cicero_gene_df %>%
+    group_by(rmp, prom_peak, cell_type, Gene) %>%
+    summarise(
+      types = {
+        all_types <- unique(c(Transcript_Type, Gene_Type))
+        all_types <- sort(all_types)
+        all_types <- all_types[!is.na(all_types)] # removing NA entries
+        if (length(all_types) == 0) {
+          ""
+        } else {
+          paste(all_types, collapse = "; ")
+        }
+      },
+      .groups = "drop"
+    ) %>%
     group_by(rmp, prom_peak, cell_type) %>%
     summarise(
-      Gene = unique(Gene) %>%
-        sort() %>%
-        str_c(collapse = ", "),
+      Gene = paste(
+        ifelse(types == "", Gene, paste0(Gene, " (", types, ")")),
+        collapse = ", "
+      ),
       .groups = "drop"
     )
   
   # adding the cicero information
   final_output <- final_output %>%
     left_join(
-      cicero_gene_df,
+      cicero_gene_sum,
       by = c("rmp", "cell_type"), 
       relationship = "many-to-many"
     )
@@ -251,14 +290,88 @@ if (file.exists(hic_results_dir)) {
   colnames(hic_results)[colnames(hic_results) == "cell"] <- "cell_type"
   
   # group genes that had same promoter peak
-  hic_gene_df <- hic_results %>%
-    group_by(rmp, promRegion, cell_type) %>%
-    summarise(
-      gene = unique(gene) %>%
-        sort() %>%
-        str_c(collapse = ", "),
-      .groups = "drop"
-    )
+  if (all(c('transcriptType', 'geneType') %in% names(hic_results))) {
+    hic_gene_df <- hic_results %>%
+      group_by(rmp, promRegion, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(transcriptType, geneType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(rmp, promRegion, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else if ('transcriptType' %in% names(hic_results)) {
+    hic_gene_df <- hic_results %>%
+      group_by(rmp, promRegion, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(transcriptType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(rmp, promRegion, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else if ('geneType' %in% names(hic_results)) {
+    hic_gene_df <- hic_results %>%
+      group_by(rmp, promRegion, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(geneType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(rmp, promRegion, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else {
+    hic_gene_df <- hic_results %>%
+      group_by(rmp, promRegion, cell_type) %>%
+      summarise(
+        gene = unique(gene) %>%
+          sort() %>%
+          str_c(collapse = ", "),
+        .groups = "drop"
+      )
+  }
   
   # adding the hic information
   final_output <- final_output %>%
@@ -316,19 +429,94 @@ if (file.exists(eqtl_results_dir)) {
   colnames(eqtl_for_table)[colnames(eqtl_for_table) == "cell"] <- "cell_type"
   
   # group genes tgt if they are prioritized with the same SNP in the same cell type
-  eqtl_for_table <- eqtl_for_table %>%
-    group_by(effect_snp, cell_type) %>%
-    summarise(
-      gene = unique(gene) %>%
-        sort() %>%
-        str_c(collapse = ", "),
-      .groups = "drop"
-    )
+  # accounting for different cases where transcriptType / geneType columns are present or absent
+  if (all(c('transcriptType', 'geneType') %in% names(eqtl_for_table))) {
+    eqtl_gene_df <- eqtl_for_table %>%
+      group_by(effect_snp, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(transcriptType, geneType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(effect_snp, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else if ('transcriptType' %in% names(eqtl_for_table)) {
+    eqtl_gene_df <- eqtl_for_table %>%
+      group_by(effect_snp, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(transcriptType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(effect_snp, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else if ('geneType' %in% names(eqtl_for_table)) {
+    eqtl_gene_df <- eqtl_for_table %>%
+      group_by(effect_snp, cell_type, gene) %>%
+      summarise(
+        types = {
+          all_types <- unique(c(geneType))
+          all_types <- sort(all_types)
+          all_types <- all_types[!is.na(all_types)] # removing NA entries
+          if (length(all_types) == 0) {
+            ""
+          } else {
+            paste(all_types, collapse = "; ")
+          }
+        },
+        .groups = "drop"
+      ) %>%
+      group_by(effect_snp, cell_type) %>%
+      summarise(
+        gene = paste(
+          ifelse(types == "", gene, paste0(gene, " (", types, ")")),
+          collapse = ", "
+        ),
+        .groups = "drop"
+      )
+  } else {
+    eqtl_gene_df <- eqtl_for_table %>%
+      group_by(effect_snp, cell_type) %>%
+      summarise(
+        gene = unique(gene) %>%
+          sort() %>%
+          str_c(collapse = ", "),
+        .groups = "drop"
+      )
+  }
   
   # adding the eqtl information
   final_output <- final_output %>%
     left_join(
-      eqtl_for_table,
+      eqtl_gene_df,
       by = c("effect_snp", "cell_type")
     )
   
@@ -366,6 +554,7 @@ for (i in 1:nrow(final_table)) {
 # creating a separate row for each gene that could be prioritized by cicero, direct overlap, hic, or eqtl
 final_table <- final_table %>% separate_rows(gene, sep = ", ")
 final_table <- final_table[!final_table$gene %in% "NA",] # remove the rows with NA in the gene column
+final_table$gene <- trimws(gsub("\\s*\\([^)]*\\)", "", final_table$gene))
 final_table <- final_table %>% distinct()
 
 # calculating gene ppa values
@@ -387,6 +576,16 @@ scoring_system <- c(
 
 scoring_system <- scoring_system[cols_present]
 
+# function to extract gene names from gene columns
+extract_gene_names <- function(cell_val) {
+  if (is.na(cell_val) || cell_val == "") return(character(0))
+  # Split on commas (with optional surrounding whitespace)
+  entries <- trimws(unlist(strsplit(cell_val, ",\\s*")))
+  # Strip anything from the first space/parenthesis onward
+  entries_no_brack <- sub("\\s*\\(.*", "", entries)
+  trimws(entries_no_brack)
+}
+
 # now establishing gene score
 for (i in seq_len(nrow(final_table))) {
   gene <- final_table$gene[i]
@@ -395,8 +594,8 @@ for (i in seq_len(nrow(final_table))) {
   for (col in names(scoring_system)) {
     col_val <- final_table[[col]][i]
     
-    # Split by ", " and trim whitespace
-    genes_in_col <- trimws(unlist(strsplit(col_val, ",\\s*")))
+    # Split by ", ", trim whitespace, remove characters inside brackets, including brackets
+    genes_in_col <- extract_gene_names(col_val)
     
     if (gene %in% genes_in_col) {
       score <- score + scoring_system[[col]]
@@ -746,20 +945,6 @@ if (nrow(prioritized_table) == 0) {
   stop("Final tables created, no prioritized genes found with gene_score >= ", gene_score_th, ", gene_sum_ppa_th >= ", gene_sum_ppa_th, ", and tf_score_th >= ", tf_score_th, ".")
 }
 
-if (file.exists(hic_results_dir) & file.exists(cicero_dir)) { 
-  prioritized_table <- prioritized_table %>%
-    select(-c(hic_prom, cicero_prom)) %>%
-    distinct()
-} else if (file.exists(hic_results_dir)){ 
-  prioritized_table <- prioritized_table %>%
-    select(-c(hic_prom)) %>%
-    distinct()
-} else if (file.exists(cicero_dir)) {
-  prioritized_table <- prioritized_table %>%
-    select(-c(cicero_prom)) %>%
-    distinct()
-}
-
 # creating a prioritized gene by cell type heat map, starting with creating a data frame for the plot
 gene_ct_df <- prioritized_table[,c('cell_type','gene','gene_score')] %>% distinct()
 gene_ct_df <- suppressMessages(gene_ct_df %>% # obtaining max gene_score value for each cell type - gene pair
@@ -817,9 +1002,8 @@ invisible(dev.off())
 # printing a summary of findings for this dataset
 summary_stat <- c("Effect-SNPs" = length(unique(prioritized_table$effect_snp)), 
                   "Genes" = length(unique(prioritized_table$gene)), 
-                  "Cell Types" = length(unique(prioritized_table$cell_type)), 
-                  "TFs" = length(unique(unlist(strsplit(prioritized_table$tf, ", ")))))
-message("Number of unique effect-SNPs, genes, cell types, and TFs in prioritized table:")
+                  "Cell Types" = length(unique(prioritized_table$cell_type)))
+message("Number of unique effect-SNPs, genes, and cell types in prioritized table:")
 message(paste(summary_stat, collapse = "   "))
 
 
@@ -910,11 +1094,20 @@ if (file.exists(tf_expr_results_dir)) {
 table_results_combined <- table_results_combined %>%
   mutate(across(any_of(c("effect_ppa", "lead_ppa")), ~ round(.x, 4)))
 
+if (file.exists(hic_results_dir) & file.exists(cicero_dir)) { 
+  table_results_combined <- table_results_combined %>%
+    select(-c(hic_prom, cicero_prom)) %>%
+    distinct()
+} else if (file.exists(hic_results_dir)){ 
+  table_results_combined <- table_results_combined %>%
+    select(-c(hic_prom)) %>%
+    distinct()
+} else if (file.exists(cicero_dir)) {
+  table_results_combined <- table_results_combined %>%
+    select(-c(cicero_prom)) %>%
+    distinct()
+}
+
 write.table(prioritized_table, file = paste0(output_dir, "prioritized_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
 write.table(final_table_new, file = paste0(output_dir, "complete_table.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
 write.table(table_results_combined, file = paste0(output_dir, "prioritized_table_condensed.tsv"), row.names = FALSE, quote = FALSE, sep = "\t")
-# } else if (file_f == "xlsx") {
-#   write_xlsx(prioritized_table, path = paste0(output_dir, "prioritized_table.xlsx"))
-#   write_xlsx(final_table_new, path = paste0(output_dir, "complete_table.xlsx"))
-#   write_xlsx(table_results_combined, path = paste0(output_dir, "prioritized_table_condensed.xlsx"))
-# }

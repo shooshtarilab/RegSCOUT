@@ -114,6 +114,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
       promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
       promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap2)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
     
@@ -148,6 +150,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -165,6 +169,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
       Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
       End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap1)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
@@ -199,6 +205,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -216,6 +224,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
       Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
       End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap1)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
@@ -227,6 +237,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
       promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
       promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap2)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
     
@@ -267,6 +279,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -283,6 +297,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -299,6 +315,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -312,6 +330,8 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -339,8 +359,10 @@ bulk_nogene_analysis <- function(hic_data, rmp_data, atac_ct, gencode_granges) {
     arrange(cell)
   
   colnames(all_rmp_gene_df)[colnames(all_rmp_gene_df) == 'Gene'] <- "gene"
+  colnames(all_rmp_gene_df)[colnames(all_rmp_gene_df) == 'Transcript_Type'] <- "transcriptType"
+  colnames(all_rmp_gene_df)[colnames(all_rmp_gene_df) == 'Gene_Type'] <- "geneType"
   
-  all_rmp_gene_df <- all_rmp_gene_df[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
+  all_rmp_gene_df <- all_rmp_gene_df[,c('cell', 'gene', 'transcriptType', 'geneType', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
   
   return(all_rmp_gene_df)
 }
@@ -377,6 +399,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
       promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
       promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap2)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
     
@@ -414,6 +438,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -436,6 +462,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
       Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
       End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap1)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
@@ -474,6 +502,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -496,6 +526,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
       Start2 = hic_data$start2[queryHits(hic_gene_overlap1)],
       End2 = hic_data$end2[queryHits(hic_gene_overlap1)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap1)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap1)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap1)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap1)])
     )
     
@@ -507,6 +539,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
       promStart = hic_data$start2[queryHits(hic_gene_overlap2)],
       promEnd = hic_data$end2[queryHits(hic_gene_overlap2)],
       Gene = gencode_granges$gene_name[subjectHits(hic_gene_overlap2)],
+      Transcript_Type = gencode_granges$transcript_type[subjectHits(hic_gene_overlap2)],
+      Gene_Type = gencode_granges$gene_type[subjectHits(hic_gene_overlap2)],
       Promoter = GRangesToString(gencode_granges[subjectHits(hic_gene_overlap2)])
     )
     
@@ -556,6 +590,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -577,6 +613,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -598,6 +636,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df1$Start2[queryHits(hic_rmp_overlap1)],
         rmpEnd = gene_overlap_df1$End2[queryHits(hic_rmp_overlap1)],
         Gene = gene_overlap_df1$Gene[queryHits(hic_rmp_overlap1)],
+        Transcript_Type = gene_overlap_df1$Transcript_Type[queryHits(hic_rmp_overlap1)],
+        Gene_Type = gene_overlap_df1$Gene_Type[queryHits(hic_rmp_overlap1)],
         Promoter = gene_overlap_df1$Promoter[queryHits(hic_rmp_overlap1)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap1)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap1)]
@@ -611,6 +651,8 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
         rmpStart = gene_overlap_df2$Start1[queryHits(hic_rmp_overlap2)],
         rmpEnd = gene_overlap_df2$End1[queryHits(hic_rmp_overlap2)],
         Gene = gene_overlap_df2$Gene[queryHits(hic_rmp_overlap2)],
+        Transcript_Type = gene_overlap_df2$Transcript_Type[queryHits(hic_rmp_overlap2)],
+        Gene_Type = gene_overlap_df2$Gene_Type[queryHits(hic_rmp_overlap2)],
         Promoter = gene_overlap_df2$Promoter[queryHits(hic_rmp_overlap2)],
         rmpRegion = GRangesToString(rmp_granges[subjectHits(hic_rmp_overlap2)]),
         cell = rmp_df_filt$cell[subjectHits(hic_rmp_overlap2)]
@@ -639,7 +681,7 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
   # checking to see if chicago scores or p-values are provided
   filtered_results <- list()
   if (signif_th >= 1) {
-    message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
+    message("Chicago scores detected as significance values filtering for score >= ", signif_th)
     for (i in seq_along(cell_type_combos)) {
       cell_type <- names(cell_type_combos)[i]
       column_name <- cell_type_combos[[i]]
@@ -675,8 +717,10 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
       arrange(cell)
     
     colnames(final_results)[colnames(final_results) == 'Gene'] <- "gene"
+    colnames(final_results)[colnames(final_results) == 'Transcript_Type'] <- "transcriptType"
+    colnames(final_results)[colnames(final_results) == 'Gene_Type'] <- "geneType"
     
-    final_results <- final_results[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
+    final_results <- final_results[,c('cell', 'gene', 'transcriptType', 'geneType', 'rmpRegion', 'promRegion', 'oeRegion')] %>% distinct()
     
     return(final_results)
   }
@@ -684,8 +728,17 @@ sc_nogene_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, gencode_gran
 
 # when the hic dataset encompasses just one cell type or if it is bulk Hi-C data with gene info
 bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
+  # check if transcript and gene type information are provided, if not, set columns to NA
+  if (!"transcripttype" %in% names(hic_data)) {
+    hic_data$transcripttype <- NA
+  }
+  
+  if (!"genetype" %in% names(hic_data)) {
+    hic_data$genetype <- NA
+  }
+  
   # filter hic dataset for certain columns
-  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend')
+  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend', 'transcripttype', 'genetype')
   hic_data <- hic_data[,columns_to_keep]
   
   # create granges for other end (oe) interacting with bait
@@ -743,8 +796,10 @@ bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
     
     # finalizing dataframe
     colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'baitname'] <- "gene"
+    colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'transcripttype'] <- "transcriptType"
+    colnames(overlap_df_filt)[colnames(overlap_df_filt) == 'genetype'] <- "geneType"
     
-    overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
+    overlap_df_filt <- overlap_df_filt[,c('cell', 'gene', 'transcriptType', 'geneType', 'rmpRegion', 'promRegion', 'oeRegion')]
     
     overlap_df_filt <- overlap_df_filt %>%
       separate_rows(gene, sep = ";") %>%
@@ -755,8 +810,17 @@ bulk_gene_present_analysis <- function(hic_data, rmp_data, atac_ct) {
 }
 
 sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif_th) { # when the hic dataset encompasses multiple cell types
+  # check if transcript type information is provided, if not, set column to NA
+  if (!"transcripttype" %in% names(hic_data)) {
+    hic_data$transcripttype <- NA
+  }
+  
+  if (!"genetype" %in% names(hic_data)) {
+    hic_data$genetype <- NA
+  }
+  
   # filter hic dataset for certain columns
-  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend', unique(hic_ct))
+  columns_to_keep <- c('baitchr', 'baitstart', 'baitend', 'baitname', 'oechr', 'oestart', 'oeend', 'transcripttype', 'genetype', unique(hic_ct))
   hic_data <- hic_data[,columns_to_keep]
   
   # create granges for other end (oe) interacting with bait
@@ -806,7 +870,7 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
     # checking if p-values or chicago scores are provided
     filtered_results <- list()
     if (signif_th >= 1) {
-      message("Chicago scores detected as significance values for Hi-C in row ", i, ", filtering for score >= ", signif_th)
+      message("Chicago scores detected as significance values filtering for score >= ", signif_th)
       for (i in seq_along(cell_type_combos)) {
         cell_type <- names(cell_type_combos)[i]
         column_name <- cell_type_combos[[i]]
@@ -844,8 +908,10 @@ sc_gene_present_analysis <- function(hic_data, rmp_data, hic_ct, atac_ct, signif
       
       # rename baitName and cell column and make it so there is one gene per row
       colnames(final_results)[colnames(final_results) == 'baitname'] <- "gene"
+      colnames(final_results)[colnames(final_results) == 'transcripttype'] <- "transcriptType"
+      colnames(final_results)[colnames(final_results) == 'genetype'] <- "geneType"
       
-      final_results <- final_results[,c('cell', 'gene', 'rmpRegion', 'promRegion', 'oeRegion')]
+      final_results <- final_results[,c('cell', 'gene', 'transcriptType', 'geneType', 'rmpRegion', 'promRegion', 'oeRegion')]
       
       final_results <- final_results %>%
         separate_rows(gene, sep = ";") %>%
@@ -931,6 +997,10 @@ if (length(hic_results_list) == 0) {
   # bind all results together
   all_results <- bind_rows(hic_results_list) %>% distinct()
   rownames(all_results) <- NULL
+  
+  # removing transcript or gene type column if just NAs
+  cols_to_drop <- c("transcriptType", "geneType")[sapply(all_results[c("transcriptType", "geneType")], function(x) all(is.na(x)))]
+  all_results <- all_results[, !(names(all_results) %in% cols_to_drop)]
   
   # save this dataframe
   write.table(all_results, file = paste0(output_dir, "all_hic_results.txt"), row.names = F, quote = F,

@@ -2,8 +2,6 @@
 set -e
 set -o pipefail
 
-trap 'rm -f "temp_instruct_vars.sh"' EXIT
-
 # Function to run R script and track time
 run_rscript() {
     local script_name="$1"
@@ -62,6 +60,7 @@ while [[ $# -gt 0 ]]; do
     --peak_th) peak_th="$2"; shift;;
     --coaccess_th) coaccess_th="$2"; shift;;
     --cic_genomic_window) cic_genomic_window="$2"; shift;;
+    --transcript_types) transcript_types="$2"; shift;;
     --hic_analysis) hic_analysis="$2"; shift;;
     --eqtl_analysis) eqtl_analysis="$2"; shift;;
     --histone_mark_analysis) histone_mark_analysis="$2"; shift;;
@@ -86,6 +85,9 @@ if [[ -z "${output_dir:-}" ]]; then
     echo "Error: --output_dir missing."
     exit 1
 fi
+
+instruct_vars_file="${output_dir}/temp_instruct_vars.sh"
+trap 'rm -f "$instruct_vars_file"' EXIT
 
 # Conditional requirements
 if [[ "${finemap,,}" == "y" ]]; then
@@ -188,7 +190,8 @@ if [ "${mode,,}" == "atac_obj" ]; then
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
-        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir"
+        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir" \
+	--transcript_types "$transcript_types"
 
 elif [ "${mode,,}" == "peak_table" ]; then
     run_rscript EffectSNP.R \
@@ -198,18 +201,20 @@ elif [ "${mode,,}" == "peak_table" ]; then
     run_rscript Peak_Gene_SNP_Integration.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" --gencode_file "$gencode_file" \
-        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir"
+        --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir" \
+	--transcript_types "$transcript_types"
 fi
 
-source temp_instruct_vars.sh
-rm temp_instruct_vars.sh
+source "$instruct_vars_file"
+rm -f "$instruct_vars_file"
 
 if [ "${tf_expr_analysis,,}" == "atac" ] || [ "${tf_expr_analysis,,}" == "rna" ] || [ "${tf_expr_analysis,,}" == "both" ]; then
     run_rscript TF_expression_analysis.R \
         --output_dir "$output_dir" --prom_th_up "$prom_th_up" \
         --prom_th_down "$prom_th_down" \
         --tf_rna_quantile_th "$tf_rna_quantile_th" --scrna_instruct "$scrna_instruct" \
-        --tf_expr_analysis "$tf_expr_analysis" --peak_cell_file "$peak_cell_file"
+        --tf_expr_analysis "$tf_expr_analysis" --peak_cell_file "$peak_cell_file" \
+	--gencode_file "$gencode_file"
 fi
 
 if [ "${histone_mark_analysis,,}" == "y" ]; then

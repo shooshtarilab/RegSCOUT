@@ -28,7 +28,8 @@ output_dir = args[["output_dir"]]
 defaults <- list(
   prom_th_up = 2000,
   prom_th_down = 2000,
-  quantile_th = 0.25
+  quantile_th = 0.25,
+  transcript_types = c('protein_coding')
 )
 
 # read in TF, SNP, and rmp information
@@ -46,7 +47,38 @@ tf_table_filt <- tf_table %>%
 
 # defining function that identifies peaks on TF promoters
 confirm_tf_promoter_peaks <- function(tf_list, heterodimer_list, prom_th_up, prom_th_down, peak_file_path, prio_tf_table) {
-  gene_tss_grg = readRDS(paste0(output_dir, "gene_tss_granges.rds"))
+  # creating gencode, protein_coding transcripts only, granges
+  gene_annot_dir = args[["gencode_file"]]
+  gencode_transcripts  <- import(gene_annot_dir, format = "gff3", feature.type = "transcript")
+  gene_transcript_data <- gencode_transcripts[gencode_transcripts$transcript_type == "protein_coding"]
+  gene_id_lists <- mcols(gene_transcript_data)$gene_name 
+  
+  pos_transcripts <- gene_transcript_data[strand(gene_transcript_data) == "+"]
+  neg_transcripts <- gene_transcript_data[strand(gene_transcript_data) == "-"]
+  
+  prom_pos <- GRanges(
+    seqnames = seqnames(pos_transcripts),
+    ranges = IRanges(
+      start = start(pos_transcripts) - prom_th_up,
+      end   = start(pos_transcripts) + prom_th_down
+    ),
+    strand = strand(pos_transcripts),
+    gene_name = mcols(pos_transcripts)$gene_name
+  )
+  
+  prom_neg <- GRanges(
+    seqnames = seqnames(neg_transcripts),
+    ranges = IRanges(
+      start = end(neg_transcripts) - prom_th_down,
+      end   = end(neg_transcripts) + prom_th_up
+    ),
+    strand = strand(neg_transcripts),
+    gene_name = mcols(neg_transcripts)$gene_name
+  )
+  
+  gene_tss_grg <- c(prom_pos, prom_neg)
+  
+  # filtering for TFs in list
   gene_tss_grg = gene_tss_grg[gene_tss_grg$gene_name %in% tf_list, ]
 
   # Read peak data
@@ -371,6 +403,7 @@ if (tf_expr_req == "atac") {
   suppressPackageStartupMessages(library(ape))
   suppressPackageStartupMessages(library(GenomicRanges))
   suppressPackageStartupMessages(library(tibble))
+  suppressPackageStartupMessages(library(rtracklayer))
   
   # obtain list of TFs to test
   TFs <- tf_table_filt$tf
@@ -588,6 +621,7 @@ if (tf_expr_req == "atac") {
   suppressPackageStartupMessages(library(methods))
   suppressPackageStartupMessages(library(ape))
   suppressPackageStartupMessages(library(GenomicRanges))
+  suppressPackageStartupMessages(library(rtracklayer))
   
   # first conducting RNA-seq analysis
   # obtain user instructions

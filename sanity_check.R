@@ -309,5 +309,6 @@ if (tolower(args[["histone_mark_analysis"]]) == "y" || tolower(args[["hic_analys
   }
 
   message("Pass")
-  writeLines(bash_vars, "temp_instruct_vars.sh")
+  instruct_vars_file <- file.path(args[["output_dir"]], "temp_instruct_vars.sh")
+  writeLines(bash_vars, instruct_vars_file)
 }

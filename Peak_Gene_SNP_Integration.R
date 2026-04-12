@@ -15,7 +15,8 @@ args <- commandArgs(trailingOnly = TRUE, asValues = TRUE)
 #Defining default parameter values
 defaults <- list(
   prom_th_up = 2000,
-  prom_th_down = 2000
+  prom_th_down = 2000,
+  transcript_types = c('protein_coding')
 )
 
 #Getting the working directory
@@ -275,9 +276,17 @@ prom_th_down = if (nzchar(args[["prom_th_down"]])) {
   defaults$prom_th_down
 }
 
+# loading user defined transcript types list to filter gencode dataframe
+transcript_types = if (nzchar(args[["transcript_types"]])) {
+  trimws(strsplit(args[["transcript_types"]], ",", fixed = TRUE)[[1]])
+} else {
+  message("Using default transcript_types value: ", defaults$transcript_types)
+  defaults$transcript_types
+} 
+
 gene_annot_dir = args[["gencode_file"]]
 gencode_transcripts  <- import(gene_annot_dir, format = "gff3", feature.type = "transcript")
-gene_transcript_data <- gencode_transcripts[gencode_transcripts$transcript_type == "protein_coding"]
+gene_transcript_data <- gencode_transcripts[gencode_transcripts$transcript_type %in% transcript_types]
 gene_id_lists <- mcols(gene_transcript_data)$gene_name 
 
 pos_transcripts <- gene_transcript_data[strand(gene_transcript_data) == "+"]
@@ -290,7 +299,9 @@ prom_pos <- GRanges(
     end   = start(pos_transcripts) + prom_th_down
   ),
   strand = strand(pos_transcripts),
-  gene_name = mcols(pos_transcripts)$gene_name
+  gene_name = mcols(pos_transcripts)$gene_name,
+  transcript_type = mcols(pos_transcripts)$transcript_type,
+  gene_type = mcols(pos_transcripts)$gene_type
 )
 
 prom_neg <- GRanges(
@@ -300,7 +311,9 @@ prom_neg <- GRanges(
     end   = end(neg_transcripts) + prom_th_up
   ),
   strand = strand(neg_transcripts),
-  gene_name = mcols(neg_transcripts)$gene_name
+  gene_name = mcols(neg_transcripts)$gene_name,
+  transcript_type = mcols(neg_transcripts)$transcript_type,
+  gene_type = mcols(neg_transcripts)$gene_type
 )
 
 gene_tss_grg <- c(prom_pos, prom_neg)
@@ -320,13 +333,14 @@ rmp_promoter_overlap = findOverlaps(rmp_granges, gene_tss_grg)
 #Creating a dataframe to record these results
 if (length(rmp_promoter_overlap) != 0) {
   direct_overlap_df = as.data.frame(matrix(0, nrow = length(rmp_promoter_overlap),
-                                            ncol = 4))
-  colnames(direct_overlap_df) = c("RMP","Promoter",
-                                  "Gene","Cell_Type")
+                                            ncol = 6))
+  colnames(direct_overlap_df) = c("RMP","Promoter", "Gene", "Transcript_Type", "Gene_Type", "Cell_Type")
   
   direct_overlap_df$RMP = peak_ppa_frame_filt$region[queryHits(rmp_promoter_overlap)]
   direct_overlap_df$Promoter = GRangesToString(gene_tss_grg[subjectHits(rmp_promoter_overlap)])
   direct_overlap_df$Gene = gene_tss_grg$gene_name[subjectHits(rmp_promoter_overlap)]
+  direct_overlap_df$Transcript_Type = gene_tss_grg$transcript_type[subjectHits(rmp_promoter_overlap)]
+  direct_overlap_df$Gene_Type = gene_tss_grg$gene_type[subjectHits(rmp_promoter_overlap)]
   direct_overlap_df$Cell_Type = peak_ppa_frame_filt$cell[queryHits(rmp_promoter_overlap)]
   direct_overlap_df = direct_overlap_df %>%
     separate_rows(Cell_Type, sep = ',')
@@ -370,9 +384,9 @@ for (i in c(1:length(cell_type_list))){
   #promoter regions, and gene names for the list of peak2 ones
   #that overlap a promoter regions
   peak_gene_frame_temp = as.data.frame(matrix(nrow = length(peak2_promoter_overlap),
-                                              ncol = 6))
+                                              ncol = 8))
   colnames(peak_gene_frame_temp) = c("Peak1","Peak2","coaccess","Promoter",
-                                     "Gene","Cell_Type")
+                                     "Gene","Transcript_Type","Gene_Type","Cell_Type")
   
   if(nrow(peak_gene_frame_temp) == 0) { # check if no results for this cell type
     next
@@ -381,6 +395,8 @@ for (i in c(1:length(cell_type_list))){
   peak_gene_frame_temp$Peak2 = cell_cicero_data$Peak2[queryHits(peak2_promoter_overlap)]
   peak_gene_frame_temp$coaccess = cell_cicero_data$coaccess[queryHits(peak2_promoter_overlap)]
   peak_gene_frame_temp$Gene = gene_tss_grg$gene_name[subjectHits(peak2_promoter_overlap)]
+  peak_gene_frame_temp$Transcript_Type = gene_tss_grg$transcript_type[subjectHits(peak2_promoter_overlap)]
+  peak_gene_frame_temp$Gene_Type = gene_tss_grg$gene_type[subjectHits(peak2_promoter_overlap)]
   peak_gene_frame_temp$Promoter = GRangesToString(gene_tss_grg[subjectHits(peak2_promoter_overlap)])
   peak_gene_frame_temp$Cell_Type = cell_temp
   

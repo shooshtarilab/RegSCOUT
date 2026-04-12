@@ -25,8 +25,6 @@ read_file <- function(file_path) {
 # read output directory
 output_dir = args[["output_dir"]]
 
-genome_build = args[["genome_build"]]
-
 # read in SNP, rmp information
 snp_rmp_dir <- paste0(output_dir, "risk_regions_ratio.txt")
 snp_rmp_df = read.table(paste0(output_dir, "risk_regions_ratio.txt"), header = TRUE)
@@ -94,6 +92,7 @@ for (i in 1:num_eqtl) {
   if (!tabix) {
     # read in eqtl dataset
     eqtl_dataset <- read.table(file = eqtl_dir, sep = '\t', header = T, comment.char="")
+    colnames(eqtl_dataset) = tolower(colnames(eqtl_dataset))
     
     # filter snp_rmp_df
     snp_rmp_filt <- snp_rmp_df[snp_rmp_df$cell %in% atac_cell_types,]
@@ -119,8 +118,17 @@ for (i in 1:num_eqtl) {
     if (nrow(eqtl_results) == 0) {
       message("Note: No eQTL results found for row with eQTL directory '", eqtl_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. One possible reason for this is a mismatch between genome builds of eQTL and SNP data.")
     } else {
+      # checking for gene and transcript type columns
+      if (!"transcripttype" %in% names(eqtl_results)) {
+        eqtl_results$transcriptType <- NA
+      }
+      
+      if (!"genetype" %in% names(eqtl_results)) {
+        eqtl_results$geneType <- NA
+      }
+      
       # clean up dataframe and append to list
-      eqtl_results <- eqtl_results[,c('snp', 'rmp', 'cell', 'gene')]
+      eqtl_results <- eqtl_results[,c('snp', 'rmp', 'cell', 'gene', 'geneType', 'transcriptType')]
       eqtl_results_list[[i]] <- eqtl_results
       
       # save the dataframe
@@ -157,9 +165,20 @@ for (i in 1:num_eqtl) {
     if (nrow(eqtl_results_df) == 0) {
       message("Note: No eQTL results found for row with eQTL directory '", eqtl_dir, "' ", "and ATAC cell types: '", paste(atac_cell_types, collapse = ','), "' of instructions spreadsheet. One possible reason for this is a mismatch between genome builds of eQTL and SNP data.")
     } else {
-      eqtl_results_df <- eqtl_results_df[,c('snp', 'rmp', 'cell', 'V3')] 
+      # checking for gene and transcript type columns
+      if (!"V4" %in% names(eqtl_results_df)) {
+        eqtl_results_df$V4 <- NA
+      }
+      
+      if (!"V5" %in% names(eqtl_results_df)) {
+        eqtl_results_df$V5 <- NA
+      }
+      
+      eqtl_results_df <- eqtl_results_df[,c('snp', 'rmp', 'cell', 'V3', 'V4', 'V5')] 
 
       colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V3'] <- 'gene'
+      colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V4'] <- 'geneType'
+      colnames(eqtl_results_df)[colnames(eqtl_results_df) == 'V5'] <- 'transcriptType'
       eqtl_results_list[[i]] <- eqtl_results_df
       
       # save the dataframe
@@ -176,6 +195,10 @@ if (length(eqtl_results_list) == 0) {
   # obtaining one dataframe with all results
   all_results <- bind_rows(eqtl_results_list) %>% distinct()
   rownames(all_results) <- NULL
+  
+  # removing transcript or gene type column if just NAs
+  cols_to_drop <- c("transcriptType", "geneType")[sapply(all_results[c("transcriptType", "geneType")], function(x) all(is.na(x)))]
+  all_results <- all_results[, !(names(all_results) %in% cols_to_drop)]
   
   # save this dataframe
   write.table(all_results, file = paste0(output_dir, "all_eqtl_results.txt"), row.names = F, quote = F,
