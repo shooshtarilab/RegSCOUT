@@ -12,7 +12,6 @@ run_rscript() {
     
     start_time=$(date +%s)
     /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/bin/time -v Rscript "$script_name" "$@" 2>&1 | tee -a "$master_log"
-    # for Compute Canada replace /usr/bin/time with /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/bin/time
     end_time=$(date +%s)
     
     elapsed=$((end_time - start_time))
@@ -44,8 +43,8 @@ while [[ $# -gt 0 ]]; do
     --ld_th) ld_th="$2"; shift ;;
     --ci_th) ci_th="$2"; shift;;
     --ci_ppa_th) ci_ppa_th="$2"; shift;;
-    --fgwas_dir) fgwas_dir="$2"; shift;;
-    --plink2_dir) plink2_dir="$2"; shift;;
+    --fgwas_bin) fgwas_bin="$2"; shift;;
+    --plink2_bin) plink2_bin="$2"; shift;;
     --loci_info_file) loci_info_file="$2"; shift;;
     --ci_gwas_file) ci_gwas_file="$2"; shift;;
     --genome_build) genome_build="$2"; shift ;;
@@ -74,6 +73,12 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Add slashes for directories
+output_dir="${output_dir%/}/"
+snp_ref_dir="${snp_ref_dir%/}/"
+cicero_dir="${cicero_dir%/}/"
+instruction_file_dir="${instruction_file_dir%/}/"
 
 # Absolute requirements
 if [[ -z "${mode:-}" ]]; then
@@ -145,7 +150,7 @@ run_rscript sanity_check.R \
     --finemap "$finemap" --gencode_file "$gencode_file" \
     --snp_ref_dir "$snp_ref_dir" --population "$population" \
     --sum_stats_file "$sum_stats_file" --lead_snps_file "$lead_snps_file" \
-    --plink2_dir "$plink2_dir" --fgwas_dir "$fgwas_dir" --jaspar_mtx_file "$jaspar_mtx_file"\
+    --plink2_bin "$plink2_bin" --fgwas_bin "$fgwas_bin" --jaspar_mtx_file "$jaspar_mtx_file"\
     --ci_gwas_file "$ci_gwas_file" --peak_cell_file "$peak_cell_file" --cicero_dir "$cicero_dir" --hic_analysis "$hic_analysis" \
     --eqtl_analysis "$eqtl_analysis" --tf_expr_analysis "$tf_expr_analysis" \
     --instruction_file_dir "$instruction_file_dir" --loci_info_file "$loci_info_file" \
@@ -159,11 +164,11 @@ if [ "${finemap,,}" == "y" ]; then
     run_rscript fgwas_data_prep.R \
         --output_dir "$output_dir" --snp_ref_dir "$snp_ref_dir" \
         --population "$population" --sum_stats_file "$sum_stats_file" \
-        --lead_snps_file "$lead_snps_file" --plink2_dir "$plink2_dir" \
+        --lead_snps_file "$lead_snps_file" --plink2_bin "$plink2_bin" \
         --sample_num "$sample_num" --locus_region "$locus_region" --ld_th "$ld_th"
 
     run_rscript fine_map.R \
-        --output_dir "$output_dir" --fgwas_dir "$fgwas_dir" \
+        --output_dir "$output_dir" --fgwas_bin "$fgwas_bin" \
         --ci_th "$ci_th" --ci_ppa_th "$ci_ppa_th"
 
     suff="gwas_CI.txt"
