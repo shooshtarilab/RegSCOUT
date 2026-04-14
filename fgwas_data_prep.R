@@ -52,7 +52,7 @@ output_dir = args[["output_dir"]]
 snp_ref = args[["snp_ref_dir"]]
 
 #Getting the directory of Plink2 software
-plink2_bin = args[["plink2_bin"]]
+plink2_bin = args[["plink2_bin "]]
 if (!nzchar(plink2_bin)){
     plink2_bin = Sys.which("plink2")
 }
@@ -91,7 +91,7 @@ if (sum(c("A1","A2","MAF") %in% colnames(gwas_data)) == 3){
 }else{
   shell <- ifelse(Sys.info()['sysname'] == "Windows", "cmd", "sh")
   #Getting the allele frequency file from reference panel SNP data using Plink
-  freq_file_out = paste0(output_dir,"Plink2")
+  freq_file_out = paste0(output_dir,"/Plink2")
   fun <- paste0(
     shQuote(plink2_bin, type=shell),
     " --bfile ", shQuote(snp_ref_files, type=shell),
