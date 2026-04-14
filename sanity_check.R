@@ -49,7 +49,7 @@ check_path = function(path, name, dir=F, verbose = 0){
     }
   }
   if (verbose == 1){
-    message(sprintf("%s found at'%s'", name, path))
+    message(sprintf("%s found at '%s'", name, path))
   }
 }
 
