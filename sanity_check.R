@@ -193,7 +193,7 @@ if (tolower(args[["mode"]] == "peak_table")){
   check_path(args[["gencode_file"]])
   gencode_file = tolower(basename(args[["gencode_file"]]))
 
-  if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3" || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf"))){
+  if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3") || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf"))){
   } else {
     stop(paste("Error: Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz"), call. = FALSE)
   }
