@@ -91,8 +91,15 @@ settings_msg <- paste(
 )
 cat(do.call(sprintf, c(
   list(settings_msg, tolower(args[["genome_build"]])),
-  lapply(args[c("finemap", "tf_expr_analysis", "histone_mark_analysis", "hic_analysis", "eqtl_analysis")], 
-         \(x) if(identical(tolower(x), "y")) "Y" else "N")
+  lapply(names(args[c("finemap", "tf_expr_analysis", "histone_mark_analysis", "hic_analysis", "eqtl_analysis")]), 
+         function(name) {
+           val <- args[[name]]
+           if (name == "tf_expr_analysis") {
+             if (!is.null(val) && tolower(val) != "none") "Y" else "N"
+           } else {
+             if (identical(tolower(val), "y")) "Y" else "N"
+           }
+         })
 )))
 
 
