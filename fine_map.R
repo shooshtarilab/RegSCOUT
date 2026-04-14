@@ -11,7 +11,7 @@ defaults <- list(
 
 output_dir = args[["output_dir"]]
 
-fgwas_src = args[["fgwas_dir"]]
+fgwas_src = args[["fgwas_bin"]]
 
 if (!nzchar(fgwas_src)){
     fgwas_src = Sys.which("fgwas")

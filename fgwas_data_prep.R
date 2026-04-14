@@ -52,7 +52,7 @@ output_dir = args[["output_dir"]]
 snp_ref = args[["snp_ref_dir"]]
 
 #Getting the directory of Plink2 software
-plink2_bin = args[["plink2_dir"]]
+plink2_bin = args[["plink2_bin"]]
 if (!nzchar(plink2_bin)){
     plink2_bin = Sys.which("plink2")
 }
