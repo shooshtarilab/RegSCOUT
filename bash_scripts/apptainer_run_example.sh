@@ -16,7 +16,7 @@ OUTPUT_DATA=/home/jwan2633/scratch/RA_OUT
 # Enter path of apptainer image.
 SIF_IMAGE=/home/jwan2633/scratch/regscout_app/regscout_4.5.2.sif 
 
-# The container will mirr--pwd /RegSCOUTor the path in INPUT_DATA and OUTPUT_DATA inside the container.
+# The container will mirror the path in INPUT_DATA and OUTPUT_DATA inside the container.
 apptainer run --pwd /RegSCOUT -B ${INPUT_DATA},${OUTPUT_DATA} ${SIF_IMAGE} \
   --mode peak_table \
   --finemap Y \
@@ -36,3 +36,5 @@ apptainer run --pwd /RegSCOUT -B ${INPUT_DATA},${OUTPUT_DATA} ${SIF_IMAGE} \
   --hic_analysis Y \
   --eqtl_analysis Y \
   --instruction_file_dir ${INPUT_DATA}/instruction_files \
+
+# sbatch apptainer_run_example.sh, remember to change --time or --mem, or --mail-user 
