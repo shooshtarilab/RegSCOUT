@@ -195,7 +195,7 @@ if (tolower(args[["mode"]] == "peak_table")){
 
   if (endsWith(gencode_file, ".gff3.gz") || endsWith(gencode_file, ".gff3") || endsWith(gencode_file, ".gtf.gz") || endsWith(gencode_file, ".gtf")){
   } else {
-    stop(paste("Error: Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz"), call. = FALSE)
+    stop(paste("Expected GENCODE file to end with gff3, gff3.gz, gtf or gtf.gz"), call. = FALSE)
   }
 
   if (!nzchar(args[["jaspar_mtx_file"]])){
