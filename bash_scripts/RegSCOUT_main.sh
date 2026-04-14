@@ -74,6 +74,12 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+# Add slashes for directories
+output_dir="${output_dir%/}/"
+snp_ref_dir="${snp_ref_dir%/}/"
+cicero_dir="${cicero_dir%/}/"
+instruction_file_dir="${instruction_file_dir%/}/"
+
 # Absolute requirements
 if [[ -z "${mode:-}" ]]; then
     echo "Error: --mode missing."
