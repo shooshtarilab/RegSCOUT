@@ -114,13 +114,13 @@ if (tolower(args[["finemap"]]) == "y") {
   # Check binaries
   message("\n--- Checking finemapping requirements ----")
   # check if plink_binary and fgwas_src param exists
-  if (nzchar(args[["plink2_dir"]])){ 
-    check_path(args[["plink2_dir"]])
+  if (nzchar(args[["plink2_bin"]])){ 
+    check_path(args[["plink2_bin"]])
   } else {
     check_binary("plink2")
   }
-  if (nzchar(args[["fgwas_dir"]])){
-    check_path(args[["fgwas_dir"]])
+  if (nzchar(args[["fgwas_bin"]])){
+    check_path(args[["fgwas_bin"]])
   } else {
     check_binary("fgwas")
   }
