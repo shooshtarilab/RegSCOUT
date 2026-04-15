@@ -95,7 +95,7 @@ cat(do.call(sprintf, c(
          function(name) {
            val <- args[[name]]
            if (name == "tf_expr_analysis") {
-             if (!is.null(val) && tolower(val) != "none") "Y" else "N"
+             if (is.null(val) || tolower(val) == "n") "N" else "Y"
            } else {
              if (identical(tolower(val), "y")) "Y" else "N"
            }
